@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_PATIENTS, INIT_ARCHIVED, INIT_ROOMS, INIT_MEDS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_FINANCE, INIT_CASHBOX, INIT_CASHBOX_COUNTS, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY, INIT_HOUSES } from "./data/initialData";
-import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser } from "./lib/api";
+import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_FINANCE, INIT_CASHBOX, INIT_CASHBOX_COUNTS, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
+import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
 import Login from "./Login";
@@ -21,11 +21,12 @@ import Manage from "./pages/Manage";
 import Therapy from "./pages/Therapy";
 
 export default function App() {
+  const [houses, setHouses] = useState([]);
   const [users, setUsers] = useState([]);
-  const [patients, setPatients] = useState(INIT_PATIENTS);
+  const [patients, setPatients] = useState([]);
   const [archived, setArchived] = useState(INIT_ARCHIVED);
   const [rooms, setRooms] = useState(INIT_ROOMS);
-  const [meds, setMeds] = useState(INIT_MEDS);
+  const [meds, setMeds] = useState([]);
   const [dist, setDist] = useState(INIT_DIST);
   const [phones, setPhones] = useState(INIT_PHONES);
   const [phoneHist, setPhoneHist] = useState(INIT_PHONE_HIST);
@@ -62,6 +63,21 @@ export default function App() {
   const [showHousePicker, setShowHousePicker] = useState(false);
   const [toastMsg, showToast] = useToast();
 
+  useEffect(() => {
+    if (!user) return;
+    authFetch("/api/houses").then(setHouses).catch(console.error);
+  }, [user]);
+
+  useEffect(() => {
+    if (!user || !activeHouseId) return;
+    authFetch(`/api/patients?houseId=${activeHouseId}`)
+      .then((data) => {
+        setPatients(data);
+        setMeds(data.flatMap((p) => p.meds || []));
+      })
+      .catch(console.error);
+  }, [user, activeHouseId]);
+
   const handleLogin = (u, token) => {
     setToken(token);
     setStoredUser(u);
@@ -80,13 +96,13 @@ export default function App() {
     return <Login onLogin={handleLogin} />;
 
   const allowedHouseIds = (user.allowedHouses || []).map((a) => a.houseId || a);
-  const allowedHouses = INIT_HOUSES.filter(
+  const allowedHouses = houses.filter(
     (h) => user.allHousesAccess || allowedHouseIds.includes(h.id),
   );
   const activeHouse =
-    INIT_HOUSES.find((h) => h.id === activeHouseId) ||
+    houses.find((h) => h.id === activeHouseId) ||
     allowedHouses[0] ||
-    INIT_HOUSES[0];
+    houses[0];
   const canSwitchHouses =
     allowedHouses.length > 1; /* Filter data by active house */
   const housePatients = patients.filter((p) => p.houseId === activeHouse?.id);
