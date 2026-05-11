@@ -18,6 +18,7 @@ export default function PatientProfile({
   toast,
   consequences,
   finance,
+  onUpdatePatient,
 }) {
   const p = patients.find((pt) => pt.id === pid);
   const [tab, setTab] = useState("meds");
@@ -114,28 +115,26 @@ export default function PatientProfile({
     setShowAddMed(false);
     toast("✅ Medication added");
   };
-  const openAbsence = () => {
+  const openAbsence = async () => {
     if (!absData.returnDate) {
       toast("⚠️ Please enter expected return date");
       return;
     }
-    setPatients((prev) =>
-      prev.map((pt) =>
-        pt.id === pid ? { ...pt, status: "away", awayType: absData.type } : pt,
-      ),
-    );
-    setShowAbsence(false);
-    toast(
-      `✅ ${p.name} left for ${absData.type} – back on ${absData.returnDate}`,
-    );
+    try {
+      await onUpdatePatient(pid, { status: "away" });
+      setShowAbsence(false);
+      toast(`✅ ${p.name} left for ${absData.type} – back on ${absData.returnDate}`);
+    } catch {
+      toast("❌ Failed to update patient");
+    }
   };
-  const returnPatient = () => {
-    setPatients((prev) =>
-      prev.map((pt) =>
-        pt.id === pid ? { ...pt, status: "active", awayType: null } : pt,
-      ),
-    );
-    toast(`✅ ${p.name} returned to center`);
+  const returnPatient = async () => {
+    try {
+      await onUpdatePatient(pid, { status: "active" });
+      toast(`✅ ${p.name} returned to center`);
+    } catch {
+      toast("❌ Failed to update patient");
+    }
   };
   const moods = [8, 7, 9, 8, 7, 8, p.mood];
   const days = ["3/5", "4/5", "5/5", "6/5", "7/5", "8/5", "9/5"];

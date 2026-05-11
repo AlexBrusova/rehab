@@ -19,24 +19,48 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 });
 
 router.post("/", async (req: AuthRequest, res: Response) => {
-  const patient = await prisma.patient.create({ data: req.body });
-  res.status(201).json(patient);
+  try {
+    const { name, dob, admitDate, houseId, roomId } = req.body;
+    const patient = await prisma.patient.create({
+      data: { name, dob: dob || "", admitDate: admitDate || "", houseId, roomId: roomId || null },
+    });
+    res.status(201).json(patient);
+  } catch (e) {
+    console.error("Create patient error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 router.patch("/:id", async (req: AuthRequest, res: Response) => {
-  const patient = await prisma.patient.update({
-    where: { id: String(req.params.id) },
-    data: req.body,
-  });
-  res.json(patient);
+  try {
+    const allowed = ["name","dob","admitDate","roomId","mood","alert","status","dischargeType","dischargeDate","daysInRehab"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = {};
+    for (const key of allowed) {
+      if (req.body[key] !== undefined) data[key] = req.body[key];
+    }
+    const patient = await prisma.patient.update({
+      where: { id: String(req.params.id) },
+      data,
+    });
+    res.json(patient);
+  } catch (e) {
+    console.error("Update patient error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 router.delete("/:id", async (req: AuthRequest, res: Response) => {
-  await prisma.patient.update({
-    where: { id: String(req.params.id) },
-    data: { status: "archived" },
-  });
-  res.json({ ok: true });
+  try {
+    await prisma.patient.update({
+      where: { id: String(req.params.id) },
+      data: { status: "archived" },
+    });
+    res.json({ ok: true });
+  } catch (e) {
+    console.error("Archive patient error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 export default router;

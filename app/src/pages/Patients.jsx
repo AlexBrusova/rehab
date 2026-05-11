@@ -18,6 +18,9 @@ export default function Patients({
   initialPatientId,
   consequences,
   finance,
+  onAddPatient,
+  onArchivePatient,
+  onUpdatePatient,
 }) {
   const [filter, setFilter] = useState("active");
   const [showAdd, setShowAdd] = useState(false);
@@ -33,64 +36,33 @@ export default function Patients({
     notes: "",
     roomId: "r4",
   });
-  const addPatient = () => {
-    if (!newP.name || !newP.idNum) {
-      toast("⚠️ Please fill Name and ID number");
+  const addPatient = async () => {
+    if (!newP.name) {
+      toast("⚠️ Please fill Name");
       return;
     }
-    const id = "p" + Date.now();
-    const today = new Date()
-      .toLocaleDateString("he-IL", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      })
-      .replace(/\./g, "/");
-    setPatients((prev) => [
-      ...prev,
-      {
-        ...newP,
-        id,
-        admitDate: newP.admitDate || today,
-        days: 0,
-        status: "active",
-        mood: 7,
-        balance: 0,
-        awayType: null,
-        counselorId: "u2",
-      },
-    ]);
-    setNewP({
-      name: "",
-      dob: "",
-      idNum: "",
-      admitDate: "",
-      addiction: "",
-      notes: "",
-      roomId: "r4",
-    });
-    setShowAdd(false);
-    toast("✅ Patient added successfully");
+    try {
+      await onAddPatient(newP);
+      setNewP({ name: "", dob: "", idNum: "", admitDate: "", addiction: "", notes: "", roomId: "" });
+      setShowAdd(false);
+      toast("✅ Patient added successfully");
+    } catch {
+      toast("❌ Failed to add patient");
+    }
   };
-  const discharge = () => {
+  const discharge = async () => {
     if (!dischargeType) {
       toast("⚠️ Please select a discharge reason");
       return;
     }
-    const p = patients.find((pt) => pt.id === showDischarge);
-    setArchived((prev) => [
-      {
-        ...p,
-        status: "discharged",
-        dischargeType,
-        dischargeDate: "09/05/2025",
-      },
-      ...prev,
-    ]);
-    setPatients((prev) => prev.filter((pt) => pt.id !== showDischarge));
-    setShowDischarge(null);
-    setDischargeType("");
-    toast("✅ Treatment completed");
+    try {
+      await onArchivePatient(showDischarge, dischargeType);
+      setShowDischarge(null);
+      setDischargeType("");
+      toast("✅ Treatment completed");
+    } catch {
+      toast("❌ Failed to discharge patient");
+    }
   };
   const canEditMeds = user.role === "manager" || user.role === "doctor";
   const dt = {
@@ -251,6 +223,7 @@ export default function Patients({
           toast={toast}
           consequences={consequences}
           finance={finance}
+          onUpdatePatient={onUpdatePatient}
         />
       )}{" "}
       <div

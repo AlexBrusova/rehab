@@ -78,6 +78,38 @@ export default function App() {
       .catch(console.error);
   }, [user, activeHouseId]);
 
+  const refreshPatients = async () => {
+    if (!activeHouseId) return;
+    const data = await authFetch(`/api/patients?houseId=${activeHouseId}`);
+    setPatients(data);
+    setMeds(data.flatMap((p) => p.meds || []));
+  };
+
+  const createPatient = async (formData) => {
+    await authFetch("/api/patients", {
+      method: "POST",
+      body: JSON.stringify({ ...formData, houseId: activeHouseId }),
+    });
+    await refreshPatients();
+  };
+
+  const updatePatient = async (id, data) => {
+    await authFetch(`/api/patients/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+  };
+
+  const archivePatient = async (id, dischargeType) => {
+    const dischargeDate = new Date().toLocaleDateString("en-GB").replace(/\//g, "/");
+    await authFetch(`/api/patients/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
+    });
+    setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
   const handleLogin = (u, token) => {
     setToken(token);
     setStoredUser(u);
@@ -164,6 +196,9 @@ export default function App() {
         initialPatientId={initialPatientId}
         consequences={houseConsequences}
         finance={houseFinance}
+        onAddPatient={createPatient}
+        onArchivePatient={archivePatient}
+        onUpdatePatient={updatePatient}
       />
     ),
     rooms: (
