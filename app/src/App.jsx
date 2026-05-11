@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_USERS, INIT_PATIENTS, INIT_ARCHIVED, INIT_ROOMS, INIT_MEDS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_FINANCE, INIT_CASHBOX, INIT_CASHBOX_COUNTS, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY, INIT_HOUSES } from "./data/initialData";
+import { INIT_PATIENTS, INIT_ARCHIVED, INIT_ROOMS, INIT_MEDS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_FINANCE, INIT_CASHBOX, INIT_CASHBOX_COUNTS, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY, INIT_HOUSES } from "./data/initialData";
+import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
 import Login from "./Login";
@@ -20,7 +21,7 @@ import Manage from "./pages/Manage";
 import Therapy from "./pages/Therapy";
 
 export default function App() {
-  const [users, setUsers] = useState(INIT_USERS);
+  const [users, setUsers] = useState([]);
   const [patients, setPatients] = useState(INIT_PATIENTS);
   const [archived, setArchived] = useState(INIT_ARCHIVED);
   const [rooms, setRooms] = useState(INIT_ROOMS);
@@ -41,7 +42,10 @@ export default function App() {
   const [therapistAssignments, setTherapistAssignments] = useState(
     INIT_THERAPIST_ASSIGNMENTS,
   );
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    if (getToken()) return getStoredUser();
+    return null;
+  });
   const [screen, setScreen] = useState("dashboard");
   const [initialPatientId, setInitialPatientId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -49,22 +53,35 @@ export default function App() {
     setScreen(screenId);
     setInitialPatientId(patientId);
   };
-  const [activeHouseId, setActiveHouseId] = useState(null);
+  const [activeHouseId, setActiveHouseId] = useState(() => {
+    const stored = getStoredUser();
+    if (!stored) return null;
+    const ids = (stored.allowedHouses || []).map((a) => a.houseId || a);
+    return ids[0] || stored.houseId || null;
+  });
   const [showHousePicker, setShowHousePicker] = useState(false);
   const [toastMsg, showToast] = useToast();
+
+  const handleLogin = (u, token) => {
+    setToken(token);
+    setStoredUser(u);
+    setUser(u);
+    setScreen("dashboard");
+    const ids = (u.allowedHouses || []).map((a) => a.houseId || a);
+    setActiveHouseId(ids[0] || u.houseId || null);
+  };
+
+  const handleLogout = () => {
+    removeStoredUser();
+    setUser(null);
+  };
+
   if (!user)
-    return (
-      <Login
-        users={users}
-        onLogin={(u) => {
-          setUser(u);
-          setScreen("dashboard");
-          setActiveHouseId(u.allowedHouses?.[0] || "h1");
-        }}
-      />
-    );
+    return <Login onLogin={handleLogin} />;
+
+  const allowedHouseIds = (user.allowedHouses || []).map((a) => a.houseId || a);
   const allowedHouses = INIT_HOUSES.filter(
-    (h) => user.allHousesAccess || (user.allowedHouses || []).includes(h.id),
+    (h) => user.allHousesAccess || allowedHouseIds.includes(h.id),
   );
   const activeHouse =
     INIT_HOUSES.find((h) => h.id === activeHouseId) ||
@@ -555,7 +572,7 @@ export default function App() {
             </div>
           </div>{" "}
           <button
-            onClick={() => setUser(null)}
+            onClick={handleLogout}
             style={{
               background: "rgba(255,255,255,0.08)",
               border: "none",
