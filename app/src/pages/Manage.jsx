@@ -88,7 +88,7 @@ export default function Manage({
           ...u,
           allHousesAccess: newVal,
           allowedHouses: newVal
-            ? INIT_HOUSES.map((h) => h.id)
+            ? houses.map((h) => h.id)
             : u.allowedHouses,
         };
       }),
@@ -152,7 +152,7 @@ export default function Manage({
               }}
             >
               {" "}
-              {INIT_HOUSES.map((h) => {
+              {houses.map((h) => {
                 const sel = (newU.allowedHouses || []).includes(h.id);
                 return (
                   <div
@@ -200,7 +200,7 @@ export default function Manage({
                     ...u,
                     allHousesAccess: !u.allHousesAccess,
                     allowedHouses: !u.allHousesAccess
-                      ? INIT_HOUSES.map((h) => h.id)
+                      ? houses.map((h) => h.id)
                       : u.allowedHouses,
                   }))
                 }
@@ -257,7 +257,7 @@ export default function Manage({
                 >
                   Access to Houses:
                 </div>{" "}
-                {INIT_HOUSES.map((h) => {
+                {houses.map((h) => {
                   const has = (eu.allowedHouses || []).includes(h.id);
                   return (
                     <div
@@ -586,7 +586,7 @@ export default function Manage({
                       </span>
                     ) : (
                       (u.allowedHouses || []).map((hid) => {
-                        const h = INIT_HOUSES.find((x) => x.id === hid);
+                        const h = houses.find((x) => x.id === hid);
                         return h ? (
                           <span
                             key={hid}
