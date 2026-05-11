@@ -17,22 +17,44 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 });
 
 router.post("/", async (req: AuthRequest, res: Response) => {
-  const { password, ...rest } = req.body;
-  const passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.create({ data: { ...rest, passwordHash } });
-  const { passwordHash: _, ...safe } = user;
-  res.status(201).json(safe);
+  try {
+    const { password, name, username, role, roleLabel, initials, color, phone, allHousesAccess, houseId } = req.body;
+    const passwordHash = await bcrypt.hash(password || "1234", 10);
+    const user = await prisma.user.create({
+      data: { name, username, role, roleLabel, initials, color: color || "#1e5fa8",
+              phone, allHousesAccess: allHousesAccess || false, houseId: houseId || null, passwordHash },
+    });
+    const { passwordHash: _, ...safe } = user;
+    res.status(201).json(safe);
+  } catch (e) {
+    console.error("Create user error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 router.patch("/:id", async (req: AuthRequest, res: Response) => {
-  const id = String(req.params.id);
-  const { password, ...rest } = req.body;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = { ...rest };
-  if (password) data.passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.update({ where: { id }, data });
-  const { passwordHash: _, ...safe } = user;
-  res.json(safe);
+  try {
+    const id = String(req.params.id);
+    const { password, name, username, role, roleLabel, initials, color, phone, allHousesAccess, houseId } = req.body;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data: any = {};
+    if (name !== undefined) data.name = name;
+    if (username !== undefined) data.username = username;
+    if (role !== undefined) data.role = role;
+    if (roleLabel !== undefined) data.roleLabel = roleLabel;
+    if (initials !== undefined) data.initials = initials;
+    if (color !== undefined) data.color = color;
+    if (phone !== undefined) data.phone = phone;
+    if (allHousesAccess !== undefined) data.allHousesAccess = allHousesAccess;
+    if (houseId !== undefined) data.houseId = houseId;
+    if (password) data.passwordHash = await bcrypt.hash(password, 10);
+    const user = await prisma.user.update({ where: { id }, data });
+    const { passwordHash: _, ...safe } = user;
+    res.json(safe);
+  } catch (e) {
+    console.error("Update user error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 export default router;

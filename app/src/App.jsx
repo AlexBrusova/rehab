@@ -66,6 +66,7 @@ export default function App() {
   useEffect(() => {
     if (!user) return;
     authFetch("/api/houses").then(setHouses).catch(console.error);
+    authFetch("/api/users").then(setUsers).catch(console.error);
   }, [user]);
 
   useEffect(() => {
@@ -108,6 +109,34 @@ export default function App() {
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
     setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const ROLE_LABELS = {
+    counselor: "Counselor", doctor: "Doctor",
+    therapist: "Emotional Therapist", manager: "House Manager", org_manager: "Org Manager",
+  };
+
+  const createUser = async (formData) => {
+    const initials = formData.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+    const roleLabel = ROLE_LABELS[formData.role] || "Counselor";
+    const created = await authFetch("/api/users", {
+      method: "POST",
+      body: JSON.stringify({ ...formData, initials, roleLabel }),
+    });
+    setUsers((prev) => [...prev, created]);
+  };
+
+  const updateUser = async (id, formData) => {
+    const data = { ...formData };
+    if (formData.name) {
+      data.initials = formData.name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+    }
+    if (formData.role) data.roleLabel = ROLE_LABELS[formData.role] || formData.roleLabel;
+    const updated = await authFetch(`/api/users/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    setUsers((prev) => prev.map((u) => (u.id === id ? { ...u, ...updated } : u)));
   };
 
   const handleLogin = (u, token) => {
@@ -316,6 +345,9 @@ export default function App() {
         setTherapistAssignments={setTherapistAssignments}
         shifts={houseShifts}
         activeHouseId={activeHouse?.id}
+        houses={houses}
+        onAddUser={createUser}
+        onUpdateUser={updateUser}
       />
     ),
     therapy: (

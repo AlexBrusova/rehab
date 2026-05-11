@@ -17,6 +17,9 @@ export default function Manage({
   setTherapistAssignments,
   shifts,
   activeHouseId,
+  houses,
+  onAddUser,
+  onUpdateUser,
 }) {
   const [tab, setTab] = useState("staff");
   const [showAdd, setShowAdd] = useState(false);
@@ -31,68 +34,33 @@ export default function Manage({
   });
   const [editUser, setEditUser] = useState(null);
   const [editData, setEditData] = useState({});
-  const saveEdit = () => {
+  const saveEdit = async () => {
     if (!editData.name) {
       toast("⚠️ Name cannot be empty");
       return;
     }
-    setUsers((prev) =>
-      prev.map((u) =>
-        u.id === editUser
-          ? {
-              ...u,
-              ...editData,
-              initials: editData.name
-                .split(" ")
-                .map((w) => w[0])
-                .join("")
-                .slice(0, 2),
-            }
-          : u,
-      ),
-    );
-    setEditUser(null);
-    toast("✅ Details updated");
+    try {
+      await onUpdateUser(editUser, editData);
+      setEditUser(null);
+      toast("✅ Details updated");
+    } catch {
+      toast("❌ Failed to update user");
+    }
   };
   const isOrgManager = currentUser.role === "org_manager";
-  const addUser = () => {
+  const addUser = async () => {
     if (!newU.name || !newU.username) {
       toast("⚠️ Please fill Name and Username");
       return;
     }
-    const roleLabels = {
-      counselor: "Counselor",
-      doctor: "Doctor",
-      therapist: "Emotional Therapist",
-      manager: "House Manager",
-      org_manager: "Org Manager",
-    };
-    setUsers((prev) => [
-      ...prev,
-      {
-        ...newU,
-        id: "u" + Date.now(),
-        password: "1234",
-        roleLabel: roleLabels[newU.role] || "Counselor",
-        initials: newU.name
-          .split(" ")
-          .map((w) => w[0])
-          .join("")
-          .slice(0, 2),
-        color: C.teal,
-        active: true,
-      },
-    ]);
-    setNewU({
-      name: "",
-      username: "",
-      role: "counselor",
-      phone: "",
-      allowedHouses: [],
-      allHousesAccess: false,
-    });
-    setShowAdd(false);
-    toast("✅ User added – Password: 1234");
+    try {
+      await onAddUser({ ...newU, color: C.teal });
+      setNewU({ name: "", username: "", role: "counselor", phone: "", allowedHouses: [], allHousesAccess: false });
+      setShowAdd(false);
+      toast("✅ User added – Default password: 1234");
+    } catch {
+      toast("❌ Failed to add user (username may already exist)");
+    }
   };
   const toggleUser = (id) => {
     setUsers((prev) =>
