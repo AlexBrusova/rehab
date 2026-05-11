@@ -83,6 +83,9 @@ export default function App() {
     authFetch(`/api/shifts?houseId=${activeHouseId}`)
       .then(setShifts)
       .catch(console.error);
+    authFetch(`/api/consequences?houseId=${activeHouseId}`)
+      .then(setConsequences)
+      .catch(console.error);
   }, [user, activeHouseId]);
 
   const refreshPatients = async () => {
@@ -115,6 +118,23 @@ export default function App() {
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
     setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const createConsequence = async (data) => {
+    const today = new Date().toLocaleDateString("en-GB");
+    const created = await authFetch("/api/consequences", {
+      method: "POST",
+      body: JSON.stringify({ ...data, houseId: activeHouseId, date: today }),
+    });
+    setConsequences((prev) => [created, ...prev]);
+  };
+
+  const updateConsequence = async (id, data) => {
+    const updated = await authFetch(`/api/consequences/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    setConsequences((prev) => prev.map((c) => (c.id === id ? updated : c)));
   };
 
   const createShift = async (data) => {
@@ -366,6 +386,8 @@ export default function App() {
         users={users}
         user={user}
         toast={showToast}
+        onAdd={createConsequence}
+        onUpdate={updateConsequence}
       />
     ),
     finance: (

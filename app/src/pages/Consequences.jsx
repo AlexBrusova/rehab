@@ -9,10 +9,12 @@ export default function Consequences({
   users,
   user,
   toast,
+  onAdd,
+  onUpdate,
 }) {
   const [showNew, setShowNew] = useState(false);
   const [newC, setNewC] = useState({
-    patientId: "p1",
+    patientId: "",
     type: "phone",
     desc: "",
     reason: "",
@@ -25,44 +27,35 @@ export default function Consequences({
   };
   const pending = consequences.filter((c) => c.status === "pending");
   const approved = consequences.filter((c) => c.status === "approved");
-  const approve = (id) => {
-    setConsequences((prev) =>
-      prev.map((c) =>
-        c.id === id ? { ...c, status: "approved", approvedBy: user.id } : c,
-      ),
-    );
-    toast("✅ Consequence approved");
+  const approve = async (id) => {
+    try {
+      await onUpdate(id, { status: "approved", approvedBy: user.name });
+      toast("✅ Consequence approved");
+    } catch { toast("❌ Failed"); }
   };
-  const reject = (id) => {
-    setConsequences((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: "rejected" } : c)),
-    );
-    toast("Consequence rejected");
+  const reject = async (id) => {
+    try {
+      await onUpdate(id, { status: "rejected" });
+      toast("Consequence rejected");
+    } catch { toast("❌ Failed"); }
   };
-  const cancel = (id) => {
-    setConsequences((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, status: "cancelled" } : c)),
-    );
-    toast("Consequence cancelled");
+  const cancel = async (id) => {
+    try {
+      await onUpdate(id, { status: "rejected" });
+      toast("Consequence cancelled");
+    } catch { toast("❌ Failed"); }
   };
-  const addConsequence = () => {
-    if (!newC.desc || !newC.reason) {
-      toast("⚠️ Please fill Description and Reason");
+  const addConsequence = async () => {
+    if (!newC.patientId || !newC.desc) {
+      toast("⚠️ Please select a patient and fill Description");
       return;
     }
-    setConsequences((prev) => [
-      ...prev,
-      {
-        ...newC,
-        id: "c" + Date.now(),
-        proposedBy: user.id,
-        status: "pending",
-        createdAt: "09/05",
-      },
-    ]);
-    setNewC({ patientId: "p1", type: "phone", desc: "", reason: "" });
-    setShowNew(false);
-    toast("✅ Consequence proposed – awaiting manager approval");
+    try {
+      await onAdd({ patientId: newC.patientId, type: newC.type, description: newC.desc });
+      setNewC({ patientId: "", type: "phone", desc: "", reason: "" });
+      setShowNew(false);
+      toast("✅ Consequence proposed – awaiting manager approval");
+    } catch { toast("❌ Failed to add consequence"); }
   };
   return (
     <div>

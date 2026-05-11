@@ -8,6 +8,7 @@ import usersRoutes from "./routes/users";
 import patientsRoutes from "./routes/patients";
 import roomsRoutes from "./routes/rooms";
 import shiftsRoutes from "./routes/shifts";
+import consequencesRoutes from "./routes/consequences";
 
 dotenv.config();
 
@@ -25,6 +26,7 @@ app.use("/api/users", usersRoutes);
 app.use("/api/patients", patientsRoutes);
 app.use("/api/rooms", roomsRoutes);
 app.use("/api/shifts", shiftsRoutes);
+app.use("/api/consequences", consequencesRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
