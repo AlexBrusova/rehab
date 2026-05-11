@@ -5,18 +5,18 @@ import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../c
 export default function Finance({
   patients,
   finance,
-  setFinance,
   cashbox,
-  setCashbox,
   cashboxCounts,
-  setCashboxCounts,
   user,
   toast,
   activeHouseId,
+  onAddPatientTx,
+  onAddCashTx,
+  onAddCashboxCount,
 }) {
   const [tab, setTab] = useState("patients");
   const isManager = user.role === "manager"; /* ── PATIENTS TAB ── */
-  const [selPat, setSelPat] = useState("p1");
+  const [selPat, setSelPat] = useState("");
   const [showAdd, setShowAdd] = useState(null);
   const [newTx, setNewTx] = useState({
     type: "deposit",
@@ -26,7 +26,7 @@ export default function Finance({
   });
   const pFin = finance
     .filter((f) => f.patientId === selPat)
-    .sort((a, b) => b.id.localeCompare(a.id));
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const balance = pFin.length > 0 ? pFin[0].balance : 0;
   const totalIn = pFin
     .filter((f) => f.type === "deposit")
@@ -34,29 +34,19 @@ export default function Finance({
   const totalOut = pFin
     .filter((f) => f.type === "withdrawal")
     .reduce((a, f) => a + f.amount, 0);
-  const addPatientTx = () => {
+  const addPatientTx = async () => {
+    if (!selPat) { toast("⚠️ Please select a patient"); return; }
     if (!newTx.amount || isNaN(newTx.amount)) {
       toast("⚠️ Please enter a valid Amount");
       return;
     }
     const amt = Number(newTx.amount);
-    const newBal = newTx.type === "deposit" ? balance + amt : balance - amt;
-    setFinance((prev) => [
-      {
-        id: "f" + Date.now(),
-        patientId: selPat,
-        type: newTx.type,
-        amount: amt,
-        cat: newTx.cat,
-        note: newTx.note,
-        date: "09/05",
-        balance: newBal,
-      },
-      ...prev,
-    ]);
-    setNewTx({ type: "deposit", amount: "", cat: "Family", note: "" });
-    setShowAdd(null);
-    toast(`✅ ${newTx.type === "deposit" ? "Deposit" : "Withdrawal"} recorded`);
+    try {
+      await onAddPatientTx(selPat, newTx.type, amt, newTx.cat, newTx.note, balance);
+      setNewTx({ type: "deposit", amount: "", cat: "Family", note: "" });
+      setShowAdd(null);
+      toast(`✅ ${newTx.type === "deposit" ? "Deposit" : "Withdrawal"} recorded`);
+    } catch { toast("❌ Failed to record transaction"); }
   }; /* ── CASHBOX TAB ── */
   const [showCashTx, setShowCashTx] = useState(null);
   const [showCount, setShowCount] = useState(false);
@@ -68,12 +58,8 @@ export default function Finance({
   });
   const [countAmount, setCountAmount] = useState("");
   const [countNotes, setCountNotes] = useState("");
-  const houseCashbox = cashbox.filter(
-    (f) => !f.houseId || f.houseId === activeHouseId,
-  );
-  const houseCounts = cashboxCounts.filter(
-    (c) => !c.houseId || c.houseId === activeHouseId,
-  );
+  const houseCashbox = cashbox;
+  const houseCounts = cashboxCounts;
   const cbBalance = houseCashbox.length > 0 ? houseCashbox[0].balance : 0;
   const cbIn = houseCashbox
     .filter((f) => f.type === "deposit")
@@ -81,71 +67,39 @@ export default function Finance({
   const cbOut = houseCashbox
     .filter((f) => f.type === "withdrawal")
     .reduce((a, f) => a + f.amount, 0);
-  const addCashTx = () => {
+  const addCashTx = async () => {
     if (!newCashTx.amount || isNaN(newCashTx.amount)) {
       toast("⚠️ Please enter a valid Amount");
       return;
     }
     const amt = Number(newCashTx.amount);
-    const newBal =
-      newCashTx.type === "deposit" ? cbBalance + amt : cbBalance - amt;
-    setCashbox((prev) => [
-      {
-        id: "cb" + Date.now(),
-        houseId: activeHouseId,
-        type: newCashTx.type,
-        amount: amt,
-        cat: newCashTx.cat,
-        note: newCashTx.note,
-        date: "09/05",
-        time: new Date().toTimeString().slice(0, 5),
-        by: user.name,
-        balance: newBal,
-      },
-      ...prev,
-    ]);
-    setNewCashTx({
-      type: "deposit",
-      amount: "",
-      cat: "Misc. Income",
-      note: "",
-    });
-    setShowCashTx(null);
-    toast(
-      `✅ ${newCashTx.type === "deposit" ? "Income" : "Withdrawal"} to Cashbox recorded`,
-    );
+    try {
+      await onAddCashTx(activeHouseId, newCashTx.type, amt, newCashTx.cat, newCashTx.note, cbBalance);
+      setNewCashTx({ type: "deposit", amount: "", cat: "Misc. Income", note: "" });
+      setShowCashTx(null);
+      toast(`✅ ${newCashTx.type === "deposit" ? "Income" : "Withdrawal"} to Cashbox recorded`);
+    } catch { toast("❌ Failed to record cashbox transaction"); }
   };
-  const submitCount = () => {
+  const submitCount = async () => {
     if (!countAmount || isNaN(countAmount)) {
       toast("⚠️ Please enter the amount you counted");
       return;
     }
     const counted = Number(countAmount);
     const diff = counted - cbBalance;
-    setCashboxCounts((prev) => [
-      {
-        id: "cc" + Date.now(),
-        houseId: activeHouseId,
-        countedBy: user.name,
-        amount: counted,
-        expected: cbBalance,
-        diff,
-        date: "09/05",
-        time: new Date().toTimeString().slice(0, 5),
-        notes: countNotes,
-      },
-      ...prev,
-    ]);
-    setShowCount(false);
-    setCountAmount("");
-    setCountNotes("");
-    toast(
-      diff === 0
-        ? "✅ Cashbox count OK – all balanced"
-        : diff > 0
-          ? `⚠️ Surplus of ₪${diff}`
-          : `⚠️ Missing ₪${Math.abs(diff)}`,
-    );
+    try {
+      await onAddCashboxCount(activeHouseId, counted, cbBalance, diff, countNotes);
+      setShowCount(false);
+      setCountAmount("");
+      setCountNotes("");
+      toast(
+        diff === 0
+          ? "✅ Cashbox count OK – all balanced"
+          : diff > 0
+            ? `⚠️ Surplus of ₪${diff}`
+            : `⚠️ Missing ₪${Math.abs(diff)}`,
+      );
+    } catch { toast("❌ Failed to save cashbox count"); }
   };
   return (
     <div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_FINANCE, INIT_CASHBOX, INIT_CASHBOX_COUNTS, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
+import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
@@ -33,9 +33,9 @@ export default function App() {
   const [groups, setGroups] = useState(INIT_GROUPS);
   const [attendance, setAttendance] = useState(INIT_ATTENDANCE);
   const [consequences, setConsequences] = useState(INIT_CONSEQUENCES);
-  const [finance, setFinance] = useState(INIT_FINANCE);
-  const [cashbox, setCashbox] = useState(INIT_CASHBOX);
-  const [cashboxCounts, setCashboxCounts] = useState(INIT_CASHBOX_COUNTS);
+  const [finance, setFinance] = useState([]);
+  const [cashbox, setCashbox] = useState([]);
+  const [cashboxCounts, setCashboxCounts] = useState([]);
   const [therapy, setTherapy] = useState(INIT_THERAPY);
   const [shifts, setShifts] = useState(INIT_SHIFTS);
   const [dailySummary, setDailySummary] = useState(INIT_DAILY_SUMMARY);
@@ -91,6 +91,15 @@ export default function App() {
         setPhones(data.filter((p) => p.status === "active"));
         setPhoneHist(data.filter((p) => p.status === "returned"));
       })
+      .catch(console.error);
+    authFetch(`/api/finance/patient?houseId=${activeHouseId}`)
+      .then(setFinance)
+      .catch(console.error);
+    authFetch(`/api/finance/cashbox?houseId=${activeHouseId}`)
+      .then(setCashbox)
+      .catch(console.error);
+    authFetch(`/api/finance/cashbox-counts?houseId=${activeHouseId}`)
+      .then(setCashboxCounts)
       .catch(console.error);
   }, [user, activeHouseId]);
 
@@ -165,6 +174,40 @@ export default function App() {
       body: JSON.stringify(data),
     });
     setConsequences((prev) => prev.map((c) => (c.id === id ? updated : c)));
+  };
+
+  const createPatientTx = async (patientId, type, amount, cat, note, currentBalance) => {
+    const newBal = type === "deposit" ? currentBalance + amount : currentBalance - amount;
+    const date = new Date().toLocaleDateString("en-GB");
+    const created = await authFetch("/api/finance/patient", {
+      method: "POST",
+      body: JSON.stringify({ patientId, type, amount, cat, note, date, balance: newBal }),
+    });
+    setFinance((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const createCashTx = async (houseId, type, amount, cat, note, currentBalance) => {
+    const newBal = type === "deposit" ? currentBalance + amount : currentBalance - amount;
+    const date = new Date().toLocaleDateString("en-GB");
+    const time = new Date().toTimeString().slice(0, 5);
+    const created = await authFetch("/api/finance/cashbox", {
+      method: "POST",
+      body: JSON.stringify({ houseId, type, amount, cat, note, date, time, by: user.name, balance: newBal }),
+    });
+    setCashbox((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const createCashboxCount = async (houseId, amount, expected, diff, notes) => {
+    const date = new Date().toLocaleDateString("en-GB");
+    const time = new Date().toTimeString().slice(0, 5);
+    const created = await authFetch("/api/finance/cashbox-counts", {
+      method: "POST",
+      body: JSON.stringify({ houseId, countedBy: user.name, amount, expected, diff, date, time, notes }),
+    });
+    setCashboxCounts((prev) => [created, ...prev]);
+    return created;
   };
 
   const createShift = async (data) => {
@@ -426,14 +469,14 @@ export default function App() {
       <Finance
         patients={housePatients}
         finance={houseFinance}
-        setFinance={setFinance}
         cashbox={cashbox}
-        setCashbox={setCashbox}
         cashboxCounts={cashboxCounts}
-        setCashboxCounts={setCashboxCounts}
         user={user}
         toast={showToast}
         activeHouseId={activeHouse?.id}
+        onAddPatientTx={createPatientTx}
+        onAddCashTx={createCashTx}
+        onAddCashboxCount={createCashboxCount}
       />
     ),
     manage: (
