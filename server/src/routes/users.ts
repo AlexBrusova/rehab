@@ -25,10 +25,12 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 });
 
 router.patch("/:id", async (req: AuthRequest, res: Response) => {
+  const id = String(req.params.id);
   const { password, ...rest } = req.body;
-  const data: Record<string, unknown> = { ...rest };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = { ...rest };
   if (password) data.passwordHash = await bcrypt.hash(password, 10);
-  const user = await prisma.user.update({ where: { id: req.params.id }, data });
+  const user = await prisma.user.update({ where: { id }, data });
   const { passwordHash: _, ...safe } = user;
   res.json(safe);
 });

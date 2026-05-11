@@ -25,7 +25,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
 router.patch("/:id", async (req: AuthRequest, res: Response) => {
   const patient = await prisma.patient.update({
-    where: { id: req.params.id },
+    where: { id: String(req.params.id) },
     data: req.body,
   });
   res.json(patient);
@@ -33,7 +33,7 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
 
 router.delete("/:id", async (req: AuthRequest, res: Response) => {
   await prisma.patient.update({
-    where: { id: req.params.id },
+    where: { id: String(req.params.id) },
     data: { status: "archived" },
   });
   res.json({ ok: true });
