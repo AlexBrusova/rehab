@@ -12,18 +12,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  "http://localhost:5173",
-  "http://localhost:4173",
-].filter(Boolean) as string[];
-
-app.use(cors({
-  origin: (origin, cb) => {
-    if (!origin || allowedOrigins.some((o) => origin.startsWith(o))) cb(null, true);
-    else cb(new Error("Not allowed by CORS"));
-  },
-}));
+app.use(cors({ origin: "*" }));
 app.use(express.json());
 
 app.get("/health", (_req, res) => res.json({ ok: true }));
