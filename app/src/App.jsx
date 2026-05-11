@@ -77,6 +77,9 @@ export default function App() {
         setMeds(data.flatMap((p) => p.meds || []));
       })
       .catch(console.error);
+    authFetch(`/api/rooms?houseId=${activeHouseId}`)
+      .then(setRooms)
+      .catch(console.error);
   }, [user, activeHouseId]);
 
   const refreshPatients = async () => {
@@ -109,6 +112,27 @@ export default function App() {
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
     setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const createRoom = async (data) => {
+    const created = await authFetch("/api/rooms", {
+      method: "POST",
+      body: JSON.stringify({ ...data, houseId: activeHouseId }),
+    });
+    setRooms((prev) => [...prev, created]);
+  };
+
+  const updateRoom = async (id, data) => {
+    const updated = await authFetch(`/api/rooms/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    setRooms((prev) => prev.map((r) => (r.id === id ? updated : r)));
+  };
+
+  const deleteRoom = async (id) => {
+    await authFetch(`/api/rooms/${id}`, { method: "DELETE" });
+    setRooms((prev) => prev.filter((r) => r.id !== id));
   };
 
   const ROLE_LABELS = {
@@ -237,6 +261,10 @@ export default function App() {
         patients={housePatients}
         setPatients={setPatients}
         toast={showToast}
+        onAddRoom={createRoom}
+        onUpdateRoom={updateRoom}
+        onDeleteRoom={deleteRoom}
+        onUpdatePatient={updatePatient}
       />
     ),
     absences: (

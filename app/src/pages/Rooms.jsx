@@ -8,6 +8,10 @@ export default function Rooms({
   patients,
   setPatients,
   toast,
+  onAddRoom,
+  onUpdateRoom,
+  onDeleteRoom,
+  onUpdatePatient,
 }) {
   const [showAdd, setShowAdd] = useState(false);
   const [openRoom, setOpenRoom] = useState(null); /* room id currently "open" */
@@ -24,51 +28,51 @@ export default function Rooms({
   const room = rooms.find((r) => r.id === openRoom);
   const occ = openRoom ? patients.filter((p) => p.roomId === openRoom) : [];
   const unassigned = patients.filter((p) => p.status === "active" && !p.roomId);
-  const addRoom = () => {
+  const addRoom = async () => {
     if (!newR.number || !newR.building) {
       toast("⚠️ Please fill building and room number");
       return;
     }
-    setRooms((prev) => [
-      ...prev,
-      {
-        id: "r" + Date.now(),
-        number: newR.number,
-        building: newR.building,
-        capacity: Number(newR.capacity) || 1,
-      },
-    ]);
-    setNewR({ number: "", building: "Building A", capacity: "1" });
-    setShowAdd(false);
-    toast("✅ Room added");
+    try {
+      await onAddRoom(newR);
+      setNewR({ number: "", building: "Building A", capacity: "1" });
+      setShowAdd(false);
+      toast("✅ Room added");
+    } catch {
+      toast("❌ Failed to add room");
+    }
   };
-  const saveEdit = () => {
-    setRooms((prev) =>
-      prev.map((r) =>
-        r.id === openRoom
-          ? { ...r, ...editData, capacity: Number(editData.capacity) || 1 }
-          : r,
-      ),
-    );
-    setEditingRoom(false);
-    toast("✅ Room updated");
+  const saveEdit = async () => {
+    try {
+      await onUpdateRoom(openRoom, editData);
+      setEditingRoom(false);
+      toast("✅ Room updated");
+    } catch {
+      toast("❌ Failed to update room");
+    }
   };
-  const deleteRoom = () => {
+  const deleteRoom = async () => {
     if (occ.length > 0) {
       toast("⚠️ Please remove patients before deleting");
       return;
     }
-    setRooms((prev) => prev.filter((r) => r.id !== openRoom));
-    setOpenRoom(null);
-    toast("🗑️ Room deleted");
-  }; /* Remove Patient from Room (vacate) */
-  const vacatePatient = (patId) => {
-    setPatients((prev) =>
-      prev.map((p) => (p.id === patId ? { ...p, roomId: null } : p)),
-    );
-    toast("✅ Patient removed from room");
-  }; /* Transfer Patient to Another Room */
-  const movePatient = () => {
+    try {
+      await onDeleteRoom(openRoom);
+      setOpenRoom(null);
+      toast("🗑️ Room deleted");
+    } catch {
+      toast("❌ Failed to delete room");
+    }
+  };
+  const vacatePatient = async (patId) => {
+    try {
+      await onUpdatePatient(patId, { roomId: null });
+      toast("✅ Patient removed from room");
+    } catch {
+      toast("❌ Failed to update patient");
+    }
+  };
+  const movePatient = async () => {
     if (!movePatId || !moveToRoomId) {
       toast("⚠️ Select Patient and Room first");
       return;
@@ -79,26 +83,28 @@ export default function Rooms({
       toast(`⚠️ ${target.number} Full`);
       return;
     }
-    setPatients((prev) =>
-      prev.map((p) =>
-        p.id === movePatId ? { ...p, roomId: moveToRoomId } : p,
-      ),
-    );
-    setMovePatId("");
-    setMoveToRoomId("");
-    toast(`✅ Patient moved to ${target.number}`);
-  }; /* Add Patient to Room (for patients without a Room) */
-  const assignToRoom = (patId) => {
+    try {
+      await onUpdatePatient(movePatId, { roomId: moveToRoomId });
+      setMovePatId("");
+      setMoveToRoomId("");
+      toast(`✅ Patient moved to ${target.number}`);
+    } catch {
+      toast("❌ Failed to move patient");
+    }
+  };
+  const assignToRoom = async (patId) => {
     if (!patId) return;
     const cur = rooms.find((r) => r.id === openRoom);
     if (occ.length >= cur.capacity) {
       toast("⚠️ Room is Full");
       return;
     }
-    setPatients((prev) =>
-      prev.map((p) => (p.id === patId ? { ...p, roomId: openRoom } : p)),
-    );
-    toast("✅ Patient assigned to Room");
+    try {
+      await onUpdatePatient(patId, { roomId: openRoom });
+      toast("✅ Patient assigned to Room");
+    } catch {
+      toast("❌ Failed to assign patient");
+    }
   }; /* ── Inner screen – Open Room ── */
   if (openRoom && room) {
     const allOtherRooms = rooms.filter((r) => r.id !== openRoom);
