@@ -8,6 +8,8 @@ export default function Shifts({
   users,
   user,
   toast,
+  onCreateShift,
+  onUpdateShift,
 }) {
   const [shiftActive, setShiftActive] = useState(true);
   const [showStart, setShowStart] = useState(false);
@@ -84,10 +86,17 @@ export default function Shifts({
           <div style={{ display: "flex", gap: 10 }}>
             <Btn
               color="teal"
-              onClick={() => {
-                setShowStart(false);
-                setShiftActive(true);
-                toast("✅ Shift opened");
+              onClick={async () => {
+                try {
+                  const today = new Date().toLocaleDateString("en-GB");
+                  const start = new Date().toTimeString().slice(0, 5);
+                  await onCreateShift({ date: today, receivedFrom, start });
+                  setShowStart(false);
+                  setShiftActive(true);
+                  toast("✅ Shift opened");
+                } catch {
+                  toast("❌ Failed to start shift");
+                }
               }}
             >
               ✓ Start Shift
@@ -165,27 +174,33 @@ export default function Shifts({
             <Btn
               color="teal"
               disabled={!handedTo}
-              onClick={() => {
+              onClick={async () => {
                 if (!handedTo) {
                   toast("⚠️ Please select Counselor");
                   return;
                 }
-                setShifts((prev) => [
-                  {
-                    id: "s" + Date.now(),
-                    counselorId: user.id,
-                    start: "09/05 09:00",
-                    end: "09/05 " + new Date().toTimeString().slice(0, 5),
-                    receivedFrom,
-                    handedTo,
-                    notes,
-                    accepted: false,
-                  },
-                  ...prev,
-                ]);
-                setShowEnd(false);
-                setShiftActive(false);
-                toast(`✅ Handed to ${handedTo} – Pending approval`);
+                try {
+                  const activeShift = shifts.find(
+                    (s) => s.counselorId === user.id && s.status === "ACTIVE"
+                  );
+                  const end = new Date().toTimeString().slice(0, 5);
+                  if (activeShift) {
+                    await onUpdateShift(activeShift.id, {
+                      status: "completed", handedTo, note: notes, end,
+                    });
+                  } else {
+                    const today = new Date().toLocaleDateString("en-GB");
+                    await onCreateShift({
+                      date: today, receivedFrom, handedTo,
+                      note: notes, end, status: "completed",
+                    });
+                  }
+                  setShowEnd(false);
+                  setShiftActive(false);
+                  toast(`✅ Handed to ${handedTo} – Pending approval`);
+                } catch {
+                  toast("❌ Failed to complete shift");
+                }
               }}
             >
               ✓ Finish and Handoff

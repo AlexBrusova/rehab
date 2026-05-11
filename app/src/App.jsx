@@ -80,6 +80,9 @@ export default function App() {
     authFetch(`/api/rooms?houseId=${activeHouseId}`)
       .then(setRooms)
       .catch(console.error);
+    authFetch(`/api/shifts?houseId=${activeHouseId}`)
+      .then(setShifts)
+      .catch(console.error);
   }, [user, activeHouseId]);
 
   const refreshPatients = async () => {
@@ -112,6 +115,24 @@ export default function App() {
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
     setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const createShift = async (data) => {
+    const created = await authFetch("/api/shifts", {
+      method: "POST",
+      body: JSON.stringify({ ...data, houseId: activeHouseId, counselorId: user.id }),
+    });
+    setShifts((prev) => [created, ...prev]);
+    return created;
+  };
+
+  const updateShift = async (id, data) => {
+    const updated = await authFetch(`/api/shifts/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    setShifts((prev) => prev.map((s) => (s.id === id ? updated : s)));
+    return updated;
   };
 
   const createRoom = async (data) => {
@@ -333,6 +354,8 @@ export default function App() {
         user={user}
         patients={housePatients}
         toast={showToast}
+        onCreateShift={createShift}
+        onUpdateShift={updateShift}
       />
     ),
     consequences: (
