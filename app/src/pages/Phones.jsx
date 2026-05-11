@@ -9,56 +9,38 @@ export default function Phones({
   phoneHist,
   setPhoneHist,
   toast,
+  onIssue,
+  onReturn,
 }) {
-  /* Shows only Active Phones for Patients of this Housattendance */
   const housePatientIds = new Set(patients.map((p) => p.id));
   const housePhones = phones.filter((ph) => housePatientIds.has(ph.patientId));
-  const housePhoneHist = phoneHist.filter((ph) =>
-    housePatientIds.has(ph.patientId),
-  );
+  const housePhoneHist = phoneHist.filter((ph) => housePatientIds.has(ph.patientId));
   const [showIssue, setShowIssue] = useState(false);
-  const [issueData, setIssueData] = useState({ patientId: "p1", duration: 15 });
+  const [issueData, setIssueData] = useState({ patientId: "", duration: 15 });
   const [now, setNow] = useState(new Date());
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 15000);
     return () => clearInterval(t);
   }, []);
-  const elapsed = (issuedAt) => Math.floor((now - new Date(issuedAt)) / 60000);
-  const isLate = (ph) => elapsed(ph.issuedAt) > ph.duration;
+  const toMinutes = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const nowMin = now.getHours() * 60 + now.getMinutes();
+  const isLate = (ph) => ph.returnBy && nowMin > toMinutes(ph.returnBy);
   const lateCount = housePhones.filter(isLate).length;
   const activePats = patients.filter((p) => p.status === "active");
-  const issuePhone = () => {
-    setPhones((prev) => [
-      ...prev,
-      {
-        ...issueData,
-        id: "ph" + Date.now(),
-        issuedAt: new Date(),
-        returned: false,
-      },
-    ]);
-    setShowIssue(false);
-    toast(
-      `📱 Phone Issued to ${pName(patients, issueData.patientId)} for ${issueData.duration} minutes`,
-    );
+  const issuePhone = async () => {
+    if (!issueData.patientId) { toast("⚠️ Please select a patient"); return; }
+    try {
+      await onIssue(issueData.patientId, issueData.duration);
+      setShowIssue(false);
+      toast(`📱 Phone issued to ${pName(patients, issueData.patientId)} for ${issueData.duration} min`);
+    } catch { toast("❌ Failed to issue phone"); }
   };
-  const returnPhone = (id) => {
+  const returnPhone = async (id) => {
     const ph = phones.find((p) => p.id === id);
-    const el = elapsed(ph.issuedAt);
-    setPhoneHist((prev) => [
-      {
-        id: "ph" + Date.now(),
-        patientId: ph.patientId,
-        date: "09/05",
-        issuedTime: new Date(ph.issuedAt).toTimeString().slice(0, 5),
-        duration: ph.duration,
-        returnedTime: now.toTimeString().slice(0, 5),
-        late: el > ph.duration,
-      },
-      ...prev,
-    ]);
-    setPhones((prev) => prev.filter((p) => p.id !== id));
-    toast(`✅ ${pName(patients, ph.patientId)} returned`);
+    try {
+      await onReturn(id);
+      toast(`✅ ${pName(patients, ph.patientId)} returned`);
+    } catch { toast("❌ Failed to return phone"); }
   };
   return (
     <div>
@@ -241,10 +223,13 @@ export default function Phones({
             Phones In Use
           </CT>{" "}
           {housePhones.map((ph) => {
-            const el = elapsed(ph.issuedAt);
+            const givenMin = ph.givenAt ? toMinutes(ph.givenAt) : nowMin;
+            const returnMin = ph.returnBy ? toMinutes(ph.returnBy) : givenMin + 30;
+            const duration = returnMin - givenMin;
+            const el = nowMin - givenMin;
+            const rem = returnMin - nowMin;
             const late = isLate(ph);
-            const rem = ph.duration - el;
-            const pct = Math.min(100, (el / ph.duration) * 100);
+            const pct = Math.min(100, duration > 0 ? (el / duration) * 100 : 100);
             return (
               <div
                 key={ph.id}
@@ -288,8 +273,7 @@ export default function Phones({
                       {pName(patients, ph.patientId)}
                     </div>{" "}
                     <div style={{ fontSize: 12, color: C.soft }}>
-                      Issued: {new Date(ph.issuedAt).toTimeString().slice(0, 5)}{" "}
-                      | Allocated: {ph.duration} min
+                      Issued: {ph.givenAt} | Return by: {ph.returnBy}
                     </div>{" "}
                   </div>{" "}
                   <div style={{ textAlign: "center" }}>
@@ -300,12 +284,12 @@ export default function Phones({
                         fontWeight: 900,
                         color: late
                           ? C.red
-                          : el > ph.duration * 0.7
+                          : el > duration * 0.7
                             ? C.orange
                             : C.teal,
                       }}
                     >
-                      {late ? `+${el - ph.duration}` : rem}
+                      {late ? `+${el - duration}` : rem}
                     </div>{" "}
                     <div style={{ fontSize: 10, color: late ? C.red : C.soft }}>
                       {late ? "minutes overdue" : "remaining"}
@@ -370,8 +354,8 @@ export default function Phones({
                   {pName(patients, r.patientId)}
                 </Td>{" "}
                 <Td style={{ fontSize: 12, color: C.soft }}>{r.date}</Td>{" "}
-                <Td>{r.issuedTime}</Td> <Td>{r.duration} min</Td>{" "}
-                <Td>{r.returnedTime}</Td>{" "}
+                <Td>{r.givenAt}</Td> <Td>{r.returnBy}</Td>{" "}
+                <Td>{r.returnedAt || "—"}</Td>{" "}
                 <Td>
                   <Badge type={r.late ? "orange" : "green"}>
                     {r.late ? "⚠ Late" : "✓ On time"}

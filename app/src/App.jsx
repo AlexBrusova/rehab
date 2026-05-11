@@ -86,6 +86,12 @@ export default function App() {
     authFetch(`/api/consequences?houseId=${activeHouseId}`)
       .then(setConsequences)
       .catch(console.error);
+    authFetch(`/api/phones?houseId=${activeHouseId}`)
+      .then((data) => {
+        setPhones(data.filter((p) => p.status === "active"));
+        setPhoneHist(data.filter((p) => p.status === "returned"));
+      })
+      .catch(console.error);
   }, [user, activeHouseId]);
 
   const refreshPatients = async () => {
@@ -118,6 +124,30 @@ export default function App() {
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
     setPatients((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const issuePhone = async (patientId, durationMin) => {
+    const now = new Date();
+    const givenAt = now.toTimeString().slice(0, 5);
+    const returnByDate = new Date(now.getTime() + durationMin * 60000);
+    const returnBy = returnByDate.toTimeString().slice(0, 5);
+    const created = await authFetch("/api/phones", {
+      method: "POST",
+      body: JSON.stringify({ patientId, givenAt, returnBy }),
+    });
+    setPhones((prev) => [created, ...prev]);
+  };
+
+  const returnPhone = async (id) => {
+    const ph = phones.find((p) => p.id === id);
+    const returnedAt = new Date().toTimeString().slice(0, 5);
+    const late = returnedAt > ph.returnBy;
+    const updated = await authFetch(`/api/phones/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify({ status: "returned", returnedAt, late }),
+    });
+    setPhones((prev) => prev.filter((p) => p.id !== id));
+    setPhoneHist((prev) => [updated, ...prev]);
   };
 
   const createConsequence = async (data) => {
@@ -354,6 +384,8 @@ export default function App() {
         phoneHist={phoneHist}
         setPhoneHist={setPhoneHist}
         toast={showToast}
+        onIssue={issuePhone}
+        onReturn={returnPhone}
       />
     ),
     summary: (
