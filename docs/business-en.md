@@ -95,15 +95,17 @@ Manages the physical rooms of the house.
 Two sub-modules:
 
 **Med Manager:**
-- Doctor-only view
+- Doctor and manager view
 - Add, edit, delete medications for patients
 - Set dosing schedule (morning / noon / evening / night)
 - Set start/end dates and prescribing doctor
 
-**Medication Distribution:**
-- Daily checklist for dispensing medications
-- Mark each dose as given, with timestamp and staff name
-- View which doses are pending for the current time slot
+**Medication Distribution (Shift Distribution):**
+- Daily checklist for dispensing medications per shift
+- Mark each shift as given or missed for each patient
+- Tracks: morning, noon, evening, night shifts
+- Status per patient+shift+date is persisted in the database
+- Patients currently absent (away) do not appear in the distribution list
 
 ### 3.5 Groups
 Tracks therapeutic group sessions.
@@ -141,9 +143,10 @@ Visual counselor schedule (which counselor works which day).
 
 **Features:**
 - View monthly calendar of counselor assignments
-- Add a counselor to a date/shift type
-- Remove a schedule entry
-- Used by managers to plan coverage
+- Assign a counselor to a specific date (one counselor per day)
+- Remove an assignment (leave a day uncovered)
+- Used by managers and org managers to plan coverage
+- Editable by: manager, org_manager
 
 ### 3.9 Consequences
 Disciplinary record system for patient rule violations.
@@ -170,24 +173,26 @@ Two sub-modules:
 - Flag discrepancies
 
 ### 3.11 Absences
-Manages approved leave from the facility.
+Manages patient leave from the facility.
 
 **Features:**
-- Request an absence for a patient (type: home visit, errands, medical, other)
-- Set start and expected return date
-- Manager approves or rejects
+- Record an absence for a patient (type: Home Visit, Errands, Therapy Medical, Other)
+- Set expected return date
 - Mark patient as returned when they come back
-- Absence history stored per patient
+- While absent, patient does NOT appear in Medication Distribution, Groups, or Phones
 
-**Absence statuses:** pending → approved → active → returned
+**Implementation:** Absence is tracked via the `awayType` field on the Patient record. When set, the patient appears with status `"away"` throughout the system. On return, `awayType` is cleared.
+
+**Absence types:** Home Visit · Errands · Therapy Medical · Other
 
 ### 3.12 Management Center
 Admin module, visible mainly to managers and org managers.
 
 **Tabs:**
 - **Staff** — view, add, edit employees. Set role, phone, house access. New users get default password `1234`.
-- **Schedule** — manage counselor shift schedule
-- **Therapists** — assign therapists to patients
+- **Schedule** — manage counselor shift schedule (monthly calendar, one counselor per day)
+- **Therapists** — assign therapists to patients (one therapist per patient)
+- **Absences** — record and manage patient absences; mark patients as returned
 
 ### 3.13 Therapy
 Therapy session management, primarily for therapists.
@@ -249,12 +254,14 @@ End-of-shift report written by the counselor.
 2. A room cannot be deleted if it has patients assigned
 3. A patient cannot be discharged without selecting a discharge type
 4. Consequences require manager approval before taking effect
-5. Absences require manager approval before the patient can leave
-6. Medication distributions are generated per patient per day based on their med schedule
+5. Medication distribution status (given/missed) is stored per patient per shift per date
+6. Absent patients are excluded from Medication Distribution, Groups, and Phones views
 7. Therapy sessions flagged as URGENT appear on the Dashboard
 8. A counselor's shift must be explicitly accepted before it becomes ACTIVE
 9. Phone return time is tracked; late returns are flagged automatically
 10. Each patient has exactly one assigned therapist (or none)
+11. The counselor schedule supports one counselor per house per day; assigning a new one replaces the previous
+12. Schedule editing is available to managers and org managers only
 
 ---
 
@@ -266,8 +273,8 @@ End-of-shift report written by the counselor.
 | User | username, name, role, houseId, allHousesAccess |
 | Patient | name, dob, admitDate, houseId, roomId, status, mood, alert |
 | Room | number, building, capacity, houseId |
-| Med | name, dose, unit, times[], patientId |
-| MedDistribution | medId, patientId, date, time, given, givenBy |
+| Med | name, dose, unit, times[], morning, noon, evening, night, patientId |
+| ShiftDist | patientId, shift, date, status — composite PK |
 | Group | date, topic, leaderId, houseId |
 | GroupAttendance | groupId, patientId, present |
 | Phone | patientId, givenAt, returnBy, returnedAt, status |
@@ -277,8 +284,8 @@ End-of-shift report written by the counselor.
 | Finance | patientId, type, amount, balance |
 | CashboxEntry | houseId, type, amount, cat, balance |
 | CashboxCount | houseId, amount, expected, diff |
-| Absence | patientId, type, startDate, endDate, status |
-| TherapistAssignment | patientId, therapistId |
+| Patient (away) | awayType TEXT — set when absent, cleared on return |
+| TherapistAssignment | patientId, therapistId — one per patient |
 | TherapySession | patientId, therapistId, date, topic, urgency |
 | DailySummary | counselorId, houseId, date, generalText, patientSummaries |
 

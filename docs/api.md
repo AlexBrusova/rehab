@@ -126,7 +126,7 @@ Update a user. All fields are optional. Pass `password` to change it.
 ## Patients
 
 ### GET /api/patients
-Returns active patients. Optionally filter by house.
+Returns active + away patients for a house. Patients with `awayType` set are returned with `status: "away"`.
 
 **Query params:**
 - `houseId` (optional) — filter by house ID
@@ -145,6 +145,7 @@ Returns active patients. Optionally filter by house.
     "roomId": "clrrr...",
     "houseId": "clyyy...",
     "status": "active",
+    "awayType": null,
     "alert": false,
     "dischargeType": null,
     "dischargeDate": null,
@@ -153,6 +154,16 @@ Returns active patients. Optionally filter by house.
   }
 ]
 ```
+
+When a patient is absent, `status` is `"away"` and `awayType` is set (e.g. `"Home Visit"`).
+
+### GET /api/patients/archived
+Returns archived (discharged) patients for a house. Uses raw SQL to bypass Prisma enum matching.
+
+**Query params:**
+- `houseId` — required
+
+**Response 200:** Array of patient objects (no nested relations).
 
 ### POST /api/patients
 Create a new patient.
@@ -171,14 +182,15 @@ Create a new patient.
 **Response 201:** Created patient object.
 
 ### PATCH /api/patients/:id
-Update a patient. Allowed fields: `name`, `dob`, `admitDate`, `roomId`, `mood`, `alert`, `status`, `dischargeType`, `dischargeDate`, `daysInRehab`.
+Update a patient. Allowed fields: `name`, `dob`, `admitDate`, `roomId`, `mood`, `alert`, `status`, `dischargeType`, `dischargeDate`, `daysInRehab`, `awayType`.
+
+To mark a patient as absent: set `awayType` to the absence type string.  
+To mark a patient as returned: set `awayType` to `null`.
 
 **Request body (any subset):**
 ```json
 {
-  "mood": 8,
-  "alert": true,
-  "roomId": "clrrr..."
+  "awayType": "Home Visit"
 }
 ```
 
@@ -224,8 +236,10 @@ Permanently deletes a room. Will fail if patients are assigned to it.
 
 ## Medications
 
+Medications are stored in the `Med` table and linked to a patient. Dosing times are stored as a string array internally but the API accepts and returns boolean flags for convenience.
+
 ### GET /api/meds?patientId=:id
-Returns all medications for a patient.
+Returns all medications for a patient. Response includes both `times[]` and boolean flags.
 
 **Response 200:**
 ```json
@@ -237,6 +251,10 @@ Returns all medications for a patient.
     "dose": "0.5",
     "unit": "mg",
     "times": ["morning", "evening"],
+    "morning": true,
+    "noon": false,
+    "evening": true,
+    "night": false,
     "startDate": "01/04/2025",
     "endDate": null,
     "prescribedBy": "Dr. Katz",
@@ -246,6 +264,8 @@ Returns all medications for a patient.
 ```
 
 ### POST /api/meds
+Create a new medication. Pass boolean flags for dosing times.
+
 **Request body:**
 ```json
 {
@@ -253,55 +273,108 @@ Returns all medications for a patient.
   "name": "Alprazolam",
   "dose": "0.5",
   "unit": "mg",
-  "times": ["morning", "evening"],
-  "prescribedBy": "Dr. Katz"
+  "morning": true,
+  "noon": false,
+  "evening": true,
+  "night": false
 }
 ```
-**Response 201:** Created med object.
+**Response 201:** Created med object (with boolean flags).
 
 ### PATCH /api/meds/:id
-Update medication fields.  
-**Response 200:** Updated med object.
+Update medication fields. Pass only the fields to change. Boolean time flags are merged with existing values (omitting a flag keeps its current value).
+
+**Request body (any subset):**
+```json
+{
+  "dose": "1.0",
+  "evening": false
+}
+```
+**Response 200:** Updated med object (with boolean flags).
 
 ### DELETE /api/meds/:id
 **Response 200:** `{ "ok": true }`
 
 ---
 
-## Medication Distributions
+## Medication Distributions (Shift Distribution)
 
-### GET /api/distributions?patientId=:id&date=:date
-Returns distribution records for a patient on a given date.
+Tracks whether each patient received their medications per shift per day. Stored in the `ShiftDist` table with composite primary key `(patientId, shift, date)`.
 
-**Query params:** `patientId`, `date` (format: `YYYY-MM-DD`)
+**Shift values:** `morning`, `noon`, `evening`, `night`  
+**Status values:** `given`, `missed`, `pending`
+
+### GET /api/distributions?houseId=:id&date=:date
+Returns all shift distribution records for a house on a given date.
+
+**Query params:**
+- `houseId` — required
+- `date` — required, format: `DD/MM/YYYY`
 
 **Response 200:**
 ```json
 [
   {
-    "id": "clddd...",
     "patientId": "clppp...",
-    "medId": "clmmm...",
-    "date": "2025-05-11",
-    "time": "morning",
-    "given": true,
-    "givenAt": "08:15",
-    "givenBy": "Sarah Cohen"
+    "shift": "morning",
+    "date": "11/05/2025",
+    "status": "given"
   }
 ]
 ```
 
-### POST /api/distributions
-Create distribution records (typically generated daily per med schedule).
-
-### PATCH /api/distributions/:id
-Mark a dose as given or undo.
+### PUT /api/distributions
+Upsert a distribution record. Creates it if it doesn't exist; updates `status` if it does.
 
 **Request body:**
 ```json
-{ "given": true, "givenAt": "08:15", "givenBy": "Sarah Cohen" }
+{
+  "patientId": "clppp...",
+  "shift": "morning",
+  "date": "11/05/2025",
+  "status": "given"
+}
 ```
-**Response 200:** Updated distribution object.
+**Response 200:** `{ "patientId", "shift", "date", "status" }`
+
+---
+
+## Therapist Assignments
+
+Maps patients to their assigned therapist. One patient → one therapist (or none).
+
+### GET /api/therapist-assignments?houseId=:id
+Returns a map of `{ patientId: therapistId }` for all patients in the house.
+
+**Response 200:**
+```json
+{
+  "clppp...": "clxxx...",
+  "clppp2...": "clxxx2..."
+}
+```
+
+### PUT /api/therapist-assignments
+Assign or unassign a therapist. If `therapistId` is omitted or null, the assignment is deleted.
+
+**Request body:**
+```json
+{
+  "patientId": "clppp...",
+  "therapistId": "clxxx..."
+}
+```
+
+To unassign:
+```json
+{
+  "patientId": "clppp...",
+  "therapistId": null
+}
+```
+
+**Response 200:** `{ "patientId", "therapistId" }`
 
 ---
 
@@ -434,8 +507,10 @@ Update shift status, notes, handover info.
 
 ## Schedule
 
+Counselor assignment calendar. Each entry assigns one counselor to one day. Only one counselor per house per date is supported (the PUT replace endpoint enforces this).
+
 ### GET /api/schedule?houseId=:id
-Returns counselor schedule entries.
+Returns all schedule entries for a house.
 
 **Response 200:**
 ```json
@@ -446,17 +521,37 @@ Returns counselor schedule entries.
     "counselorId": "clxxx...",
     "date": "11/05/2025",
     "shiftType": "24h",
+    "shift": "24h",
     "note": null
   }
 ]
 ```
 
-### POST /api/schedule
-**Request body:** `houseId`, `counselorId`, `date`, `shiftType`, `note`  
-**Response 201:** Created schedule entry.
+Note: `shift` is an alias for `shiftType` added by the server for frontend compatibility.
 
-### DELETE /api/schedule/:id
-**Response 200:** `{ "ok": true }`
+### PUT /api/schedule/assign
+Atomically replace the counselor assignment for a given date. Deletes any existing entry for that `houseId + date`, then creates a new one if `counselorId` is provided. Use this to both assign and unassign.
+
+**Request body:**
+```json
+{
+  "houseId": "clyyy...",
+  "date": "11/05/2025",
+  "counselorId": "clxxx...",
+  "note": ""
+}
+```
+
+To unassign (remove coverage for a day):
+```json
+{
+  "houseId": "clyyy...",
+  "date": "11/05/2025",
+  "counselorId": null
+}
+```
+
+**Response 200:** Created schedule entry, or `null` if unassigned.
 
 ---
 
@@ -583,65 +678,7 @@ Returns cashbox count records.
 
 ---
 
-## Absences
-
-### GET /api/absences?houseId=:id
-Returns absences for a house.
-
-**Response 200:**
-```json
-[
-  {
-    "id": "claaa...",
-    "patientId": "clppp...",
-    "houseId": "clyyy...",
-    "type": "Home Visit",
-    "startDate": "10/05/2025",
-    "endDate": "12/05/2025",
-    "approvedBy": "Jonathan Barak",
-    "status": "active",
-    "returnedAt": null
-  }
-]
-```
-
-**Status values:** `pending`, `approved`, `active`, `returned`
-
-### POST /api/absences
-**Request body:** `patientId`, `houseId`, `type`, `startDate`, `endDate`  
-**Response 201:** Created absence.
-
-### PATCH /api/absences/:id
-Approve, activate, or mark as returned.
-
-**Request body:**
-```json
-{ "status": "returned", "returnedAt": "12/05/2025 14:30" }
-```
-**Response 200:** Updated absence.
-
----
-
 ## Therapy
-
-### GET /api/therapy/assignments?houseId=:id
-Returns therapist-patient assignments for a house.
-
-**Response 200:**
-```json
-[
-  { "patientId": "clppp...", "therapistId": "clxxx..." }
-]
-```
-
-### POST /api/therapy/assignments
-**Request body:** `patientId`, `therapistId`  
-**Response 201:** Created assignment.
-
-### PATCH /api/therapy/assignments/:patientId
-Update therapist assignment.  
-**Request body:** `therapistId`  
-**Response 200:** Updated assignment.
 
 ### GET /api/therapy/sessions?patientId=:id
 Returns therapy sessions for a patient.
@@ -676,7 +713,7 @@ Returns therapy sessions for a patient.
 
 ## Daily Summaries
 
-### GET /api/summaries?houseId=:id&date=:date
+### GET /api/summary?houseId=:id&date=:date
 Returns daily summaries for a house, optionally filtered by date.
 
 **Response 200:**
@@ -694,11 +731,11 @@ Returns daily summaries for a house, optionally filtered by date.
 ]
 ```
 
-### POST /api/summaries
+### POST /api/summary
 **Request body:** `counselorId`, `houseId`, `date`, `generalText`, `patientSummaries`  
 **Response 201:** Created summary.
 
-### PATCH /api/summaries/:id
+### PATCH /api/summary/:id
 **Request body (any subset):** `generalText`, `patientSummaries`, `notifiedAt`  
 **Response 200:** Updated summary.
 
@@ -713,6 +750,22 @@ Returns daily summaries for a house, optionally filtered by date.
 | Counselor | `counselor` | Shift-based access, daily operations |
 | Doctor | `doctor` | Medication management |
 | Therapist | `therapist` | Therapy sessions and assignments |
+
+---
+
+## Schema Notes
+
+### Patient `awayType` field
+The `Patient` table has an `awayType TEXT` column (nullable). When set, the GET `/api/patients` response returns `status: "away"` for that patient instead of `"active"`. This avoids changing the PostgreSQL enum and keeps the approach simple.
+
+To mark as absent: `PATCH /api/patients/:id` with `{ "awayType": "Home Visit" }`  
+To mark as returned: `PATCH /api/patients/:id` with `{ "awayType": null }`
+
+### ShiftDist table
+The `ShiftDist` table is created via raw SQL in `ensureSchema()` on server start (not via Prisma migration). It has composite primary key `(patientId, shift, date)`. Upserts use `ON CONFLICT ... DO UPDATE`.
+
+### ensureSchema migrations
+The server runs `ensureSchema()` on startup, applying `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for columns added after the initial Prisma migration. Each migration step is wrapped independently so a failure in one step does not block subsequent steps.
 
 ---
 
