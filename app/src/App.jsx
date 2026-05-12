@@ -109,6 +109,7 @@ export default function App() {
         setAttendance(data.flatMap((g) => g.attendance || []));
       })
       .catch(console.error);
+    const today = new Date().toLocaleDateString("en-GB");
     authFetch(`/api/finance/patient?houseId=${activeHouseId}`)
       .then(setFinance)
       .catch(console.error);
