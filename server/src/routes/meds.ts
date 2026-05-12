@@ -43,7 +43,7 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     if (dose !== undefined) data.dose = dose;
     if (unit !== undefined) data.unit = unit;
     if ([morning, noon, evening, night].some((v) => v !== undefined)) {
-      const existing = await prisma.med.findUnique({ where: { id: req.params.id } });
+      const existing = await prisma.med.findUnique({ where: { id: String(req.params.id) } });
       const cur = {
         morning: (existing?.times || []).includes("morning"),
         noon: (existing?.times || []).includes("noon"),
@@ -57,7 +57,7 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
         night: night !== undefined ? night : cur.night,
       });
     }
-    const med = await prisma.med.update({ where: { id: req.params.id }, data });
+    const med = await prisma.med.update({ where: { id: String(req.params.id) }, data });
     res.json(toFrontend(med));
   } catch (e) {
     console.error("Update med error:", e);
@@ -67,7 +67,7 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
 
 router.delete("/:id", async (req: AuthRequest, res: Response) => {
   try {
-    await prisma.med.delete({ where: { id: req.params.id } });
+    await prisma.med.delete({ where: { id: String(req.params.id) } });
     res.json({ ok: true });
   } catch (e) {
     console.error("Delete med error:", e);
