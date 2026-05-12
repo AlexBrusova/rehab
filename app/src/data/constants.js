@@ -59,6 +59,7 @@ export const NAV_CFG = {
     { id: "consequences", icon: "⚠️", label: "Consequences", section: null },
     { id: "finance", icon: "💰", label: "General", section: null },
     { id: "manage", icon: "🏥", label: "Management Center", section: null },
+    { id: "therapy", icon: "🧠", label: "Session Records", section: "Emotional Therapy" },
   ],
   counselor: [
     { id: "dashboard", icon: "📊", label: "Dashboard", section: "Main" },
