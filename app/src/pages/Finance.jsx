@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { C, pName } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../components/ui";
 
@@ -17,9 +17,7 @@ export default function Finance({
   const [tab, setTab] = useState("patients");
   const isManager = user.role === "manager"; /* ── PATIENTS TAB ── */
   const [selPat, setSelPat] = useState("");
-  useEffect(() => {
-    if (patients.length > 0 && !selPat) setSelPat(patients[0].id);
-  }, [patients]);
+  const effectiveSelPat = selPat || patients[0]?.id || "";
   const [showAdd, setShowAdd] = useState(null);
   const [newTx, setNewTx] = useState({
     type: "deposit",
@@ -28,7 +26,7 @@ export default function Finance({
     note: "",
   });
   const pFin = finance
-    .filter((f) => f.patientId === selPat)
+    .filter((f) => f.patientId === effectiveSelPat)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   const balance = pFin.length > 0 ? pFin[0].balance : 0;
   const totalIn = pFin
@@ -38,14 +36,14 @@ export default function Finance({
     .filter((f) => f.type === "withdrawal")
     .reduce((a, f) => a + f.amount, 0);
   const addPatientTx = async () => {
-    if (!selPat) { toast("⚠️ Please select a patient"); return; }
+    if (!effectiveSelPat) { toast("⚠️ Please select a patient"); return; }
     if (!newTx.amount || isNaN(newTx.amount)) {
       toast("⚠️ Please enter a valid Amount");
       return;
     }
     const amt = Number(newTx.amount);
     try {
-      await onAddPatientTx(selPat, newTx.type, amt, newTx.cat, newTx.note, balance);
+      await onAddPatientTx(effectiveSelPat, newTx.type, amt, newTx.cat, newTx.note, balance);
       setNewTx({ type: "deposit", amount: "", cat: "Family", note: "" });
       setShowAdd(null);
       toast(`✅ ${newTx.type === "deposit" ? "Deposit" : "Withdrawal"} recorded`);
@@ -367,7 +365,7 @@ export default function Finance({
                 Select Patient
               </label>{" "}
               <FS
-                value={selPat}
+                value={effectiveSelPat}
                 onChange={setSelPat}
                 options={patients.map((p) => ({ v: p.id, l: p.name }))}
               />{" "}
@@ -396,7 +394,7 @@ export default function Finance({
           <Card>
             {" "}
             <CT icon="💰" bg="#e8f0fb">
-              Account – {pName(patients, selPat)}
+              Account – {pName(patients, effectiveSelPat)}
             </CT>{" "}
             <div
               style={{
