@@ -5,17 +5,38 @@ import prisma from "../lib/prisma";
 const router = Router();
 router.use(authMiddleware);
 
+router.get("/archived", async (req: AuthRequest, res: Response) => {
+  try {
+    const { houseId } = req.query;
+    const patients = await prisma.$queryRaw<any[]>`
+      SELECT * FROM "Patient"
+      WHERE "houseId" = ${String(houseId)}
+      AND status::text = 'archived'
+      ORDER BY name ASC
+    `;
+    res.json(patients);
+  } catch (e) {
+    console.error("Get archived patients error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 router.get("/", async (req: AuthRequest, res: Response) => {
-  const { houseId, status } = req.query;
-  const patients = await prisma.patient.findMany({
-    where: {
-      status: status === "archived" ? "archived" : "active",
-      ...(houseId ? { houseId: String(houseId) } : {}),
-    },
-    include: { room: true, meds: true },
-    orderBy: { name: "asc" },
-  });
-  res.json(patients);
+  try {
+    const { houseId } = req.query;
+    const patients = await prisma.patient.findMany({
+      where: {
+        status: "active",
+        ...(houseId ? { houseId: String(houseId) } : {}),
+      },
+      include: { room: true, meds: true },
+      orderBy: { name: "asc" },
+    });
+    res.json(patients);
+  } catch (e) {
+    console.error("Get patients error:", e);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 router.post("/", async (req: AuthRequest, res: Response) => {

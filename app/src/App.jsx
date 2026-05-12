@@ -123,7 +123,7 @@ export default function App() {
     authFetch(`/api/distributions?houseId=${activeHouseId}&date=${today}`)
       .then(setDist)
       .catch(console.error);
-    authFetch(`/api/patients?houseId=${activeHouseId}&status=archived`)
+    authFetch(`/api/patients/archived?houseId=${activeHouseId}`)
       .then(setArchived)
       .catch(console.error);
     authFetch(`/api/therapist-assignments?houseId=${activeHouseId}`)
@@ -163,9 +163,8 @@ export default function App() {
       method: "PATCH",
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
-    const pat = patients.find((p) => p.id === id);
-    if (pat) setArchived((prev) => [{ ...pat, status: "archived", dischargeType, dischargeDate }, ...prev]);
     setPatients((prev) => prev.filter((p) => p.id !== id));
+    authFetch(`/api/patients/archived?houseId=${activeHouseId}`).then(setArchived).catch(console.error);
   };
 
   const issuePhone = async (patientId, durationMin) => {
