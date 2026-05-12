@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { C, pName } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../components/ui";
 
@@ -17,6 +17,9 @@ export default function Finance({
   const [tab, setTab] = useState("patients");
   const isManager = user.role === "manager"; /* ── PATIENTS TAB ── */
   const [selPat, setSelPat] = useState("");
+  useEffect(() => {
+    if (patients.length > 0 && !selPat) setSelPat(patients[0].id);
+  }, [patients]);
   const [showAdd, setShowAdd] = useState(null);
   const [newTx, setNewTx] = useState({
     type: "deposit",
