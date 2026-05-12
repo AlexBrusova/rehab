@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import prisma from "./lib/prisma";
 import authRoutes from "./routes/auth";
 import housesRoutes from "./routes/houses";
 import usersRoutes from "./routes/users";
@@ -34,6 +35,20 @@ app.use("/api/phones", phonesRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/groups", groupsRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+async function ensureSchema() {
+  try {
+    await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "type" TEXT NOT NULL DEFAULT 'therapeutic'`;
+    await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "time" TEXT NOT NULL DEFAULT ''`;
+    await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'active'`;
+    await prisma.$executeRaw`ALTER TABLE "GroupAttendance" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'present'`;
+    console.log("Schema ensured");
+  } catch (e) {
+    console.error("Schema migration error:", e);
+  }
+}
+
+ensureSchema().then(() => {
+  app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+  });
 });
