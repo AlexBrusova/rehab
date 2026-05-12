@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_GROUPS, INIT_ATTENDANCE, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
+import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
@@ -30,8 +30,8 @@ export default function App() {
   const [dist, setDist] = useState(INIT_DIST);
   const [phones, setPhones] = useState(INIT_PHONES);
   const [phoneHist, setPhoneHist] = useState(INIT_PHONE_HIST);
-  const [groups, setGroups] = useState(INIT_GROUPS);
-  const [attendance, setAttendance] = useState(INIT_ATTENDANCE);
+  const [groups, setGroups] = useState([]);
+  const [attendance, setAttendance] = useState([]);
   const [consequences, setConsequences] = useState(INIT_CONSEQUENCES);
   const [finance, setFinance] = useState([]);
   const [cashbox, setCashbox] = useState([]);
@@ -90,6 +90,13 @@ export default function App() {
       .then((data) => {
         setPhones(data.filter((p) => p.status === "active"));
         setPhoneHist(data.filter((p) => p.status === "returned"));
+      })
+      .catch(console.error);
+    const today = new Date().toLocaleDateString("en-GB");
+    authFetch(`/api/groups?houseId=${activeHouseId}&date=${today}`)
+      .then((data) => {
+        setGroups(data);
+        setAttendance(data.flatMap((g) => g.attendance || []));
       })
       .catch(console.error);
     authFetch(`/api/finance/patient?houseId=${activeHouseId}`)
@@ -174,6 +181,38 @@ export default function App() {
       body: JSON.stringify(data),
     });
     setConsequences((prev) => prev.map((c) => (c.id === id ? updated : c)));
+  };
+
+  const createGroup = async (data) => {
+    const today = new Date().toLocaleDateString("en-GB");
+    const created = await authFetch("/api/groups", {
+      method: "POST",
+      body: JSON.stringify({ ...data, houseId: activeHouseId, date: today }),
+    });
+    setGroups((prev) => [...prev, created]);
+    return created;
+  };
+
+  const updateGroup = async (id, data) => {
+    const updated = await authFetch(`/api/groups/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+    setGroups((prev) => prev.map((g) => (g.id === id ? updated : g)));
+    return updated;
+  };
+
+  const upsertAttendance = async (groupId, patientId, status) => {
+    const record = await authFetch(`/api/groups/${groupId}/attendance`, {
+      method: "PUT",
+      body: JSON.stringify({ patientId, status }),
+    });
+    setAttendance((prev) => {
+      const ex = prev.find((a) => a.sessionId === groupId && a.patientId === patientId);
+      if (ex) return prev.map((a) => (a.id === ex.id ? record : a));
+      return [...prev, record];
+    });
+    return record;
   };
 
   const createPatientTx = async (patientId, type, amount, cat, note, currentBalance) => {
@@ -417,6 +456,9 @@ export default function App() {
         attendance={attendance}
         setAttendance={setAttendance}
         toast={showToast}
+        onCreateGroup={createGroup}
+        onUpdateGroup={updateGroup}
+        onUpsertAttendance={upsertAttendance}
       />
     ),
     phones: (

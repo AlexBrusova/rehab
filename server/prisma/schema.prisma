@@ -212,6 +212,9 @@ model Group {
   houseId  String
   date     String
   topic    String
+  type     String  @default("therapeutic")
+  time     String  @default("")
+  status   String  @default("active")
   leaderId String?
   notes    String?
 
@@ -224,7 +227,7 @@ model Group {
 model GroupAttendance {
   groupId   String
   patientId String
-  present   Boolean @default(false)
+  status    String @default("present")
 
   group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)

@@ -9,6 +9,9 @@ export default function Groups({
   attendance,
   setAttendance,
   toast,
+  onCreateGroup,
+  onUpdateGroup,
+  onUpsertAttendance,
 }) {
   const [activeGroup, setActiveGroup] = useState(null);
   const [showEvent, setShowEvent] = useState(null);
@@ -33,52 +36,27 @@ export default function Groups({
   const cycleAtt = (pid) => {
     const states = ["present", "late", "absent"];
     const next = states[(states.indexOf(getAtt(pid)) + 1) % 3];
-    const ex = attendance.find(
-      (a) => a.sessionId === activeGroup && a.patientId === pid,
-    );
-    if (ex)
-      setAttendance((prev) =>
-        prev.map((a) => (a.id === ex.id ? { ...a, status: next } : a)),
-      );
-    else
-      setAttendance((prev) => [
-        ...prev,
-        {
-          id: "a" + Date.now(),
-          sessionId: activeGroup,
-          patientId: pid,
-          status: next,
-        },
-      ]);
+    onUpsertAttendance(activeGroup, pid, next).catch(() => toast("❌ Failed to update attendance"));
   };
-  const openGroup = () => {
+  const openGroup = async () => {
     if (!quickTopic.trim()) {
       toast("⚠️ Please enter a Topic");
       return;
     }
-    const id = "g" + Date.now();
-    setGroups((prev) => [
-      ...prev,
-      {
-        id,
-        topic: quickTopic,
-        type: quickType,
-        time: quickTime,
-        status: "active",
-        notes: "",
-      },
-    ]);
-    setActiveGroup(id);
-    setShowQuickOpen(false);
-    setQuickTopic("");
-    toast("✅ Group opened");
+    try {
+      const created = await onCreateGroup({ topic: quickTopic, type: quickType, time: quickTime });
+      setActiveGroup(created.id);
+      setShowQuickOpen(false);
+      setQuickTopic("");
+      toast("✅ Group opened");
+    } catch { toast("❌ Failed to open group"); }
   };
-  const closeGroup = () => {
-    setGroups((prev) =>
-      prev.map((g) => (g.id === activeGroup ? { ...g, status: "done" } : g)),
-    );
-    setActiveGroup(null);
-    toast("✅ Group closed");
+  const closeGroup = async () => {
+    try {
+      await onUpdateGroup(activeGroup, { status: "done" });
+      setActiveGroup(null);
+      toast("✅ Group closed");
+    } catch { toast("❌ Failed to close group"); }
   };
   const [editGroupId, setEditGroupId] = useState(null);
   const editG = groups.find((g) => g.id === editGroupId);
@@ -88,23 +66,7 @@ export default function Groups({
   const cycleEditAtt = (pid) => {
     const states = ["present", "late", "absent"];
     const next = states[(states.indexOf(getEditAtt(pid)) + 1) % 3];
-    const ex = attendance.find(
-      (a) => a.sessionId === editGroupId && a.patientId === pid,
-    );
-    if (ex)
-      setAttendance((prev) =>
-        prev.map((a) => (a.id === ex.id ? { ...a, status: next } : a)),
-      );
-    else
-      setAttendance((prev) => [
-        ...prev,
-        {
-          id: "a" + Date.now(),
-          sessionId: editGroupId,
-          patientId: pid,
-          status: next,
-        },
-      ]);
+    onUpsertAttendance(editGroupId, pid, next).catch(() => toast("❌ Failed to update attendance"));
   };
   const [editNote, setEditNote] = useState("");
   const [editEventPat, setEditEventPat] = useState(null);
@@ -580,14 +542,7 @@ export default function Groups({
             </CT>{" "}
             <FTA
               value={editNote || editG.notes || ""}
-              onChange={(v) => {
-                setEditNote(v);
-                setGroups((prev) =>
-                  prev.map((g) =>
-                    g.id === editGroupId ? { ...g, notes: v } : g,
-                  ),
-                );
-              }}
+              onChange={(v) => setEditNote(v)}
               placeholder="General notes about the group..."
               rows={3}
             />{" "}
@@ -595,9 +550,12 @@ export default function Groups({
               <Btn
                 color="teal"
                 size="sm"
-                onClick={() => {
-                  toast("✅ Group updated");
-                  closeEdit();
+                onClick={async () => {
+                  try {
+                    await onUpdateGroup(editGroupId, { notes: editNote });
+                    toast("✅ Group updated");
+                    closeEdit();
+                  } catch { toast("❌ Failed to save notes"); }
                 }}
               >
                 ✓ Finish Edit
