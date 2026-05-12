@@ -43,24 +43,29 @@ app.use("/api/summary", summaryRoutes);
 app.use("/api/meds", medsRoutes);
 app.use("/api/distributions", distributionsRoutes);
 
-async function ensureSchema() {
+async function step(name: string, fn: () => Promise<any>) {
   try {
-    await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "type" TEXT NOT NULL DEFAULT 'therapeutic'`;
-    await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "time" TEXT NOT NULL DEFAULT ''`;
-    await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'active'`;
-    await prisma.$executeRaw`ALTER TABLE "GroupAttendance" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'present'`;
-    await prisma.$executeRaw`ALTER TABLE "TherapySession" ALTER COLUMN "urgency" TYPE TEXT USING urgency::text`;
-    await prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "ShiftDist" (
-      "patientId" TEXT NOT NULL,
-      "shift"     TEXT NOT NULL,
-      "date"      TEXT NOT NULL,
-      "status"    TEXT,
-      PRIMARY KEY ("patientId", "shift", "date")
-    )`;
-    console.log("Schema ensured");
-  } catch (e) {
-    console.error("Schema migration error:", e);
+    await fn();
+    console.log(`Schema step OK: ${name}`);
+  } catch (e: any) {
+    console.error(`Schema step SKIP (${name}):`, e?.message ?? e);
   }
+}
+
+async function ensureSchema() {
+  await step("Group.type", () => prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "type" TEXT NOT NULL DEFAULT 'therapeutic'`);
+  await step("Group.time", () => prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "time" TEXT NOT NULL DEFAULT ''`);
+  await step("Group.status", () => prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'active'`);
+  await step("GroupAttendance.status", () => prisma.$executeRaw`ALTER TABLE "GroupAttendance" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'present'`);
+  await step("TherapySession.urgency->text", () => prisma.$executeRaw`ALTER TABLE "TherapySession" ALTER COLUMN "urgency" TYPE TEXT USING urgency::text`);
+  await step("ShiftDist table", () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "ShiftDist" (
+    "patientId" TEXT NOT NULL,
+    "shift"     TEXT NOT NULL,
+    "date"      TEXT NOT NULL,
+    "status"    TEXT,
+    PRIMARY KEY ("patientId", "shift", "date")
+  )`);
+  console.log("ensureSchema complete");
 }
 
 ensureSchema().then(() => {
