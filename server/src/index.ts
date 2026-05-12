@@ -14,6 +14,7 @@ import phonesRoutes from "./routes/phones";
 import financeRoutes from "./routes/finance";
 import groupsRoutes from "./routes/groups";
 import therapyRoutes from "./routes/therapy";
+import summaryRoutes from "./routes/summary";
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use("/api/phones", phonesRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/groups", groupsRoutes);
 app.use("/api/therapy", therapyRoutes);
+app.use("/api/summary", summaryRoutes);
 
 async function ensureSchema() {
   try {

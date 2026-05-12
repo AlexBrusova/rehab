@@ -6,9 +6,9 @@ export default function Summary({
   patients,
   groups,
   dailySummary,
-  setDailySummary,
   user,
   toast,
+  onSave,
 }) {
   const [texts, setTexts] = useState({
     general: "",
@@ -16,21 +16,13 @@ export default function Summary({
     ...Object.fromEntries(groups.map((g) => [g.id, ""])),
   });
   const setT = (k, v) => setTexts((t) => ({ ...t, [k]: v }));
-  const save = () => {
-    setDailySummary((prev) => [
-      {
-        id: "ds" + Date.now(),
-        counselorId: user.id,
-        date: "09/05",
-        generalText: texts.general,
-        patientSummaries: Object.fromEntries(
-          patients.map((p) => [p.id, texts[p.id]]),
-        ),
-        notifiedAt: new Date().toTimeString().slice(0, 5),
-      },
-      ...prev,
-    ]);
-    toast("✅ Summary saved – all Staff notified 🔔");
+  const save = async () => {
+    try {
+      const patientSummaries = Object.fromEntries(patients.map((p) => [p.id, texts[p.id] || ""]));
+      await onSave(texts.general, patientSummaries);
+      setTexts({ general: "", ...Object.fromEntries(patients.map((p) => [p.id, ""])), ...Object.fromEntries(groups.map((g) => [g.id, ""])) });
+      toast("✅ Summary saved – all Staff notified 🔔");
+    } catch { toast("❌ Failed to save summary"); }
   };
   return (
     <div>
