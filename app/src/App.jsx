@@ -153,7 +153,11 @@ export default function App() {
       method: "PATCH",
       body: JSON.stringify(data),
     });
-    setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+    const stateUpdate = { ...data };
+    if (data.awayType !== undefined) {
+      stateUpdate.status = data.awayType ? "away" : "active";
+    }
+    setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, ...stateUpdate } : p)));
   };
 
   const markPatientAway = async (patientId, awayType) => {
@@ -504,7 +508,6 @@ export default function App() {
         setPatients={setPatients}
         archived={archived}
         meds={houseMeds}
-        setMeds={setMeds}
         rooms={houseRooms}
         users={users}
         therapy={houseTherapy}
@@ -516,6 +519,9 @@ export default function App() {
         onAddPatient={createPatient}
         onArchivePatient={archivePatient}
         onUpdatePatient={updatePatient}
+        onAddMed={createMed}
+        onSaveMed={updateMed}
+        onRemoveMed={deleteMed}
       />
     ),
     rooms: (

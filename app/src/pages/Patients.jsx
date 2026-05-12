@@ -5,11 +5,8 @@ import PatientProfile from "./PatientProfile";
 
 export default function Patients({
   patients,
-  setPatients,
   archived,
-  setArchived,
   meds,
-  setMeds,
   rooms,
   users,
   therapy,
@@ -21,6 +18,9 @@ export default function Patients({
   onAddPatient,
   onArchivePatient,
   onUpdatePatient,
+  onAddMed,
+  onSaveMed,
+  onRemoveMed,
 }) {
   const [filter, setFilter] = useState("active");
   const [showAdd, setShowAdd] = useState(false);
@@ -211,9 +211,7 @@ export default function Patients({
         <PatientProfile
           pid={showProfile}
           patients={patients}
-          setPatients={setPatients}
           meds={meds}
-          setMeds={setMeds}
           rooms={rooms}
           users={users}
           therapy={therapy}
@@ -224,6 +222,9 @@ export default function Patients({
           consequences={consequences}
           finance={finance}
           onUpdatePatient={onUpdatePatient}
+          onAddMed={onAddMed}
+          onSaveMed={onSaveMed}
+          onRemoveMed={onRemoveMed}
         />
       )}{" "}
       <div

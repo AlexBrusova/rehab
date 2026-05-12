@@ -13,7 +13,7 @@ export default function Dashboard({
   phones,
   activeHouse,
   onNav,
-  setPatients,
+
   rooms,
   user,
 }) {
@@ -22,7 +22,7 @@ export default function Dashboard({
   const lowMood = patients.filter(
     (p) => p.status === "active" && p.mood <= 3,
   ).length;
-  const changed = meds.filter((m) => m.changed).length;
+  const changed = meds.filter((m) => m.updatedAt && m.updatedAt !== m.createdAt).length;
   const urgentTherapy = therapy.filter(
     (t) => t.urgency === "URGENT",
   ).length; /* Overdue phones */
@@ -50,16 +50,17 @@ export default function Dashboard({
         <PatientProfile
           pid={profilePid}
           patients={patients}
-          setPatients={setPatients || (() => {})}
           meds={meds}
-          setMeds={() => {}}
           rooms={rooms || []}
-          users={users}
           therapy={therapy}
           user={user || { role: "manager", name: "Manager" }}
           canEditMeds={false}
           onClose={() => setProfilePid(null)}
           toast={() => {}}
+          onUpdatePatient={() => {}}
+          onAddMed={() => {}}
+          onSaveMed={() => {}}
+          onRemoveMed={() => {}}
         />
       )}{" "}
       <div
