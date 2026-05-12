@@ -2,24 +2,22 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { Btn, FL, FI, FS } from "../components/ui";
 
-export default function AbsenceForm({ patients, setPatients, toast }) {
+export default function AbsenceForm({ patients, onMarkAway, toast }) {
   const [selPat, setSelPat] = useState("");
   const [type, setType] = useState("Home Visit");
   const [returnDate, setReturnDate] = useState("");
-  const submit = () => {
+  const submit = async () => {
     if (!selPat || !returnDate) {
       toast("⚠️ Please select Patient and Return Date");
       return;
     }
-    setPatients((prev) =>
-      prev.map((p) =>
-        p.id === selPat ? { ...p, status: "away", awayType: type } : p,
-      ),
-    );
-    const name = patients.find((p) => p.id === selPat)?.name;
-    setSelPat("");
-    setReturnDate("");
-    toast(`✅ ${name} left for ${type} – Expected return ${returnDate}`);
+    try {
+      const name = patients.find((p) => p.id === selPat)?.name;
+      await onMarkAway(selPat, type);
+      setSelPat("");
+      setReturnDate("");
+      toast(`✅ ${name} left for ${type} – Expected return ${returnDate}`);
+    } catch { toast("❌ Failed to record absence"); }
   };
   return (
     <div>

@@ -62,6 +62,7 @@ async function ensureSchema() {
   await step("Group.status", () => prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'active'`);
   await step("GroupAttendance.status", () => prisma.$executeRaw`ALTER TABLE "GroupAttendance" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'present'`);
   await step("TherapySession.urgency->text", () => prisma.$executeRaw`ALTER TABLE "TherapySession" ALTER COLUMN "urgency" TYPE TEXT USING urgency::text`);
+  await step("Patient.awayType", () => prisma.$executeRaw`ALTER TABLE "Patient" ADD COLUMN IF NOT EXISTS "awayType" TEXT`);
   await step("ShiftDist table", () => prisma.$executeRaw`CREATE TABLE IF NOT EXISTS "ShiftDist" (
     "patientId" TEXT NOT NULL,
     "shift"     TEXT NOT NULL,

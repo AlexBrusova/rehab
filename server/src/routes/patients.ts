@@ -32,7 +32,11 @@ router.get("/", async (req: AuthRequest, res: Response) => {
       include: { room: true, meds: true },
       orderBy: { name: "asc" },
     });
-    res.json(patients);
+    const mapped = patients.map((p: any) => ({
+      ...p,
+      status: p.awayType ? "away" : "active",
+    }));
+    res.json(mapped);
   } catch (e) {
     console.error("Get patients error:", e);
     res.status(500).json({ error: "Server error" });
@@ -54,7 +58,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
 router.patch("/:id", async (req: AuthRequest, res: Response) => {
   try {
-    const allowed = ["name","dob","admitDate","roomId","mood","alert","status","dischargeType","dischargeDate","daysInRehab"];
+    const allowed = ["name","dob","admitDate","roomId","mood","alert","status","dischargeType","dischargeDate","daysInRehab","awayType"];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
     for (const key of allowed) {

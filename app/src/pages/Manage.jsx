@@ -16,6 +16,7 @@ export default function Manage({
   onAssignSchedule,
   therapistAssignments,
   onAssignTherapist,
+  onReturn,
   shifts,
   activeHouseId,
   houses,
@@ -789,15 +790,11 @@ export default function Manage({
                   <Btn
                     color="teal"
                     size="sm"
-                    onClick={() => {
-                      setPatients((prev) =>
-                        prev.map((pt) =>
-                          pt.id === p.id
-                            ? { ...pt, status: "active", awayType: null }
-                            : pt,
-                        ),
-                      );
-                      toast(`✅ ${p.name} returned to center`);
+                    onClick={async () => {
+                      try {
+                        await onReturn(p.id);
+                        toast(`✅ ${p.name} returned to center`);
+                      } catch { toast("❌ Failed to update"); }
                     }}
                   >
                     ✓ Confirm Return

@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_ROOMS, INIT_PHONES, INIT_PHONE_HIST, INIT_CONSEQUENCES, INIT_SHIFTS } from "./data/initialData";
 
 const toFrontendMed = (m) => ({
   ...m,
@@ -33,19 +32,19 @@ export default function App() {
   const [users, setUsers] = useState([]);
   const [patients, setPatients] = useState([]);
   const [archived, setArchived] = useState([]);
-  const [rooms, setRooms] = useState(INIT_ROOMS);
+  const [rooms, setRooms] = useState([]);
   const [meds, setMeds] = useState([]);
   const [dist, setDist] = useState([]);
-  const [phones, setPhones] = useState(INIT_PHONES);
-  const [phoneHist, setPhoneHist] = useState(INIT_PHONE_HIST);
+  const [phones, setPhones] = useState([]);
+  const [phoneHist, setPhoneHist] = useState([]);
   const [groups, setGroups] = useState([]);
   const [attendance, setAttendance] = useState([]);
-  const [consequences, setConsequences] = useState(INIT_CONSEQUENCES);
+  const [consequences, setConsequences] = useState([]);
   const [finance, setFinance] = useState([]);
   const [cashbox, setCashbox] = useState([]);
   const [cashboxCounts, setCashboxCounts] = useState([]);
   const [therapy, setTherapy] = useState([]);
-  const [shifts, setShifts] = useState(INIT_SHIFTS);
+  const [shifts, setShifts] = useState([]);
   const [dailySummary, setDailySummary] = useState([]);
   const [schedule, setSchedule] = useState([]);
   const [therapistAssignments, setTherapistAssignments] = useState({});
@@ -155,6 +154,22 @@ export default function App() {
       body: JSON.stringify(data),
     });
     setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, ...data } : p)));
+  };
+
+  const markPatientAway = async (patientId, awayType) => {
+    await authFetch(`/api/patients/${patientId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ awayType }),
+    });
+    setPatients((prev) => prev.map((p) => p.id === patientId ? { ...p, status: "away", awayType } : p));
+  };
+
+  const markPatientReturned = async (patientId) => {
+    await authFetch(`/api/patients/${patientId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ awayType: null }),
+    });
+    setPatients((prev) => prev.map((p) => p.id === patientId ? { ...p, status: "active", awayType: null } : p));
   };
 
   const archivePatient = async (id, dischargeType) => {
@@ -519,9 +534,10 @@ export default function App() {
     absences: (
       <Absences
         patients={housePatients}
-        setPatients={setPatients}
         user={user}
         toast={showToast}
+        onMarkAway={markPatientAway}
+        onReturn={markPatientReturned}
       />
     ),
     medmanager: (
@@ -630,6 +646,7 @@ export default function App() {
         onAssignSchedule={assignScheduleDay}
         therapistAssignments={therapistAssignments}
         onAssignTherapist={assignTherapist}
+        onReturn={markPatientReturned}
         shifts={houseShifts}
         activeHouseId={activeHouse?.id}
         houses={houses}
