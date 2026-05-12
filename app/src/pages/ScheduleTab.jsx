@@ -40,7 +40,8 @@ export default function ScheduleTab({
   const counselors = users.filter(
     (u) =>
       u.role === "counselor" &&
-      (u.allowedHouses || []).some((h) => (h.houseId || h) === activeHouseId),
+      (u.houseId === activeHouseId ||
+        (u.allowedHouses || []).some((h) => (h.houseId || h) === activeHouseId)),
   ); /* Unique color per Counselor */
   const colorMap = {};
   counselors.forEach((u, i) => {

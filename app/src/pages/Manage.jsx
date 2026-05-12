@@ -48,6 +48,7 @@ export default function Manage({
     }
   };
   const isOrgManager = currentUser.role === "org_manager";
+  const canEditSchedule = currentUser.role === "org_manager" || currentUser.role === "manager";
   const addUser = async () => {
     if (!newU.name || !newU.username) {
       toast("⚠️ Please fill Name and Username");
@@ -710,7 +711,7 @@ export default function Manage({
           users={users}
           schedule={schedule}
           onAssignSchedule={onAssignSchedule}
-          isOrgManager={isOrgManager}
+          isOrgManager={canEditSchedule}
           activeHouseId={activeHouseId}
           toast={toast}
         />
