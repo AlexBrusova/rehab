@@ -1,3 +1,4 @@
+
 # Rehab Center Management System — Business Documentation
 
 ## 1. System Overview

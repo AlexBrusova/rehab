@@ -17,6 +17,8 @@ import therapyRoutes from "./routes/therapy";
 import summaryRoutes from "./routes/summary";
 import medsRoutes from "./routes/meds";
 import distributionsRoutes from "./routes/distributions";
+import therapistAssignmentsRoutes from "./routes/therapistAssignments";
+import scheduleRoutes from "./routes/schedule";
 
 dotenv.config();
 
@@ -42,6 +44,8 @@ app.use("/api/therapy", therapyRoutes);
 app.use("/api/summary", summaryRoutes);
 app.use("/api/meds", medsRoutes);
 app.use("/api/distributions", distributionsRoutes);
+app.use("/api/therapist-assignments", therapistAssignmentsRoutes);
+app.use("/api/schedule", scheduleRoutes);
 
 async function step(name: string, fn: () => Promise<any>) {
   try {

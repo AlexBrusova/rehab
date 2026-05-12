@@ -12,9 +12,9 @@ export default function Manage({
   user: currentUser,
   toast,
   schedule,
-  setSchedule,
+  onAssignSchedule,
   therapistAssignments,
-  setTherapistAssignments,
+  onAssignTherapist,
   shifts,
   activeHouseId,
   houses,
@@ -709,7 +709,7 @@ export default function Manage({
         <ScheduleTab
           users={users}
           schedule={schedule}
-          setSchedule={setSchedule}
+          onAssignSchedule={onAssignSchedule}
           isOrgManager={isOrgManager}
           activeHouseId={activeHouseId}
           toast={toast}
@@ -720,7 +720,7 @@ export default function Manage({
           users={users}
           patients={patients}
           therapistAssignments={therapistAssignments}
-          setTherapistAssignments={setTherapistAssignments}
+          onAssignTherapist={onAssignTherapist}
         />
       )}{" "}
       {tab === "absences" && (

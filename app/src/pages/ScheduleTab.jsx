@@ -5,12 +5,13 @@ import { Card, CT, Btn, Modal, FL, FI } from "../components/ui";
 export default function ScheduleTab({
   users,
   schedule,
-  setSchedule,
+  onAssignSchedule,
   isOrgManager,
   activeHouseId,
   toast,
 }) {
-  const [selMonth, setSelMonth] = useState("2025-05");
+  const nowMonth = new Date().toISOString().slice(0, 7);
+  const [selMonth, setSelMonth] = useState(nowMonth);
   const prevMonth = () => {
     const [y, m] = selMonth.split("-");
     const d = new Date(+y, +m - 2, 1);
@@ -28,22 +29,7 @@ export default function ScheduleTab({
   const [selDay, setSelDay] = useState(null); /* Date selected */
   const [slotData, setSlotData] = useState({ counselorId: "", note: "" });
   const assignDay = (ds, counselorId, note = "") => {
-    /* Delete existing slot for this day if any */
-    setSchedule((prev) => [
-      ...prev.filter((s) => !(s.houseId === activeHouseId && s.date === ds)),
-      ...(counselorId
-        ? [
-            {
-              id: "sc" + Date.now(),
-              houseId: activeHouseId,
-              counselorId,
-              date: ds,
-              shift: "24h",
-              note,
-            },
-          ]
-        : []),
-    ]);
+    onAssignSchedule(activeHouseId, ds, counselorId, note);
     setSelDay(null);
   };
   const houseSchedule = schedule.filter(

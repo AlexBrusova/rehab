@@ -6,10 +6,10 @@ const router = Router();
 router.use(authMiddleware);
 
 router.get("/", async (req: AuthRequest, res: Response) => {
-  const { houseId } = req.query;
+  const { houseId, status } = req.query;
   const patients = await prisma.patient.findMany({
     where: {
-      status: "active",
+      status: status === "archived" ? "archived" : "active",
       ...(houseId ? { houseId: String(houseId) } : {}),
     },
     include: { room: true, meds: true },

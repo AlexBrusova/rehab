@@ -5,7 +5,7 @@ export default function TherapistTab({
   users,
   patients,
   therapistAssignments,
-  setTherapistAssignments,
+  onAssignTherapist,
 }) {
   const therapists = users.filter((u) => u.role === "therapist");
   return (
@@ -42,12 +42,7 @@ export default function TherapistTab({
             </div>{" "}
             <select
               value={assigned || ""}
-              onChange={(e) =>
-                setTherapistAssignments((prev) => ({
-                  ...prev,
-                  [p.id]: e.target.value || null,
-                }))
-              }
+              onChange={(e) => onAssignTherapist(p.id, e.target.value || null)}
               style={{
                 padding: "5px 10px",
                 borderRadius: 8,

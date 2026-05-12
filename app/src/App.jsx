@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_ARCHIVED, INIT_ROOMS, INIT_PHONES, INIT_PHONE_HIST, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_SHIFTS } from "./data/initialData";
+import { INIT_ROOMS, INIT_PHONES, INIT_PHONE_HIST, INIT_CONSEQUENCES, INIT_SHIFTS } from "./data/initialData";
 
 const toFrontendMed = (m) => ({
   ...m,
@@ -32,7 +32,7 @@ export default function App() {
   const [houses, setHouses] = useState([]);
   const [users, setUsers] = useState([]);
   const [patients, setPatients] = useState([]);
-  const [archived, setArchived] = useState(INIT_ARCHIVED);
+  const [archived, setArchived] = useState([]);
   const [rooms, setRooms] = useState(INIT_ROOMS);
   const [meds, setMeds] = useState([]);
   const [dist, setDist] = useState([]);
@@ -47,10 +47,8 @@ export default function App() {
   const [therapy, setTherapy] = useState([]);
   const [shifts, setShifts] = useState(INIT_SHIFTS);
   const [dailySummary, setDailySummary] = useState([]);
-  const [schedule, setSchedule] = useState(INIT_SCHEDULE);
-  const [therapistAssignments, setTherapistAssignments] = useState(
-    INIT_THERAPIST_ASSIGNMENTS,
-  );
+  const [schedule, setSchedule] = useState([]);
+  const [therapistAssignments, setTherapistAssignments] = useState({});
   const [user, setUser] = useState(() => {
     if (getToken()) return getStoredUser();
     return null;
@@ -125,6 +123,15 @@ export default function App() {
     authFetch(`/api/distributions?houseId=${activeHouseId}&date=${today}`)
       .then(setDist)
       .catch(console.error);
+    authFetch(`/api/patients?houseId=${activeHouseId}&status=archived`)
+      .then(setArchived)
+      .catch(console.error);
+    authFetch(`/api/therapist-assignments?houseId=${activeHouseId}`)
+      .then(setTherapistAssignments)
+      .catch(console.error);
+    authFetch(`/api/schedule?houseId=${activeHouseId}`)
+      .then(setSchedule)
+      .catch(console.error);
   }, [user, activeHouseId]);
 
   const refreshPatients = async () => {
@@ -156,6 +163,8 @@ export default function App() {
       method: "PATCH",
       body: JSON.stringify({ status: "archived", dischargeType, dischargeDate }),
     });
+    const pat = patients.find((p) => p.id === id);
+    if (pat) setArchived((prev) => [{ ...pat, status: "archived", dischargeType, dischargeDate }, ...prev]);
     setPatients((prev) => prev.filter((p) => p.id !== id));
   };
 
@@ -229,6 +238,25 @@ export default function App() {
   const deleteMed = async (id) => {
     await authFetch(`/api/meds/${id}`, { method: "DELETE" });
     setMeds((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const assignTherapist = async (patientId, therapistId) => {
+    await authFetch("/api/therapist-assignments", {
+      method: "PUT",
+      body: JSON.stringify({ patientId, therapistId }),
+    });
+    setTherapistAssignments((prev) => ({ ...prev, [patientId]: therapistId || null }));
+  };
+
+  const assignScheduleDay = async (houseId, date, counselorId, note) => {
+    const result = await authFetch("/api/schedule/assign", {
+      method: "PUT",
+      body: JSON.stringify({ houseId, date, counselorId, note }),
+    });
+    setSchedule((prev) => {
+      const filtered = prev.filter((s) => !(s.houseId === houseId && s.date === date));
+      return result ? [...filtered, result] : filtered;
+    });
   };
 
   const setDistributionStatus = async (patientId, shift, date, status) => {
@@ -461,7 +489,6 @@ export default function App() {
         patients={housePatients}
         setPatients={setPatients}
         archived={archived}
-        setArchived={setArchived}
         meds={houseMeds}
         setMeds={setMeds}
         rooms={houseRooms}
@@ -601,9 +628,9 @@ export default function App() {
         user={user}
         toast={showToast}
         schedule={schedule}
-        setSchedule={setSchedule}
+        onAssignSchedule={assignScheduleDay}
         therapistAssignments={therapistAssignments}
-        setTherapistAssignments={setTherapistAssignments}
+        onAssignTherapist={assignTherapist}
         shifts={houseShifts}
         activeHouseId={activeHouse?.id}
         houses={houses}
