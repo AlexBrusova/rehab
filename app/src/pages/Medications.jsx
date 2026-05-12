@@ -2,11 +2,12 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS } from "../components/ui";
 
-export default function Medications({ patients, meds, setMeds, dist, setDist, user, toast }) {
+export default function Medications({ patients, meds, dist, user, toast, onSetStatus }) {
+  const today = new Date().toLocaleDateString("en-GB");
   const [shift, setShift] = useState("morning");
   const [showSOS, setShowSOS] = useState(false);
   const [sosData, setSosData] = useState({
-    patientId: "p1",
+    patientId: patients[0]?.id || "",
     medName: "",
     dose: "",
     reason: "Headache",
@@ -47,29 +48,9 @@ export default function Medications({ patients, meds, setMeds, dist, setDist, us
   );
   const changedMeds = meds.filter((m) => m.changed);
   const getStatus = (pid) =>
-    dist.find(
-      (d) => d.patientId === pid && d.shift === shift && d.date === "09/05",
-    )?.status || null;
+    dist.find((d) => d.patientId === pid && d.shift === shift && d.date === today)?.status || null;
   const setStatus = (pid, status) => {
-    const existing = dist.find(
-      (d) => d.patientId === pid && d.shift === shift && d.date === "09/05",
-    );
-    if (existing)
-      setDist((prev) =>
-        prev.map((d) => (d.id === existing.id ? { ...d, status } : d)),
-      );
-    else
-      setDist((prev) => [
-        ...prev,
-        {
-          id: "d" + Date.now(),
-          patientId: pid,
-          shift,
-          date: "09/05",
-          status,
-          missed: [],
-        },
-      ]);
+    onSetStatus(pid, shift, today, status);
   };
   const addExtraMed = () => {
     if (!extraName.trim()) {
@@ -115,7 +96,7 @@ export default function Medications({ patients, meds, setMeds, dist, setDist, us
     );
     setShowSOS(false);
     setSosData({
-      patientId: "p1",
+      patientId: patients[0]?.id || "",
       medName: "",
       dose: "",
       reason: "Headache",

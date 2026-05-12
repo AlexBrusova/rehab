@@ -6,9 +6,10 @@ import EditMedRow from "./EditMedRow";
 export default function MedManager({
   patients,
   meds,
-  setMeds,
-  user,
   toast,
+  onAddMed,
+  onSaveMed,
+  onRemoveMed,
 }) {
   const [selPat, setSelPat] = useState(patients[0]?.id || "");
   const [editMed, setEditMed] = useState(null);
@@ -24,56 +25,30 @@ export default function MedManager({
   });
   const pMeds = meds.filter((m) => m.patientId === selPat);
   const pat = patients.find((p) => p.id === selPat);
-  const saveMed = (id, upd) => {
-    setMeds((prev) =>
-      prev.map((m) =>
-        m.id === id
-          ? {
-              ...m,
-              ...upd,
-              changed: true,
-              changedBy: user.name,
-              changedDate: "09/05",
-              prevDose: m.dose + m.unit,
-            }
-          : m,
-      ),
-    );
-    setEditMed(null);
-    toast("✅ Medication updated – Counselors will be notified");
+  const saveMed = async (id, upd) => {
+    try {
+      await onSaveMed(id, upd);
+      setEditMed(null);
+      toast("✅ Medication updated – Counselors will be notified");
+    } catch { toast("❌ Failed to update medication"); }
   };
-  const removeMed = (id) => {
-    setMeds((prev) => prev.filter((m) => m.id !== id));
-    toast("🗑️ Medication removed");
+  const removeMed = async (id) => {
+    try {
+      await onRemoveMed(id);
+      toast("🗑️ Medication removed");
+    } catch { toast("❌ Failed to remove medication"); }
   };
-  const addMed = () => {
+  const addMed = async () => {
     if (!newMed.name || !newMed.dose) {
       toast("⚠️ Please fill Name and Dose");
       return;
     }
-    setMeds((prev) => [
-      ...prev,
-      {
-        ...newMed,
-        id: "m" + Date.now(),
-        patientId: selPat,
-        changed: true,
-        changedBy: user.name,
-        changedDate: "09/05",
-        prevDose: "",
-      },
-    ]);
-    setNewMed({
-      name: "",
-      dose: "",
-      unit: "mg",
-      morning: false,
-      noon: false,
-      evening: false,
-      night: false,
-    });
-    setShowAdd(false);
-    toast("✅ Medication added – Counselors will be notified");
+    try {
+      await onAddMed(selPat, newMed);
+      setNewMed({ name: "", dose: "", unit: "mg", morning: false, noon: false, evening: false, night: false });
+      setShowAdd(false);
+      toast("✅ Medication added – Counselors will be notified");
+    } catch { toast("❌ Failed to add medication"); }
   };
   return (
     <div>

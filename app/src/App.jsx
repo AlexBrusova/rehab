@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_SHIFTS } from "./data/initialData";
+import { INIT_ARCHIVED, INIT_ROOMS, INIT_PHONES, INIT_PHONE_HIST, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_SHIFTS } from "./data/initialData";
+
+const toFrontendMed = (m) => ({
+  ...m,
+  morning: (m.times || []).includes("morning"),
+  noon: (m.times || []).includes("noon"),
+  evening: (m.times || []).includes("evening"),
+  night: (m.times || []).includes("night"),
+});
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
@@ -27,7 +35,7 @@ export default function App() {
   const [archived, setArchived] = useState(INIT_ARCHIVED);
   const [rooms, setRooms] = useState(INIT_ROOMS);
   const [meds, setMeds] = useState([]);
-  const [dist, setDist] = useState(INIT_DIST);
+  const [dist, setDist] = useState([]);
   const [phones, setPhones] = useState(INIT_PHONES);
   const [phoneHist, setPhoneHist] = useState(INIT_PHONE_HIST);
   const [groups, setGroups] = useState([]);
@@ -74,7 +82,7 @@ export default function App() {
     authFetch(`/api/patients?houseId=${activeHouseId}`)
       .then((data) => {
         setPatients(data);
-        setMeds(data.flatMap((p) => p.meds || []));
+        setMeds(data.flatMap((p) => (p.meds || []).map(toFrontendMed)));
       })
       .catch(console.error);
     authFetch(`/api/rooms?houseId=${activeHouseId}`)
@@ -114,13 +122,16 @@ export default function App() {
     authFetch(`/api/finance/cashbox-counts?houseId=${activeHouseId}`)
       .then(setCashboxCounts)
       .catch(console.error);
+    authFetch(`/api/distributions?houseId=${activeHouseId}&date=${today}`)
+      .then(setDist)
+      .catch(console.error);
   }, [user, activeHouseId]);
 
   const refreshPatients = async () => {
     if (!activeHouseId) return;
     const data = await authFetch(`/api/patients?houseId=${activeHouseId}`);
     setPatients(data);
-    setMeds(data.flatMap((p) => p.meds || []));
+    setMeds(data.flatMap((p) => (p.meds || []).map(toFrontendMed)));
   };
 
   const createPatient = async (formData) => {
@@ -195,6 +206,42 @@ export default function App() {
       body: JSON.stringify({ houseId: activeHouseId, counselorId: user.id, generalText, patientSummaries }),
     });
     setDailySummary((prev) => [created, ...prev]);
+  };
+
+  const createMed = async (patientId, medData) => {
+    const created = await authFetch("/api/meds", {
+      method: "POST",
+      body: JSON.stringify({ patientId, ...medData }),
+    });
+    setMeds((prev) => [...prev, toFrontendMed(created)]);
+    return created;
+  };
+
+  const updateMed = async (id, medData) => {
+    const updated = await authFetch(`/api/meds/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(medData),
+    });
+    setMeds((prev) => prev.map((m) => (m.id === id ? toFrontendMed(updated) : m)));
+    return updated;
+  };
+
+  const deleteMed = async (id) => {
+    await authFetch(`/api/meds/${id}`, { method: "DELETE" });
+    setMeds((prev) => prev.filter((m) => m.id !== id));
+  };
+
+  const setDistributionStatus = async (patientId, shift, date, status) => {
+    const record = await authFetch("/api/distributions", {
+      method: "PUT",
+      body: JSON.stringify({ patientId, shift, date, status }),
+    });
+    setDist((prev) => {
+      const ex = prev.find((d) => d.patientId === patientId && d.shift === shift && d.date === date);
+      if (ex) return prev.map((d) => (d === ex ? record : d));
+      return [...prev, record];
+    });
+    return record;
   };
 
   const createTherapySession = async (data) => {
@@ -455,20 +502,21 @@ export default function App() {
       <MedManager
         patients={housePatients}
         meds={houseMeds}
-        setMeds={setMeds}
         user={user}
         toast={showToast}
+        onAddMed={createMed}
+        onSaveMed={updateMed}
+        onRemoveMed={deleteMed}
       />
     ),
     medications: (
       <Medications
         patients={housePatients}
         meds={houseMeds}
-        setMeds={setMeds}
         dist={dist}
-        setDist={setDist}
         user={user}
         toast={showToast}
+        onSetStatus={setDistributionStatus}
       />
     ),
     groups: (
