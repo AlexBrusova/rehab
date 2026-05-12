@@ -3,6 +3,7 @@ import { C } from "../data/constants";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import ScheduleTab from "./ScheduleTab";
 import TherapistTab from "./TherapistTab";
+import AbsenceForm from "./AbsenceForm";
 
 export default function Manage({
   users,
