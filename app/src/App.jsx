@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
-import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_THERAPY, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
+import { INIT_ARCHIVED, INIT_ROOMS, INIT_DIST, INIT_PHONES, INIT_PHONE_HIST, INIT_THERAPIST_ASSIGNMENTS, INIT_SCHEDULE, INIT_CONSEQUENCES, INIT_SHIFTS, INIT_DAILY_SUMMARY } from "./data/initialData";
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
@@ -36,7 +36,7 @@ export default function App() {
   const [finance, setFinance] = useState([]);
   const [cashbox, setCashbox] = useState([]);
   const [cashboxCounts, setCashboxCounts] = useState([]);
-  const [therapy, setTherapy] = useState(INIT_THERAPY);
+  const [therapy, setTherapy] = useState([]);
   const [shifts, setShifts] = useState(INIT_SHIFTS);
   const [dailySummary, setDailySummary] = useState(INIT_DAILY_SUMMARY);
   const [schedule, setSchedule] = useState(INIT_SCHEDULE);
@@ -91,6 +91,9 @@ export default function App() {
         setPhones(data.filter((p) => p.status === "active"));
         setPhoneHist(data.filter((p) => p.status === "returned"));
       })
+      .catch(console.error);
+    authFetch(`/api/therapy?houseId=${activeHouseId}`)
+      .then(setTherapy)
       .catch(console.error);
     const today = new Date().toLocaleDateString("en-GB");
     authFetch(`/api/groups?houseId=${activeHouseId}&date=${today}`)
@@ -181,6 +184,15 @@ export default function App() {
       body: JSON.stringify(data),
     });
     setConsequences((prev) => prev.map((c) => (c.id === id ? updated : c)));
+  };
+
+  const createTherapySession = async (data) => {
+    const created = await authFetch("/api/therapy", {
+      method: "POST",
+      body: JSON.stringify({ ...data, therapistId: user.id }),
+    });
+    setTherapy((prev) => [created, ...prev]);
+    return created;
   };
 
   const createGroup = async (data) => {
@@ -544,9 +556,9 @@ export default function App() {
       <Therapy
         patients={housePatients}
         therapy={houseTherapy}
-        setTherapy={setTherapy}
         user={user}
         toast={showToast}
+        onAddSession={createTherapySession}
       />
     ),
   };

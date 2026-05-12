@@ -13,6 +13,7 @@ import consequencesRoutes from "./routes/consequences";
 import phonesRoutes from "./routes/phones";
 import financeRoutes from "./routes/finance";
 import groupsRoutes from "./routes/groups";
+import therapyRoutes from "./routes/therapy";
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use("/api/consequences", consequencesRoutes);
 app.use("/api/phones", phonesRoutes);
 app.use("/api/finance", financeRoutes);
 app.use("/api/groups", groupsRoutes);
+app.use("/api/therapy", therapyRoutes);
 
 async function ensureSchema() {
   try {
@@ -41,6 +43,7 @@ async function ensureSchema() {
     await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "time" TEXT NOT NULL DEFAULT ''`;
     await prisma.$executeRaw`ALTER TABLE "Group" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'active'`;
     await prisma.$executeRaw`ALTER TABLE "GroupAttendance" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'present'`;
+    await prisma.$executeRaw`ALTER TABLE "TherapySession" ALTER COLUMN "urgency" TYPE TEXT USING urgency::text`;
     console.log("Schema ensured");
   } catch (e) {
     console.error("Schema migration error:", e);

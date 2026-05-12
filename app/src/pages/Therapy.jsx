@@ -1,41 +1,35 @@
 import { useState } from "react";
-import { C, pName } from "../data/constants";
+import { C, pName, BADGE_STYLES } from "../data/constants";
 import { Badge, Card, Alrt, Btn, Modal, FL, FI, FS, FTA, VoiceBtn } from "../components/ui";
 
 export default function Therapy({
   patients,
   therapy,
-  setTherapy,
   user,
   toast,
+  onAddSession,
 }) {
   const [showNew, setShowNew] = useState(false);
   const [selected, setSelected] = useState(null);
   const [newT, setNewT] = useState({
-    patientId: "p1",
+    patientId: "",
     topic: "",
     notes: "",
     counselorNote: "",
     urgency: "NORMAL",
   });
-  const addSession = () => {
+  const effectivePatientId = newT.patientId || patients[0]?.id || "";
+  const addSession = async () => {
     if (!newT.topic) {
       toast("⚠️ Please fill Topic");
       return;
     }
-    setTherapy((prev) => [
-      { ...newT, id: "t" + Date.now(), therapistId: user.id, date: "09/05" },
-      ...prev,
-    ]);
-    setNewT({
-      patientId: "p1",
-      topic: "",
-      notes: "",
-      counselorNote: "",
-      urgency: "NORMAL",
-    });
-    setShowNew(false);
-    toast("✅ Session recorded");
+    try {
+      await onAddSession({ ...newT, patientId: effectivePatientId });
+      setNewT({ patientId: "", topic: "", notes: "", counselorNote: "", urgency: "NORMAL" });
+      setShowNew(false);
+      toast("✅ Session recorded");
+    } catch { toast("❌ Failed to save session"); }
   };
   const UP = {
     NORMAL: { l: "Normal", t: "teal" },
@@ -54,7 +48,7 @@ export default function Therapy({
           {" "}
           <FL label="Patient">
             <FS
-              value={newT.patientId}
+              value={effectivePatientId}
               onChange={(v) => setNewT((t) => ({ ...t, patientId: v }))}
               options={patients.map((p) => ({ v: p.id, l: p.name }))}
             />

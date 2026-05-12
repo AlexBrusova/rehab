@@ -371,7 +371,7 @@ model TherapySession {
   date          String
   topic         String
   notes         String
-  urgency       TherapyUrgency @default(NORMAL)
+  urgency       String         @default("NORMAL")
   counselorNote String?
 
   patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
