@@ -35,7 +35,7 @@ export default function TherapistTab({
             {" "}
             <div style={{ flex: 1 }}>
               {" "}
-              <div style={{ fontWeight: 700, fontSize: 13 }}>{p.name}</div>{" "}
+              <div style={{ fontWeight: 700, fontSize: 13, color: C.text }}>{p.name}</div>{" "}
               <div style={{ fontSize: 11, color: therapist ? C.teal : C.soft }}>
                 {therapist ? `🧠 ${therapist.name}` : "Not assigned"}
               </div>{" "}

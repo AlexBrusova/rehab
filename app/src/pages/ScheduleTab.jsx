@@ -2,6 +2,8 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { Card, CT, Btn, Modal, FL, FI } from "../components/ui";
 
+const COUNSELOR_COLORS = ["#0d7377","#1e5fa8","#5c2d91","#c55a11","#375623","#c00000","#7b3f00","#006d6d"];
+
 export default function ScheduleTab({
   users,
   schedule,
@@ -37,7 +39,8 @@ export default function ScheduleTab({
   );
   const counselors = users.filter(
     (u) =>
-      u.role === "counselor" && (u.allowedHouses || []).includes(activeHouseId),
+      u.role === "counselor" &&
+      (u.allowedHouses || []).some((h) => (h.houseId || h) === activeHouseId),
   ); /* Unique color per Counselor */
   const colorMap = {};
   counselors.forEach((u, i) => {
@@ -269,6 +272,7 @@ export default function ScheduleTab({
               cursor: "pointer",
               fontFamily: "inherit",
               fontSize: 12,
+              color: C.text,
             }}
           >
             ◀
@@ -279,6 +283,7 @@ export default function ScheduleTab({
               textAlign: "center",
               fontWeight: 800,
               fontSize: 14,
+              color: C.text,
             }}
           >
             {selMonth}
@@ -293,6 +298,7 @@ export default function ScheduleTab({
               cursor: "pointer",
               fontFamily: "inherit",
               fontSize: 12,
+              color: C.text,
             }}
           >
             ▶
