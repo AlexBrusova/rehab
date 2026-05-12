@@ -26,10 +26,8 @@ export default function Dashboard({
   const urgentTherapy = therapy.filter(
     (t) => t.urgency === "URGENT",
   ).length; /* Overdue phones */
-  const now = new Date();
-  const overduePhones = phones.filter(
-    (ph) => Math.floor((now - new Date(ph.issuedAt)) / 60000) > ph.duration,
-  );
+  const nowTime = new Date().toTimeString().slice(0, 5);
+  const overduePhones = phones.filter((ph) => ph.returnBy && nowTime > ph.returnBy);
   const overdueNames = overduePhones
     .map((ph) => patients.find((p) => p.id === ph.patientId)?.name)
     .filter(Boolean); /* Active consequences per patient */

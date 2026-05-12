@@ -9,13 +9,13 @@ export default function Manage({
   users,
   setUsers,
   patients,
-  setPatients,
   user: currentUser,
   toast,
   schedule,
   onAssignSchedule,
   therapistAssignments,
   onAssignTherapist,
+  onMarkAway,
   onReturn,
   shifts,
   activeHouseId,
@@ -809,7 +809,7 @@ export default function Manage({
             </CT>{" "}
             <AbsenceForm
               patients={patients.filter((p) => p.status === "active")}
-              setPatients={setPatients}
+              onMarkAway={onMarkAway}
               toast={toast}
             />{" "}
           </Card>{" "}

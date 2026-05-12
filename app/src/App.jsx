@@ -103,8 +103,7 @@ export default function App() {
     authFetch(`/api/summary?houseId=${activeHouseId}`)
       .then(setDailySummary)
       .catch(console.error);
-    const today = new Date().toLocaleDateString("en-GB");
-    authFetch(`/api/groups?houseId=${activeHouseId}&date=${today}`)
+    authFetch(`/api/groups?houseId=${activeHouseId}`)
       .then((data) => {
         setGroups(data);
         setAttendance(data.flatMap((g) => g.attendance || []));
@@ -645,13 +644,13 @@ export default function App() {
         users={users}
         setUsers={setUsers}
         patients={housePatients}
-        setPatients={setPatients}
         user={user}
         toast={showToast}
         schedule={schedule}
         onAssignSchedule={assignScheduleDay}
         therapistAssignments={therapistAssignments}
         onAssignTherapist={assignTherapist}
+        onMarkAway={markPatientAway}
         onReturn={markPatientReturned}
         shifts={houseShifts}
         activeHouseId={activeHouse?.id}
