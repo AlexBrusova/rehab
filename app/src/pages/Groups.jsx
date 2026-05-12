@@ -196,7 +196,7 @@ export default function Groups({
                   }}
                 >
                   {" "}
-                  <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>
+                  <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: C.text }}>
                     {p.name}
                   </div>{" "}
                   {/* Event button */}{" "}
@@ -493,7 +493,7 @@ export default function Groups({
                   }}
                 >
                   {" "}
-                  <div style={{ flex: 1, fontSize: 13, fontWeight: 600 }}>
+                  <div style={{ flex: 1, fontSize: 13, fontWeight: 600, color: C.text }}>
                     {p.name}
                   </div>{" "}
                   <button
