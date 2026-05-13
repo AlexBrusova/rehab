@@ -703,7 +703,7 @@ export default function App() {
           height: "100vh",
           zIndex: 100,
           boxShadow: "-4px 0 20px rgba(0,0,0,0.3)",
-          transform: sidebarOpen ? "translateX(0)" : "translateX(218px)",
+          transform: isMobile ? (sidebarOpen ? "translateX(0)" : "translateX(218px)") : "translateX(0)",
           transition: "transform 0.25s ease",
         }}
       >
@@ -829,22 +829,24 @@ export default function App() {
               </div>
             )}{" "}
           </div>{" "}
-          <button
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              background: "rgba(255,255,255,0.08)",
-              border: "none",
-              color: "rgba(255,255,255,0.5)",
-              cursor: "pointer",
-              borderRadius: 7,
-              padding: "5px 8px",
-              fontSize: 16,
-              lineHeight: 1,
-              marginTop: 2,
-            }}
-          >
-            ✕
-          </button>{" "}
+          {isMobile && (
+            <button
+              onClick={() => setSidebarOpen(false)}
+              style={{
+                background: "rgba(255,255,255,0.08)",
+                border: "none",
+                color: "rgba(255,255,255,0.5)",
+                cursor: "pointer",
+                borderRadius: 7,
+                padding: "5px 8px",
+                fontSize: 16,
+                lineHeight: 1,
+                marginTop: 2,
+              }}
+            >
+              ✕
+            </button>
+          )}{" "}
         </div>{" "}
         <nav style={{ flex: 1, padding: "7px 0", overflowY: "auto" }}>
           {" "}
@@ -983,7 +985,7 @@ export default function App() {
         </div>{" "}
       </aside>{" "}
       {/* BACKDROP when open on mobile */}{" "}
-      {sidebarOpen && (
+      {isMobile && sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
           style={{
@@ -994,13 +996,14 @@ export default function App() {
           }}
         />
       )}{" "}
-      {/* MAIN - always full width */}{" "}
+      {/* MAIN */}{" "}
       <main
         style={{
           width: "100%",
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          marginRight: isMobile ? 0 : 218,
         }}
       >
         {" "}
@@ -1019,7 +1022,7 @@ export default function App() {
           }}
         >
           {" "}
-          {/* Hamburger */}{" "}
+          {/* Hamburger - only on mobile */}{" "}
           <button
             onClick={() => setSidebarOpen((o) => !o)}
             style={{
@@ -1028,7 +1031,7 @@ export default function App() {
               cursor: "pointer",
               padding: "4px 6px",
               borderRadius: 8,
-              display: "flex",
+              display: isMobile ? "flex" : "none",
               flexDirection: "column",
               gap: 4,
               flexShrink: 0,
