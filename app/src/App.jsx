@@ -709,7 +709,10 @@ export default function App() {
         {" "}
         <div
           style={{
-            padding: "18px 16px 14px",
+            paddingTop: "calc(18px + env(safe-area-inset-top))",
+            paddingLeft: 16,
+            paddingRight: 16,
+            paddingBottom: 14,
             borderBottom: "1px solid rgba(255,255,255,0.08)",
             display: "flex",
             alignItems: "flex-start",
@@ -1007,8 +1010,11 @@ export default function App() {
           style={{
             background: "#fff",
             borderBottom: `1px solid ${C.border}`,
-            padding: "0 16px",
-            height: 56,
+            paddingTop: "env(safe-area-inset-top)",
+            paddingLeft: 16,
+            paddingRight: 16,
+            paddingBottom: 0,
+            minHeight: 56,
             display: "flex",
             alignItems: "center",
             gap: 10,
@@ -1126,7 +1132,7 @@ export default function App() {
             Active shift
           </div>}{" "}
         </div>{" "}
-        <div style={{ padding: "16px", flex: 1, overflowY: "auto" }}>
+        <div style={{ padding: "16px", paddingBottom: "calc(16px + env(safe-area-inset-bottom))", flex: 1, overflowY: "auto" }}>
           {" "}
           {screenEl[screen] || screenEl.dashboard}{" "}
         </div>{" "}
