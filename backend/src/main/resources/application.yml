@@ -1,25 +1,41 @@
 server:
   port: ${PORT:4000}
   shutdown: graceful
+  tomcat:
+    connection-timeout: 20s
+    threads:
+      max: 200
+    accept-count: 100
 
 spring:
   lifecycle:
     timeout-per-shutdown-phase: ${SHUTDOWN_TIMEOUT:30s}
   application:
     name: rehab-backend
+  # Локально без Redis: Caffeine, TTL 1 сутки. В Docker (профиль docker) — Redis, см. application-docker.yml
+  cache:
+    type: caffeine
+    cache-names: houses
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=1d
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/rehab}
     username: ${DB_USER:}
     password: ${DB_PASSWORD:}
     hikari:
       maximum-pool-size: 10
+      minimum-idle: 2
       connection-timeout: 30000
       validation-timeout: 5000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      register-mbeans: true
   jpa:
     open-in-view: false
     hibernate:
       ddl-auto: validate
     properties:
+      jakarta.persistence.query.timeout: 60000
       hibernate:
         globally_quoted_identifiers: true
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
@@ -39,10 +55,34 @@ management:
       probes:
         enabled: true
       show-details: when_authorized
+      group:
+        readiness:
+          include: readinessState, db
+  health:
+    liveness-state:
+      enabled: true
+    readiness-state:
+      enabled: true
 
 jwt:
   secret: ${JWT_SECRET:dev-secret-change-me-min-32-chars-long!!}
   expiration-hours: 12
+
+resilience4j:
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 120ms
+        enable-exponential-backoff: true
+        exponential-backoff-multiplier: 2
+        retry-exceptions:
+          - org.springframework.dao.TransientDataAccessResourceException
+          - org.springframework.transaction.CannotCreateTransactionException
+          - java.sql.SQLTransientConnectionException
+    instances:
+      db-read:
+        baseConfig: default
 
 logging:
   charset:

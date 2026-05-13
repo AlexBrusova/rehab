@@ -80,6 +80,7 @@ export default function Login({ onLogin }) {
               Username
             </label>
             <input
+              data-testid="login-username"
               value={un}
               onChange={(e) => setUn(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handle()}
@@ -115,6 +116,7 @@ export default function Login({ onLogin }) {
               Password
             </label>
             <input
+              data-testid="login-password"
               type="password"
               value={pw}
               onChange={(e) => setPw(e.target.value)}
@@ -154,6 +156,7 @@ export default function Login({ onLogin }) {
             </div>
           )}
           <button
+            data-testid="login-submit"
             onClick={handle}
             disabled={loading}
             style={{

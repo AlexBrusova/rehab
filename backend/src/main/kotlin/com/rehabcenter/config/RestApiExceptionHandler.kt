@@ -9,6 +9,8 @@ import org.springframework.dao.DataAccessResourceFailureException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.dao.QueryTimeoutException
+import org.springframework.dao.TransientDataAccessResourceException
+import org.springframework.data.redis.RedisConnectionFailureException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
@@ -131,6 +133,22 @@ class RestApiExceptionHandler {
         log.warn("Optimistic lock: {}", ex.message)
         return ResponseEntity.status(HttpStatus.CONFLICT).body(
             mapOf("error" to "Conflict", "details" to "Resource was modified concurrently"),
+        )
+    }
+
+    @ExceptionHandler(RedisConnectionFailureException::class)
+    fun redisUnavailable(ex: RedisConnectionFailureException): ResponseEntity<Map<String, Any?>> {
+        log.warn("Redis unavailable: {}", ex.message)
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+            mapOf("error" to "Service temporarily unavailable", "details" to "Cache backend unavailable"),
+        )
+    }
+
+    @ExceptionHandler(TransientDataAccessResourceException::class)
+    fun transientDataAccess(ex: TransientDataAccessResourceException): ResponseEntity<Map<String, Any?>> {
+        log.warn("Transient data access: {}", ex.message)
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(
+            mapOf("error" to "Service temporarily unavailable", "details" to "Transient storage failure"),
         )
     }
 

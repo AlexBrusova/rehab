@@ -32,7 +32,7 @@ class TherapistAssignment(
 
 @Entity
 @Table(name = "TherapySession")
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonIgnoreProperties(ignoreUnknown = true, value = ["patient", "therapist"])
 class TherapySession(
     @Id
     var id: String = "",
@@ -49,13 +49,13 @@ class TherapySession(
     @Column(nullable = false)
     var urgency: String = "NORMAL",
     var counselorNote: String? = null,
+    @get:JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patientId", insertable = false, updatable = false)
-    @JsonIgnore
     var patient: Patient? = null,
+    @get:JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "therapistId", insertable = false, updatable = false)
-    @JsonIgnore
     var therapist: AppUser? = null,
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),

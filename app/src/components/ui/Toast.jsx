@@ -3,6 +3,7 @@ import { C } from "../../data/constants";
 export default function Toast({ msg }) {
   return msg ? (
     <div
+      data-testid="toast"
       style={{
         position: "fixed",
         bottom: 24,

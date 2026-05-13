@@ -9,8 +9,8 @@ import com.rehabcenter.repo.CounselorScheduleRepository
 import com.rehabcenter.repo.DailySummaryRepository
 import com.rehabcenter.repo.FinanceRepository
 import com.rehabcenter.repo.HouseRepository
-import com.rehabcenter.repo.MedRepository
 import com.rehabcenter.repo.MedDistributionRepository
+import com.rehabcenter.repo.MedRepository
 import com.rehabcenter.repo.PatientRepository
 import com.rehabcenter.repo.PhoneRepository
 import com.rehabcenter.repo.ResidentGroupRepository
@@ -20,7 +20,9 @@ import com.rehabcenter.repo.ShiftRepository
 import com.rehabcenter.repo.TherapistAssignmentRepository
 import com.rehabcenter.repo.TherapySessionRepository
 import com.rehabcenter.repo.UserRepository
+import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.test.context.TestConfiguration
+import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Bean
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.transaction.support.TransactionTemplate
@@ -50,6 +52,7 @@ class TestSupportConfig {
         schedules: CounselorScheduleRepository,
         passwordEncoder: PasswordEncoder,
         transactionTemplate: TransactionTemplate,
+        cacheManager: ObjectProvider<CacheManager>,
     ): IntegrationTestFixture =
         IntegrationTestFixture(
             houses,
@@ -73,6 +76,7 @@ class TestSupportConfig {
             schedules,
             passwordEncoder,
             transactionTemplate,
+            cacheManager,
         )
 }
 
@@ -98,8 +102,12 @@ class IntegrationTestFixture(
     private val schedules: CounselorScheduleRepository,
     private val passwordEncoder: PasswordEncoder,
     private val transactionTemplate: TransactionTemplate,
+    private val cacheManager: ObjectProvider<CacheManager>,
 ) {
     fun resetAndSeed() {
+        cacheManager.ifAvailable { cm ->
+            cm.cacheNames.forEach { name -> cm.getCache(name)?.clear() }
+        }
         transactionTemplate.executeWithoutResult {
             dailySummaries.deleteAll()
             therapySessions.deleteAll()

@@ -30,16 +30,16 @@ class PatientController(
     @GetMapping("/archived")
     fun listArchived(
         @RequestParam @NotBlank @Size(max = UiValidation.ID_MAX) houseId: String,
-    ): List<Patient> = patients.findByHouseIdAndStatusOrderByNameAsc(houseId, "archived")
+    ): List<Patient> = patients.findByHouseIdAndPatientRecordStatusOrderByNameAsc(houseId, "archived")
 
     @GetMapping
     fun list(
         @RequestParam(required = false) @Size(min = 1, max = UiValidation.ID_MAX) houseId: String?,
     ): List<Patient> =
         if (houseId.isNullOrBlank()) {
-            patients.findByStatusOrderByNameAsc("active")
+            patients.findByPatientRecordStatusOrderByNameAsc("active")
         } else {
-            patients.findByHouseIdAndStatusOrderByNameAsc(houseId, "active")
+            patients.findByHouseIdAndPatientRecordStatusOrderByNameAsc(houseId, "active")
         }
 
     data class CreatePatientBody(

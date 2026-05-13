@@ -4,6 +4,19 @@ spring:
       ddl-auto: update
   flyway:
     enabled: false
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:redis}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
+      timeout: 3s
+      connect-timeout: 3s
+  cache:
+    type: redis
+    cache-names: houses
+    redis:
+      time-to-live: 1d
+      use-key-prefix: true
+      key-prefix: "rehab::"
 
 management:
   endpoints:
@@ -15,6 +28,9 @@ management:
       probes:
         enabled: true
       show-details: always
+      group:
+        readiness:
+          include: readinessState, db, redis
   metrics:
     tags:
       application: ${spring.application.name}

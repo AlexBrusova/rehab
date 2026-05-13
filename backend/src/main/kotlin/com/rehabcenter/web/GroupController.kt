@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -158,6 +159,7 @@ class GroupController(
     )
 
     /** Legacy Express route: `PUT /api/groups/:id/attendance`. */
+    @Transactional
     @PutMapping("/{groupId}/attendance")
     fun putAttendance(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) groupId: String,
@@ -178,7 +180,7 @@ class GroupController(
         groups.save(g)
         return ResponseEntity.ok(
             mapOf(
-                "id" to "${groupId}_${pid}",
+                "id" to "${groupId}_$pid",
                 "sessionId" to groupId,
                 "patientId" to pid,
                 "status" to st,

@@ -1,6 +1,5 @@
 package com.rehabcenter.it
 
-import com.rehabcenter.domain.TherapySession
 import com.rehabcenter.testsupport.AbstractIntegrationTest
 import com.rehabcenter.testsupport.bearerHeaders
 import com.rehabcenter.testsupport.obtainToken
@@ -177,7 +176,7 @@ class LegacyExpressApiIT : AbstractIntegrationTest() {
                 "/api/therapy?houseId=h1",
                 HttpMethod.GET,
                 HttpEntity<Void>(headers),
-                object : ParameterizedTypeReference<List<TherapySession>>() {},
+                object : ParameterizedTypeReference<List<Map<String, Any?>>>() {},
             )
         assertThat(listRes.statusCode.is2xxSuccessful).isTrue()
         assertThat(listRes.body!!.isNotEmpty()).isTrue()
@@ -197,11 +196,11 @@ class LegacyExpressApiIT : AbstractIntegrationTest() {
                     ),
                     headers,
                 ),
-                object : ParameterizedTypeReference<TherapySession>() {},
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
             )
         assertThat(postRes.statusCode.value()).isEqualTo(201)
-        assertThat(postRes.body!!.patientId).isEqualTo("p1")
-        assertThat(postRes.body!!.urgency).isEqualTo("ATTENTION")
+        assertThat(postRes.body!!["patientId"]).isEqualTo("p1")
+        assertThat(postRes.body!!["urgency"]).isEqualTo("ATTENTION")
     }
 
     @Test

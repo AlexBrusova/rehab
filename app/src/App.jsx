@@ -143,9 +143,11 @@ export default function App() {
   };
 
   const createPatient = async (formData) => {
+    const payload = { ...formData, houseId: activeHouseId };
+    if (!payload.roomId?.trim()) delete payload.roomId;
     await authFetch("/api/patients", {
       method: "POST",
-      body: JSON.stringify({ ...formData, houseId: activeHouseId }),
+      body: JSON.stringify(payload),
     });
     await refreshPatients();
   };
@@ -458,17 +460,19 @@ export default function App() {
     houses.find((h) => h.id === activeHouseId) ||
     allowedHouses[0] ||
     houses[0];
+  /** While `/api/houses` is still loading, `activeHouse` is undefined but `activeHouseId` is already set — keep filtering by id. */
+  const houseScopeId = activeHouse?.id || activeHouseId;
   const canSwitchHouses =
     allowedHouses.length > 1; /* Filter data by active house */
-  const housePatients = patients.filter((p) => p.houseId === activeHouse?.id);
-  const houseRooms = rooms.filter((r) => r.houseId === activeHouse?.id);
+  const housePatients = patients.filter((p) => p.houseId === houseScopeId);
+  const houseRooms = rooms.filter((r) => r.houseId === houseScopeId);
   const houseShifts = shifts.filter(
-    (s) => s.houseId === activeHouse?.id,
+    (s) => s.houseId === houseScopeId,
   ); /* Filter additional data by House */
   const housePatientIds = new Set(housePatients.map((p) => p.id));
   const houseMeds = meds.filter((m) => housePatientIds.has(m.patientId));
   const houseGroups = groups.filter(
-    (g) => !g.houseId || g.houseId === activeHouse?.id,
+    (g) => !g.houseId || g.houseId === houseScopeId,
   );
   const houseConsequences = consequences.filter((c) =>
     housePatientIds.has(c.patientId),
@@ -635,7 +639,7 @@ export default function App() {
         cashboxCounts={cashboxCounts}
         user={user}
         toast={showToast}
-        activeHouseId={activeHouse?.id}
+        activeHouseId={houseScopeId}
         onAddPatientTx={createPatientTx}
         onAddCashTx={createCashTx}
         onAddCashboxCount={createCashboxCount}
@@ -655,7 +659,7 @@ export default function App() {
         onMarkAway={markPatientAway}
         onReturn={markPatientReturned}
         shifts={houseShifts}
-        activeHouseId={activeHouse?.id}
+        activeHouseId={houseScopeId}
         houses={houses}
         onAddUser={createUser}
         onUpdateUser={updateUser}
@@ -875,6 +879,7 @@ export default function App() {
                   </div>
                 )}{" "}
                 <div
+                  data-testid={`nav-${item.id}`}
                   onClick={() => {
                     navTo(item.id);
                     setSidebarOpen(false);
@@ -1027,6 +1032,7 @@ export default function App() {
           {" "}
           {/* Hamburger - only on mobile */}{" "}
           <button
+            data-testid="sidebar-toggle"
             onClick={() => setSidebarOpen((o) => !o)}
             style={{
               background: "transparent",
@@ -1067,6 +1073,7 @@ export default function App() {
             />{" "}
           </button>{" "}
           <div
+            data-testid="page-title"
             style={{ fontSize: 15, fontWeight: 800, color: C.text, flex: 1 }}
           >
             {TITLES[screen]}

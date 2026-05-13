@@ -6,6 +6,11 @@ db/node_modules/
 # Build
 app/dist/
 
+# Playwright
+app/playwright-report/
+app/test-results/
+app/blob-report/
+
 # Env
 .env
 app/.env
