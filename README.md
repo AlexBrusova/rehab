@@ -15,11 +15,12 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React + Vite (PWA) |
-| Backend | Node.js + Express + TypeScript |
-| Database | PostgreSQL (via Prisma ORM) |
+| Backend API | Kotlin + Spring Boot 3 |
+| Database | PostgreSQL |
+| Schema / migrations | Prisma (`db/` package) |
 | Auth | JWT (12-hour tokens) |
 | Frontend hosting | Vercel |
-| Backend hosting | Railway |
+| Backend hosting | Railway (or any JVM host) |
 
 ---
 
@@ -62,11 +63,10 @@ rehab/
 │       ├── pages/        # Screen components
 │       ├── components/   # Shared UI components
 │       └── data/         # Constants, colors
-├── server/       # Express backend (TypeScript)
-│   └── src/
-│       ├── routes/       # API route handlers
-│       ├── middleware/   # Auth middleware
-│       └── lib/          # Prisma client
+├── backend/      # Kotlin + Spring Boot REST API
+├── db/           # Prisma schema & DB migrations (PostgreSQL)
+│   └── prisma/
+│       └── schema.prisma
 ├── docs/
 │   ├── api.md            # Full API documentation
 │   ├── business-en.md   # Business documentation (English)
@@ -88,13 +88,21 @@ Full API reference: [`docs/api.md`](docs/api.md)
 
 ## Running Locally
 
-### Backend
+### Database schema (Prisma)
 ```bash
-cd server
+cd db
 npm install
+cp .env.example .env   # set DATABASE_URL
 npx prisma generate
-npm run dev
+npx prisma migrate dev   # or: npx prisma db push
 ```
+
+### Backend API (Kotlin)
+```bash
+cd backend
+./gradlew bootRun
+```
+Uses port **4000** by default (`PORT` / `application.yml`). JDBC URL: `jdbc:postgresql://...` (see `backend/.env.example`).
 
 ### Frontend
 ```bash
@@ -103,7 +111,7 @@ npm install
 npm run dev
 ```
 
-Set `VITE_API_URL` in `app/.env` to point to your backend.
+Set `VITE_API_URL` in `app/.env` to your API (e.g. `http://localhost:4000`), or leave empty and use the Vite dev proxy to the same port.
 
 ---
 
@@ -126,11 +134,12 @@ Set `VITE_API_URL` in `app/.env` to point to your backend.
 | שכבה | טכנולוגיה |
 |------|-----------|
 | צד לקוח | React + Vite (PWA) |
-| צד שרת | Node.js + Express + TypeScript |
-| מסד נתונים | PostgreSQL (דרך Prisma ORM) |
+| צד שרת API | Kotlin + Spring Boot 3 |
+| מסד נתונים | PostgreSQL |
+| סכמה / מיגרציות | Prisma (חבילת `db/`) |
 | אימות | JWT (תוקף 12 שעות) |
 | אחסון צד לקוח | Vercel |
-| אחסון צד שרת | Railway |
+| אחסון צד שרת | Railway (או כל סביבת JVM) |
 
 ---
 
@@ -173,11 +182,10 @@ rehab/
 │       ├── pages/        # רכיבי מסכים
 │       ├── components/   # רכיבי UI משותפים
 │       └── data/         # קבועים, צבעים
-├── server/       # צד שרת Express (TypeScript)
-│   └── src/
-│       ├── routes/       # מטפלי נתיבי API
-│       ├── middleware/   # Middleware אימות
-│       └── lib/          # Prisma client
+├── backend/      # Kotlin + Spring Boot REST API
+├── db/           # Prisma — סכמה ומיגרציות PostgreSQL
+│   └── prisma/
+│       └── schema.prisma
 ├── docs/
 │   ├── api.md            # תיעוד API מלא
 │   ├── business-en.md   # תיעוד עסקי (אנגלית)
@@ -199,12 +207,19 @@ rehab/
 
 ## הרצה מקומית
 
-### צד שרת
+### סכמת מסד (Prisma)
 ```bash
-cd server
+cd db
 npm install
+cp .env.example .env   # הגדר DATABASE_URL
 npx prisma generate
-npm run dev
+npx prisma migrate dev   # או: npx prisma db push
+```
+
+### צד שרת API (Kotlin)
+```bash
+cd backend
+./gradlew bootRun
 ```
 
 ### צד לקוח
@@ -214,4 +229,4 @@ npm install
 npm run dev
 ```
 
-הגדר `VITE_API_URL` ב-`app/.env` כך שיצביע לצד השרת שלך.
+הגדר `VITE_API_URL` ב-`app/.env` כך שיצביע ל-API, או השאר ריק והשתמש ב-proxy של Vite.

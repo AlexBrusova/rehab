@@ -1,0 +1,15 @@
+{
+  "name": "rehab-db",
+  "private": true,
+  "description": "Prisma schema and migrations for PostgreSQL (shared with Kotlin JPA).",
+  "scripts": {
+    "generate": "prisma generate",
+    "migrate": "prisma migrate dev",
+    "push": "prisma db push",
+    "studio": "prisma studio",
+    "format": "prisma format"
+  },
+  "devDependencies": {
+    "prisma": "^5.22.0"
+  }
+}

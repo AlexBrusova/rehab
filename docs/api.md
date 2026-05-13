@@ -527,7 +527,7 @@ Returns all schedule entries for a house.
 ]
 ```
 
-Note: `shift` is an alias for `shiftType` added by the server for frontend compatibility.
+Note: `shift` is an alias for `shiftType` in the JSON response (Kotlin backend) for frontend compatibility.
 
 ### PUT /api/schedule/assign
 Atomically replace the counselor assignment for a given date. Deletes any existing entry for that `houseId + date`, then creates a new one if `counselorId` is provided. Use this to both assign and unassign.
@@ -756,16 +756,16 @@ Returns daily summaries for a house, optionally filtered by date.
 ## Schema Notes
 
 ### Patient `awayType` field
-The `Patient` table has an `awayType TEXT` column (nullable). When set, the GET `/api/patients` response returns `status: "away"` for that patient instead of `"active"`. This avoids changing the PostgreSQL enum and keeps the approach simple.
+The `Patient` table has an `awayType TEXT` column (nullable), declared in `db/prisma/schema.prisma`. When set, `GET /api/patients` returns `status: "away"` for that patient instead of `"active"`.
 
 To mark as absent: `PATCH /api/patients/:id` with `{ "awayType": "Home Visit" }`  
 To mark as returned: `PATCH /api/patients/:id` with `{ "awayType": null }`
 
 ### ShiftDist table
-The `ShiftDist` table is created via raw SQL in `ensureSchema()` on server start (not via Prisma migration). It has composite primary key `(patientId, shift, date)`. Upserts use `ON CONFLICT ... DO UPDATE`.
+The `ShiftDist` model is in `db/prisma/schema.prisma` (composite primary key `(patientId, shift, date)`). Apply schema with `cd db && npx prisma migrate dev` (or `prisma db push`). The Kotlin API exposes it at `GET/PUT /api/distributions`.
 
-### ensureSchema migrations
-The server runs `ensureSchema()` on startup, applying `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` for columns added after the initial Prisma migration. Each migration step is wrapped independently so a failure in one step does not block subsequent steps.
+### Schema evolution
+PostgreSQL schema is owned by **Prisma** in the `db/` package. The Kotlin service uses JPA `ddl-auto: validate` in the default profile — after pulling changes, run Prisma migrations before starting the backend.
 
 ---
 

@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+
+jwt:
+  secret: test-jwt-secret-min-32-chars-long-for-ci!!
+
+logging:
+  level:
+    root: WARN
+    com.rehabcenter: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.testcontainers: INFO
