@@ -68,6 +68,7 @@ export default function App() {
   });
   const [showHousePicker, setShowHousePicker] = useState(false);
   const [toastMsg, showToast] = useToast();
+  const { isMobile } = useBreakpoint();
 
   useEffect(() => {
     if (!user) return;
@@ -449,8 +450,6 @@ export default function App() {
 
   if (!user)
     return <Login onLogin={handleLogin} />;
-
-  const { isMobile } = useBreakpoint();
   const allowedHouseIds = (user.allowedHouses || []).map((a) => a.houseId || a);
   const allowedHouses = houses.filter(
     (h) => user.allHousesAccess || allowedHouseIds.includes(h.id),
