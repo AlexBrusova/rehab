@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { C, pName } from "../data/constants";
 import { Badge, Card, CT, Btn, Th, Td, Modal, FL, FS } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Phones({
   patients,
@@ -12,6 +13,7 @@ export default function Phones({
   onIssue,
   onReturn,
 }) {
+  const { isMobile } = useBreakpoint();
   const housePatientIds = new Set(patients.map((p) => p.id));
   const housePhones = phones.filter((ph) => housePatientIds.has(ph.patientId));
   const housePhoneHist = phoneHist.filter((ph) => housePatientIds.has(ph.patientId));
@@ -136,7 +138,7 @@ export default function Phones({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
           gap: 14,
           marginBottom: 20,
         }}

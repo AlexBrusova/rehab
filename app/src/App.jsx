@@ -927,6 +927,7 @@ export default function App() {
         <div
           style={{
             padding: "11px 13px",
+            paddingBottom: "calc(11px + env(safe-area-inset-bottom))",
             borderTop: "1px solid rgba(255,255,255,0.08)",
             display: "flex",
             alignItems: "center",

@@ -347,13 +347,14 @@ export default function Finance({
           <div
             style={{
               display: "flex",
+              flexDirection: isMobile ? "column" : "row",
               gap: 12,
               marginBottom: 18,
-              alignItems: "flex-end",
+              alignItems: isMobile ? "stretch" : "flex-end",
             }}
           >
             {" "}
-            <div style={{ flex: 1, maxWidth: 220 }}>
+            <div style={{ flex: 1 }}>
               {" "}
               <label
                 style={{

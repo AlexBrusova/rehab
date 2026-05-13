@@ -268,134 +268,43 @@ export default function MedManager({
               ) : (
                 <div
                   style={{
-                    display: "flex",
-                    alignItems: "center",
                     padding: "11px 14px",
                     borderRadius: 10,
                     border: `1.5px solid ${m.changed ? C.orange : C.border}`,
                     background: m.changed ? "#fff8f2" : "#fff",
                     marginBottom: 8,
-                    gap: 10,
                   }}
                 >
-                  {" "}
-                  <span style={{ fontSize: 18 }}>💊</span>{" "}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    {" "}
-                    <div
-                      style={{
-                        fontWeight: 700,
-                        fontSize: 13,
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {" "}
-                      {m.name}{" "}
-                      {m.changed && (
-                        <span
-                          style={{
-                            background: C.orange,
-                            color: "#fff",
-                            fontSize: 10,
-                            fontWeight: 700,
-                            padding: "2px 7px",
-                            borderRadius: 8,
-                          }}
-                        >
-                          updated
-                        </span>
-                      )}{" "}
-                    </div>{" "}
-                    <div style={{ fontSize: 12, color: C.mid }}>
-                      {" "}
-                      {m.dose}
-                      {m.unit}{" "}
-                      {m.changed && m.prevDose && (
-                        <span
-                          style={{
-                            color: C.soft,
-                            textDecoration: "line-through",
-                            marginRight: 6,
-                          }}
-                        >
-                          {m.prevDose}
-                        </span>
-                      )}{" "}
-                      {m.changed && (
-                        <span
-                          style={{
-                            color: C.orange,
-                            fontSize: 11,
-                            marginRight: 6,
-                          }}
-                        >
-                          | {m.changedBy} {m.changedDate}
-                        </span>
-                      )}{" "}
-                    </div>{" "}
-                  </div>{" "}
-                  <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
-                    {" "}
+                  {/* top row: icon + name + buttons */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                    <span style={{ fontSize: 16, flexShrink: 0 }}>💊</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                        {m.name}
+                        {m.changed && <span style={{ background: C.orange, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>updated</span>}
+                      </div>
+                      <div style={{ fontSize: 12, color: C.mid }}>
+                        {m.dose}{m.unit}
+                        {m.changed && m.prevDose && <span style={{ color: C.soft, textDecoration: "line-through", marginRight: 6, marginLeft: 4 }}>{m.prevDose}</span>}
+                        {m.changed && <span style={{ color: C.orange, fontSize: 11 }}> | {m.changedBy} {m.changedDate}</span>}
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
+                      <button onClick={() => { setEditMed(m.id); setShowAdd(false); }} style={{ padding: "4px 10px", borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: C.mid, fontFamily: "inherit" }}>✏️ Edit</button>
+                      <button onClick={() => removeMed(m.id)} style={{ padding: "4px 10px", borderRadius: 7, border: "1.5px solid #fcc", background: "#fff5f5", cursor: "pointer", fontSize: 12, fontWeight: 700, color: C.red, fontFamily: "inherit" }}>✕</button>
+                    </div>
+                  </div>
+                  {/* bottom row: time badges */}
+                  <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                     {["Morning", "Noon", "Evening", "Night"].map((t, i) => {
                       const k = ["morning", "noon", "evening", "night"][i];
                       return (
-                        <span
-                          key={t}
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: 12,
-                            fontSize: 11,
-                            fontWeight: 700,
-                            background: m[k] ? C.teal : "#f0f2f5",
-                            color: m[k] ? "#fff" : "#aaa",
-                          }}
-                        >
+                        <span key={t} style={{ padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: m[k] ? C.teal : "#f0f2f5", color: m[k] ? "#fff" : "#aaa" }}>
                           {t}
                         </span>
                       );
-                    })}{" "}
-                  </div>{" "}
-                  <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
-                    {" "}
-                    <button
-                      onClick={() => {
-                        setEditMed(m.id);
-                        setShowAdd(false);
-                      }}
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: 7,
-                        border: `1.5px solid ${C.border}`,
-                        background: "#fff",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: C.mid,
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      ✏️ Edit
-                    </button>{" "}
-                    <button
-                      onClick={() => removeMed(m.id)}
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: 7,
-                        border: "1.5px solid #fcc",
-                        background: "#fff5f5",
-                        cursor: "pointer",
-                        fontSize: 12,
-                        fontWeight: 700,
-                        color: C.red,
-                        fontFamily: "inherit",
-                      }}
-                    >
-                      ✕ Remove
-                    </button>{" "}
-                  </div>{" "}
+                    })}
+                  </div>
                 </div>
               )}{" "}
             </div>
