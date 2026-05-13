@@ -703,7 +703,7 @@ export default function App() {
           height: "100vh",
           zIndex: 100,
           boxShadow: "-4px 0 20px rgba(0,0,0,0.3)",
-          transform: isMobile ? (sidebarOpen ? "translateX(0)" : "translateX(218px)") : "translateX(0)",
+          transform: sidebarOpen ? "translateX(0)" : "translateX(218px)",
           transition: "transform 0.25s ease",
         }}
       >
@@ -829,24 +829,22 @@ export default function App() {
               </div>
             )}{" "}
           </div>{" "}
-          {isMobile && (
-            <button
-              onClick={() => setSidebarOpen(false)}
-              style={{
-                background: "rgba(255,255,255,0.08)",
-                border: "none",
-                color: "rgba(255,255,255,0.5)",
-                cursor: "pointer",
-                borderRadius: 7,
-                padding: "5px 8px",
-                fontSize: 16,
-                lineHeight: 1,
-                marginTop: 2,
-              }}
-            >
-              ✕
-            </button>
-          )}{" "}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            style={{
+              background: "rgba(255,255,255,0.08)",
+              border: "none",
+              color: "rgba(255,255,255,0.5)",
+              cursor: "pointer",
+              borderRadius: 7,
+              padding: "5px 8px",
+              fontSize: 16,
+              lineHeight: 1,
+              marginTop: 2,
+            }}
+          >
+            ✕
+          </button>{" "}
         </div>{" "}
         <nav style={{ flex: 1, padding: "7px 0", overflowY: "auto" }}>
           {" "}
@@ -985,7 +983,7 @@ export default function App() {
         </div>{" "}
       </aside>{" "}
       {/* BACKDROP when open on mobile */}{" "}
-      {isMobile && sidebarOpen && (
+      {sidebarOpen && (
         <div
           onClick={() => setSidebarOpen(false)}
           style={{
@@ -1003,7 +1001,6 @@ export default function App() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
-          marginRight: isMobile ? 0 : 218,
         }}
       >
         {" "}
@@ -1031,7 +1028,7 @@ export default function App() {
               cursor: "pointer",
               padding: "4px 6px",
               borderRadius: 8,
-              display: isMobile ? "flex" : "none",
+              display: "flex",
               flexDirection: "column",
               gap: 4,
               flexShrink: 0,
