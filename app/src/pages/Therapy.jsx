@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C, pName, BADGE_STYLES } from "../data/constants";
 import { Badge, Card, Alrt, Btn, Modal, FL, FI, FS, FTA, VoiceBtn } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Therapy({
   patients,
@@ -9,6 +10,7 @@ export default function Therapy({
   toast,
   onAddSession,
 }) {
+  const { isMobile } = useBreakpoint();
   const [showNew, setShowNew] = useState(false);
   const [selected, setSelected] = useState(null);
   const [newT, setNewT] = useState({
@@ -148,7 +150,7 @@ export default function Therapy({
           + New Record
         </Btn>{" "}
       </div>{" "}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
         {" "}
         {therapy.map((t) => (
           <Card

@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Medications({ patients, meds, dist, user, toast, onSetStatus }) {
   const today = new Date().toLocaleDateString("en-GB");
+  const { isMobile } = useBreakpoint();
   const [shift, setShift] = useState("morning");
   const [showSOS, setShowSOS] = useState(false);
   const [sosData, setSosData] = useState({
@@ -289,7 +291,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
           gap: 14,
           marginBottom: 20,
         }}

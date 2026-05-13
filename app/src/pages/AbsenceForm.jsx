@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { Btn, FL, FI, FS } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function AbsenceForm({ patients, onMarkAway, toast }) {
+  const { isMobile } = useBreakpoint();
   const [selPat, setSelPat] = useState("");
   const [type, setType] = useState("Home Visit");
   const [returnDate, setReturnDate] = useState("");
@@ -25,7 +27,7 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "2fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr",
           gap: 12,
           marginBottom: 12,
         }}

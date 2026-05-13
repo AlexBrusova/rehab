@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 import ScheduleTab from "./ScheduleTab";
 import TherapistTab from "./TherapistTab";
 import AbsenceForm from "./AbsenceForm";
@@ -23,6 +24,7 @@ export default function Manage({
   onAddUser,
   onUpdateUser,
 }) {
+  const { isMobile } = useBreakpoint();
   const [tab, setTab] = useState("staff");
   const [showAdd, setShowAdd] = useState(false);
   const [editPerms, setEditPerms] = useState(null); /* user id being edited */
@@ -489,7 +491,7 @@ export default function Manage({
             </Btn>
           </div>{" "}
           <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}
+            style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 14 }}
           >
             {" "}
             {users.map((u) => {

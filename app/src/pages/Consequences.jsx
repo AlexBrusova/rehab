@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C, pName, uName } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS, FTA } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Consequences({
   consequences,
@@ -12,6 +13,7 @@ export default function Consequences({
   onAdd,
   onUpdate,
 }) {
+  const { isMobile } = useBreakpoint();
   const [showNew, setShowNew] = useState(false);
   const [newC, setNewC] = useState({
     patientId: "",
@@ -113,7 +115,7 @@ export default function Consequences({
       <Alrt type="red" icon="🔐">
         Consequence only valid after manager approval. {pending.length} pending.
       </Alrt>{" "}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}>
         {" "}
         <Card>
           {" "}

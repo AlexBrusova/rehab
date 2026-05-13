@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C, pName } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Finance({
   patients,
@@ -14,6 +15,7 @@ export default function Finance({
   onAddCashTx,
   onAddCashboxCount,
 }) {
+  const { isMobile } = useBreakpoint();
   const [tab, setTab] = useState("patients");
   const isManager = user.role === "manager"; /* ── PATIENTS TAB ── */
   const [selPat, setSelPat] = useState("");
@@ -399,7 +401,7 @@ export default function Finance({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr 1fr",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr",
                 gap: 12,
                 marginBottom: 20,
               }}
@@ -592,7 +594,7 @@ export default function Finance({
             </div>{" "}
           </div>{" "}
           <div
-            style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: 16 }}
+            style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "3fr 2fr", gap: 16 }}
           >
             {" "}
             {/* Transactions */}{" "}
@@ -715,7 +717,7 @@ export default function Finance({
                     <div
                       style={{
                         display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
+                        gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
                         gap: 8,
                         fontSize: 12,
                       }}

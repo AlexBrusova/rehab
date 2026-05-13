@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Rooms({
   rooms,
@@ -13,6 +14,7 @@ export default function Rooms({
   onDeleteRoom,
   onUpdatePatient,
 }) {
+  const { isMobile } = useBreakpoint();
   const [showAdd, setShowAdd] = useState(false);
   const [openRoom, setOpenRoom] = useState(null); /* room id currently "open" */
   const [newR, setNewR] = useState({
@@ -191,7 +193,7 @@ export default function Rooms({
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "1fr 1fr 80px",
+                gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 80px",
                 gap: 10,
                 marginBottom: 12,
               }}
@@ -265,7 +267,7 @@ export default function Rooms({
           </Card>
         )}{" "}
         <div
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}
+          style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 16 }}
         >
           {" "}
           {/* Current occupants */}{" "}

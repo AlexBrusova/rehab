@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
+import useBreakpoint from "./hooks/useBreakpoint";
 
 const toFrontendMed = (m) => ({
   ...m,
@@ -449,6 +450,7 @@ export default function App() {
   if (!user)
     return <Login onLogin={handleLogin} />;
 
+  const { isMobile } = useBreakpoint();
   const allowedHouseIds = (user.allowedHouses || []).map((a) => a.houseId || a);
   const allowedHouses = houses.filter(
     (h) => user.allHousesAccess || allowedHouseIds.includes(h.id),
@@ -1094,7 +1096,7 @@ export default function App() {
               {activeHouse?.name}
             </div>
           )}{" "}
-          <Badge
+          {!isMobile && <Badge
             type={
               {
                 org_manager: "purple",
@@ -1106,8 +1108,8 @@ export default function App() {
             }
           >
             {user.roleLabel}
-          </Badge>{" "}
-          <div
+          </Badge>}{" "}
+          {!isMobile && <div
             style={{
               background: `linear-gradient(135deg,${C.teal},${C.tealLt})`,
               color: "#fff",
@@ -1121,17 +1123,9 @@ export default function App() {
               whiteSpace: "nowrap",
             }}
           >
-            {" "}
-            <div
-              style={{
-                width: 5,
-                height: 5,
-                background: "#fff",
-                borderRadius: "50%",
-              }}
-            />{" "}
-            Active shift{" "}
-          </div>{" "}
+            <div style={{ width: 5, height: 5, background: "#fff", borderRadius: "50%" }} />
+            Active shift
+          </div>}{" "}
         </div>{" "}
         <div style={{ padding: "16px", flex: 1, overflowY: "auto" }}>
           {" "}

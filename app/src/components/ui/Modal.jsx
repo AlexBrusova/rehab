@@ -1,6 +1,8 @@
 import { C } from "../../data/constants";
+import useBreakpoint from "../../hooks/useBreakpoint";
 
 export default function Modal({ onClose, title, children, width = 420 }) {
+  const { isMobile } = useBreakpoint();
   return (
     <div
       style={{
@@ -9,20 +11,20 @@ export default function Modal({ onClose, title, children, width = 420 }) {
         background: "rgba(0,0,0,0.5)",
         zIndex: 200,
         display: "flex",
-        alignItems: "center",
+        alignItems: isMobile ? "flex-end" : "center",
         justifyContent: "center",
-        padding: 16,
+        padding: isMobile ? 0 : 16,
       }}
     >
       <div
         style={{
           background: "#fff",
-          borderRadius: 16,
-          padding: 28,
-          width,
+          borderRadius: isMobile ? "16px 16px 0 0" : 16,
+          padding: isMobile ? "20px 16px" : 28,
+          width: isMobile ? "100%" : width,
           maxWidth: "100%",
           boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
-          maxHeight: "85vh",
+          maxHeight: isMobile ? "90vh" : "85vh",
           overflowY: "auto",
         }}
       >

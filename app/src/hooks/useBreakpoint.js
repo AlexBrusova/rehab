@@ -1,0 +1,11 @@
+import { useState, useEffect } from "react";
+
+export default function useBreakpoint() {
+  const [width, setWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    const handle = () => setWidth(window.innerWidth);
+    window.addEventListener("resize", handle);
+    return () => window.removeEventListener("resize", handle);
+  }, []);
+  return { isMobile: width < 640, isTablet: width < 1024, width };
+}

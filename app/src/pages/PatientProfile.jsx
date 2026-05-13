@@ -2,6 +2,7 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS } from "../components/ui";
 import EditMedRow from "./EditMedRow";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function PatientProfile({
   pid,
@@ -20,6 +21,7 @@ export default function PatientProfile({
   onSaveMed,
   onRemoveMed,
 }) {
+  const { isMobile } = useBreakpoint();
   const p = patients.find((pt) => pt.id === pid);
   const [tab, setTab] = useState("meds");
   const [editMed, setEditMed] = useState(null);
@@ -175,7 +177,7 @@ export default function PatientProfile({
           )}
           {showAddMed && (
             <div style={{ background: "#f0fafa", borderRadius: 10, border: `2px solid ${C.teal}`, padding: 14, marginBottom: 10 }}>
-              <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 80px", gap: 8, marginBottom: 8 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 80px", gap: 8, marginBottom: 8 }}>
                 <FI value={newMed.name} onChange={(v) => setNewMed((m) => ({ ...m, name: v }))} placeholder="Medication Name" />
                 <FI value={newMed.dose} onChange={(v) => setNewMed((m) => ({ ...m, dose: v }))} placeholder="Dose" />
                 <FS value={newMed.unit} onChange={(v) => setNewMed((m) => ({ ...m, unit: v }))} options={["mg", "mcg", "ml", "IU", "g"]} />

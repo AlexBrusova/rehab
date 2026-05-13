@@ -2,6 +2,7 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { Card, CT, Alrt, Btn, FI, FS } from "../components/ui";
 import EditMedRow from "./EditMedRow";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function MedManager({
   patients,
@@ -11,6 +12,7 @@ export default function MedManager({
   onSaveMed,
   onRemoveMed,
 }) {
+  const { isMobile } = useBreakpoint();
   const [selPat, setSelPat] = useState(patients[0]?.id || "");
   const [editMed, setEditMed] = useState(null);
   const [showAdd, setShowAdd] = useState(false);
@@ -146,7 +148,7 @@ export default function MedManager({
               <div
                 style={{
                   display: "grid",
-                  gridTemplateColumns: "2fr 1fr 80px",
+                  gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 80px",
                   gap: 8,
                   marginBottom: 10,
                 }}

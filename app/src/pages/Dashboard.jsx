@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Alrt, Stat, Th, Td } from "../components/ui";
+import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Dashboard({
   patients,
@@ -17,6 +18,7 @@ export default function Dashboard({
   rooms,
   user,
 }) {
+  const { isMobile } = useBreakpoint();
   const [profilePid, setProfilePid] = useState(null);
   const pending = consequences.filter((c) => c.status === "pending").length;
   const lowMood = patients.filter(
@@ -64,7 +66,7 @@ export default function Dashboard({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(3,1fr)",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)",
           gap: 14,
           marginBottom: 20,
         }}
@@ -95,7 +97,7 @@ export default function Dashboard({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "1fr 1fr",
+          gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
           gap: 16,
           marginBottom: 16,
         }}
