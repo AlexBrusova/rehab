@@ -83,6 +83,10 @@ export default function Login({ onLogin }) {
               value={un}
               onChange={(e) => setUn(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handle()}
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="username"
+              spellCheck="false"
               style={{
                 width: "100%",
                 padding: "10px 12px",
@@ -115,6 +119,9 @@ export default function Login({ onLogin }) {
               value={pw}
               onChange={(e) => setPw(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handle()}
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="current-password"
               style={{
                 width: "100%",
                 padding: "10px 12px",
