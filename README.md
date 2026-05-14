@@ -25,6 +25,10 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 
 **Railway:** set the service **Root Directory** to `backend` (not `server` — that folder was removed). Build is Dockerfile-based; details in [`backend/README.md`](backend/README.md#деплой-railway--heroku).
 
+**Если сборка падает** с `snapshot-target-unpack/server does not exist` или в логах видно **Railpack** вместо Dockerfile: в **Settings → Root Directory** у сервиса всё ещё указан старый путь **`server`** или **`/server`** (после merge PR с Node в `server/` на Kotlin в `backend/` его нужно сменить). Поставьте **`backend`**, в **Config as code** при необходимости укажите **`/backend/railway.json`**. После смены корня Railway соберёт образ из `backend/Dockerfile`.
+
+**Если API падает на старте из‑за БД:** переменная `DATABASE_URL` от Postgres часто без префикса `jdbc:` (`postgresql://…`). Либо задайте `jdbc:${{Postgres.DATABASE_URL}}` в Railway, либо оставьте как есть — бэкенд сам добавляет `jdbc:` при запуске (см. `backend/README.md`).
+
 ---
 
 ## Key Features
