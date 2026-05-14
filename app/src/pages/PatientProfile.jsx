@@ -1,5 +1,12 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  isValidDateDdMmYyyy,
+  sanitizeDateDdMm,
+  sanitizeMedDose,
+  sanitizeMedName,
+} from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS } from "../components/ui";
 import EditMedRow from "./EditMedRow";
 import useBreakpoint from "../hooks/useBreakpoint";
@@ -68,6 +75,10 @@ export default function PatientProfile({
 
   const openAbsence = async () => {
     if (!absData.returnDate) { toast("⚠️ Please enter expected return date"); return; }
+    if (!isValidDateDdMmYyyy(absData.returnDate)) {
+      toast("⚠️ Invalid return date (use DD/MM/YYYY)");
+      return;
+    }
     try {
       await onUpdatePatient(pid, { awayType: absData.type });
       setShowAbsence(false);
@@ -103,7 +114,15 @@ export default function PatientProfile({
             </div>
           </FL>
           <FL label="Date Return Expected">
-            <FI value={absData.returnDate} onChange={(v) => setAbsData((d) => ({ ...d, returnDate: v }))} placeholder="DD/MM/YYYY" />
+            <FI
+              value={absData.returnDate}
+              onChange={(v) => setAbsData((d) => ({ ...d, returnDate: v }))}
+              placeholder="DD/MM/YYYY"
+              sanitize={sanitizeDateDdMm}
+              maxLength={V.DATE_UI_MAX}
+              inputMode="numeric"
+              title="DD/MM/YYYY"
+            />
           </FL>
           <div style={{ background: "#fff8f0", border: "1px solid #f5c07a", borderRadius: 8, padding: "9px 12px", fontSize: 12, color: "#8b4800", marginBottom: 14 }}>
             ⚠️ During absence: Patient will NOT appear in Medication Distribution, Groups and Phones.
@@ -178,8 +197,20 @@ export default function PatientProfile({
           {showAddMed && (
             <div style={{ background: "#f0fafa", borderRadius: 10, border: `2px solid ${C.teal}`, padding: 14, marginBottom: 10 }}>
               <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "2fr 1fr 80px", gap: 8, marginBottom: 8 }}>
-                <FI value={newMed.name} onChange={(v) => setNewMed((m) => ({ ...m, name: v }))} placeholder="Medication Name" />
-                <FI value={newMed.dose} onChange={(v) => setNewMed((m) => ({ ...m, dose: v }))} placeholder="Dose" />
+                <FI
+                  value={newMed.name}
+                  onChange={(v) => setNewMed((m) => ({ ...m, name: v }))}
+                  placeholder="Medication Name"
+                  sanitize={sanitizeMedName}
+                  maxLength={V.MED_NAME_MAX}
+                />
+                <FI
+                  value={newMed.dose}
+                  onChange={(v) => setNewMed((m) => ({ ...m, dose: v }))}
+                  placeholder="Dose"
+                  sanitize={sanitizeMedDose}
+                  maxLength={V.MED_DOSE_MAX}
+                />
                 <FS value={newMed.unit} onChange={(v) => setNewMed((m) => ({ ...m, unit: v }))} options={["mg", "mcg", "ml", "IU", "g"]} />
               </div>
               <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>

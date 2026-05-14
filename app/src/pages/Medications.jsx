@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  sanitizeMedDose,
+  sanitizeMedName,
+  sanitizePersonName,
+} from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -152,6 +158,8 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
               value={sosData.medName}
               onChange={(v) => setSosData((s) => ({ ...s, medName: v }))}
               placeholder="e.g.: Diphenhydramine"
+              sanitize={sanitizeMedName}
+              maxLength={V.MED_NAME_MAX}
             />
           </FL>{" "}
           <FL label="Dose">
@@ -159,6 +167,8 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
               value={sosData.dose}
               onChange={(v) => setSosData((s) => ({ ...s, dose: v }))}
               placeholder="25mg"
+              sanitize={sanitizeMedDose}
+              maxLength={V.MED_DOSE_MAX}
             />
           </FL>{" "}
           <FL label="Reason">
@@ -173,6 +183,8 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
               value={sosData.approvedBy}
               onChange={(v) => setSosData((s) => ({ ...s, approvedBy: v }))}
               placeholder="Manager / Doctor name who approved"
+              sanitize={sanitizePersonName}
+              maxLength={V.MED_PRESCRIBED_BY_MAX}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -206,6 +218,8 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
               value={extraName}
               onChange={setExtraName}
               placeholder="e.g.: Diphenhydramine"
+              sanitize={sanitizeMedName}
+              maxLength={V.MED_NAME_MAX}
             />{" "}
           </FL>{" "}
           <div style={{ fontSize: 12, color: C.soft, marginBottom: 16 }}>

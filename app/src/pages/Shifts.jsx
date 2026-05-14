@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C, uName } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeFreeText } from "../lib/inputSanitize";
 import { Badge, Card, CT, Btn, Th, Td, Modal, FL, FS, FTA, VoiceBtn } from "../components/ui";
 
 export default function Shifts({
@@ -157,6 +159,8 @@ export default function Shifts({
               onChange={setNotes}
               placeholder="Notes for next Counselor..."
               rows={3}
+              sanitize={sanitizeFreeText}
+              maxLength={V.NOTE_MAX}
             />{" "}
           </FL>{" "}
           <FL label="Who are you handing the shift to? ⭐">

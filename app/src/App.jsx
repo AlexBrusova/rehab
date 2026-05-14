@@ -1110,7 +1110,7 @@ export default function App() {
               }}
             >
               {" "}
-              🏠 {activeHouse?.name.split("–")[0].trim()}{" "}
+              🏠 {(activeHouse?.name ?? "").split("–")[0]?.trim() || "—"}{" "}
               <span style={{ opacity: 0.6, fontSize: 10 }}>▾</span>{" "}
             </button>
           ) : (

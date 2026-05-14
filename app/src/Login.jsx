@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C } from "./data/constants";
+import { V } from "./data/validationLimits";
+import { sanitizeUsername, stripControlChars } from "./lib/inputSanitize";
 import { login } from "./lib/api";
 
 export default function Login({ onLogin }) {
@@ -9,7 +11,7 @@ export default function Login({ onLogin }) {
   const [loading, setLoading] = useState(false);
 
   const handle = async () => {
-    if (!un || !pw) return;
+    if (!un || !pw || loading) return;
     setLoading(true);
     setErr("");
     try {
@@ -82,8 +84,9 @@ export default function Login({ onLogin }) {
             <input
               data-testid="login-username"
               value={un}
-              onChange={(e) => setUn(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handle()}
+              onChange={(e) => setUn(sanitizeUsername(e.target.value))}
+              maxLength={V.USERNAME_MAX}
+              onKeyDown={(e) => e.key === "Enter" && !loading && handle()}
               autoCapitalize="none"
               autoCorrect="off"
               autoComplete="username"
@@ -119,8 +122,11 @@ export default function Login({ onLogin }) {
               data-testid="login-password"
               type="password"
               value={pw}
-              onChange={(e) => setPw(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handle()}
+              onChange={(e) =>
+                setPw(stripControlChars(e.target.value).slice(0, V.PASSWORD_MAX))
+              }
+              maxLength={V.PASSWORD_MAX}
+              onKeyDown={(e) => e.key === "Enter" && !loading && handle()}
               autoCapitalize="none"
               autoCorrect="off"
               autoComplete="current-password"

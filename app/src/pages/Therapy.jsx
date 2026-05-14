@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C, pName, BADGE_STYLES } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeFreeText, sanitizeTopic } from "../lib/inputSanitize";
 import { Badge, Card, Alrt, Btn, Modal, FL, FI, FS, FTA, VoiceBtn } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -60,6 +62,8 @@ export default function Therapy({
               value={newT.topic}
               onChange={(v) => setNewT((t) => ({ ...t, topic: v }))}
               placeholder="e.g.: Trauma processing"
+              sanitize={sanitizeTopic}
+              maxLength={V.TOPIC_MAX}
             />
           </FL>{" "}
           <FL label="Urgency">
@@ -109,6 +113,8 @@ export default function Therapy({
               onChange={(v) => setNewT((t) => ({ ...t, notes: v }))}
               placeholder="Session content, observations, recommendations..."
               rows={3}
+              sanitize={sanitizeFreeText}
+              maxLength={V.NOTE_MAX}
             />{" "}
           </FL>{" "}
           <FL label="Note for Counselors (visible to all staff)">
@@ -116,6 +122,8 @@ export default function Therapy({
               value={newT.counselorNote}
               onChange={(v) => setNewT((t) => ({ ...t, counselorNote: v }))}
               placeholder='e.g.: "Patient needs extra support"'
+              sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+              maxLength={V.SHORT_LABEL}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>

@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  sanitizePersonName,
+  sanitizePhoneInput,
+  sanitizeUsername,
+} from "../lib/inputSanitize";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 import ScheduleTab from "./ScheduleTab";
@@ -117,6 +123,8 @@ export default function Manage({
               value={newU.name}
               onChange={(v) => setNewU((u) => ({ ...u, name: v }))}
               placeholder="John Doe"
+              sanitize={sanitizePersonName}
+              maxLength={V.NAME_MAX}
             />
           </FL>{" "}
           <FL label="Username">
@@ -124,6 +132,10 @@ export default function Manage({
               value={newU.username}
               onChange={(v) => setNewU((u) => ({ ...u, username: v }))}
               placeholder="user123"
+              sanitize={sanitizeUsername}
+              maxLength={V.USERNAME_MAX}
+              autoCapitalize="none"
+              spellCheck={false}
             />
           </FL>{" "}
           <FL label="Phone">
@@ -131,6 +143,9 @@ export default function Manage({
               value={newU.phone}
               onChange={(v) => setNewU((u) => ({ ...u, phone: v }))}
               placeholder="050-0000000"
+              sanitize={sanitizePhoneInput}
+              maxLength={V.SHORT_LABEL}
+              inputMode="tel"
             />
           </FL>{" "}
           <FL label="Role">
@@ -380,6 +395,8 @@ export default function Manage({
             <FI
               value={editData.name || ""}
               onChange={(v) => setEditData((d) => ({ ...d, name: v }))}
+              sanitize={sanitizePersonName}
+              maxLength={V.NAME_MAX}
             />
           </FL>{" "}
           <FL label="Phone">
@@ -387,6 +404,9 @@ export default function Manage({
               value={editData.phone || ""}
               onChange={(v) => setEditData((d) => ({ ...d, phone: v }))}
               placeholder="050-0000000"
+              sanitize={sanitizePhoneInput}
+              maxLength={V.SHORT_LABEL}
+              inputMode="tel"
             />
           </FL>{" "}
           <FL label="Role">

@@ -1,5 +1,10 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  isValidDateDdMmYyyy,
+  sanitizeDateDdMm,
+} from "../lib/inputSanitize";
 import { Btn, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -11,6 +16,10 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
   const submit = async () => {
     if (!selPat || !returnDate) {
       toast("⚠️ Please select Patient and Return Date");
+      return;
+    }
+    if (!isValidDateDdMmYyyy(returnDate)) {
+      toast("⚠️ Invalid return date (use DD/MM/YYYY)");
       return;
     }
     try {
@@ -50,6 +59,10 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
             value={returnDate}
             onChange={setReturnDate}
             placeholder="DD/MM/YYYY"
+            sanitize={sanitizeDateDdMm}
+            maxLength={V.DATE_UI_MAX}
+            inputMode="numeric"
+            title="DD/MM/YYYY"
           />{" "}
         </FL>{" "}
       </div>{" "}

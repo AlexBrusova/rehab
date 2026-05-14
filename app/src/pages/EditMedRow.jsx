@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeMedDose, sanitizeMedName } from "../lib/inputSanitize";
 import { Btn, FI, FS } from "../components/ui";
 
 export default function EditMedRow({ med, onSave, onCancel }) {
@@ -36,8 +38,16 @@ export default function EditMedRow({ med, onSave, onCancel }) {
           value={name}
           onChange={setName}
           placeholder="Medication Name"
+          sanitize={sanitizeMedName}
+          maxLength={V.MED_NAME_MAX}
         />{" "}
-        <FI value={dose} onChange={setDose} placeholder="Dose" />{" "}
+        <FI
+          value={dose}
+          onChange={setDose}
+          placeholder="Dose"
+          sanitize={sanitizeMedDose}
+          maxLength={V.MED_DOSE_MAX}
+        />{" "}
         <FS
           value={unit}
           onChange={setUnit}

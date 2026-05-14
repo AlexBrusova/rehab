@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C, pName, uName } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeFreeText } from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS, FTA } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -92,6 +94,8 @@ export default function Consequences({
               value={newC.desc}
               onChange={(v) => setNewC((c) => ({ ...c, desc: v }))}
               placeholder="e.g.: Phone Restriction 3 days"
+              sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+              maxLength={V.SHORT_LABEL}
             />
           </FL>{" "}
           <FL label="Reason">
@@ -100,6 +104,8 @@ export default function Consequences({
               onChange={(v) => setNewC((c) => ({ ...c, reason: v }))}
               placeholder="Description of what happened..."
               rows={2}
+              sanitize={sanitizeFreeText}
+              maxLength={V.NOTE_MAX}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>

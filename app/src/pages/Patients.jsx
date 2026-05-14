@@ -1,5 +1,13 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  sanitizePersonName,
+  sanitizeNationalIdDigits,
+  sanitizeDateDdMm,
+  isValidDateDdMmYyyy,
+  sanitizeFreeText,
+} from "../lib/inputSanitize";
 import { Badge, Card, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../components/ui";
 import PatientProfile from "./PatientProfile";
 
@@ -45,8 +53,17 @@ export default function Patients({
       toast("⚠️ Please fill Date of Birth (required by server)");
       return;
     }
+    if (!isValidDateDdMmYyyy(newP.dob.trim())) {
+      toast("⚠️ Date of Birth must be a valid calendar date (DD/MM/YYYY)");
+      return;
+    }
+    const admitRaw = newP.admitDate?.trim();
     const admitDate =
-      newP.admitDate?.trim() || new Date().toLocaleDateString("en-GB");
+      admitRaw || new Date().toLocaleDateString("en-GB");
+    if (admitRaw && !isValidDateDdMmYyyy(admitRaw)) {
+      toast("⚠️ Admission date must be valid (DD/MM/YYYY) or leave empty for today");
+      return;
+    }
     try {
       await onAddPatient({ ...newP, admitDate });
       setNewP({
@@ -104,28 +121,43 @@ export default function Patients({
             <FI
               value={newP.name}
               onChange={(v) => setNewP((p) => ({ ...p, name: v }))}
+              sanitize={sanitizePersonName}
+              maxLength={V.NAME_MAX}
               placeholder="John Doe"
+              title="Letters and spaces; max 255 characters"
             />
           </FL>{" "}
           <FL label="ID number ⭐">
             <FI
               value={newP.idNum}
               onChange={(v) => setNewP((p) => ({ ...p, idNum: v }))}
+              sanitize={sanitizeNationalIdDigits}
+              maxLength={9}
+              inputMode="numeric"
               placeholder="000000000"
+              title="Digits only, up to 9"
             />
           </FL>{" "}
           <FL label="Date of Birth">
             <FI
               value={newP.dob}
               onChange={(v) => setNewP((p) => ({ ...p, dob: v }))}
+              sanitize={sanitizeDateDdMm}
+              maxLength={10}
+              inputMode="numeric"
               placeholder="DD/MM/YYYY"
+              title="Format DD/MM/YYYY"
             />
           </FL>{" "}
           <FL label="Date Login">
             <FI
               value={newP.admitDate}
               onChange={(v) => setNewP((p) => ({ ...p, admitDate: v }))}
+              sanitize={sanitizeDateDdMm}
+              maxLength={10}
+              inputMode="numeric"
               placeholder="DD/MM/YYYY (empty = today)"
+              title="Format DD/MM/YYYY or empty for today"
             />
           </FL>{" "}
           <FL label="Room">
@@ -142,6 +174,8 @@ export default function Patients({
             <FI
               value={newP.addiction}
               onChange={(v) => setNewP((p) => ({ ...p, addiction: v }))}
+              sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+              maxLength={V.SHORT_LABEL}
               placeholder="e.g.: alcohol and gambling"
             />
           </FL>{" "}
@@ -149,6 +183,8 @@ export default function Patients({
             <FTA
               value={newP.notes}
               onChange={(v) => setNewP((p) => ({ ...p, notes: v }))}
+              sanitize={(s) => sanitizeFreeText(s, V.NOTE_MAX)}
+              maxLength={V.NOTE_MAX}
               placeholder="Relevant info..."
               rows={2}
             />
