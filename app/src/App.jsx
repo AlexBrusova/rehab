@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
 import { C, NAV_CFG, TITLES } from "./data/constants";
 import useBreakpoint from "./hooks/useBreakpoint";
-
-const toFrontendMed = (m) => ({
-  ...m,
-  morning: (m.times || []).includes("morning"),
-  noon: (m.times || []).includes("noon"),
-  evening: (m.times || []).includes("evening"),
-  night: (m.times || []).includes("night"),
-});
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
@@ -27,6 +19,23 @@ import Finance from "./pages/Finance";
 import Absences from "./pages/Absences";
 import Manage from "./pages/Manage";
 import Therapy from "./pages/Therapy";
+
+const toFrontendMed = (m) => ({
+  ...m,
+  morning: (m.times || []).includes("morning"),
+  noon: (m.times || []).includes("noon"),
+  evening: (m.times || []).includes("evening"),
+  night: (m.times || []).includes("night"),
+});
+
+/** API expects `times: string[]`; forms use morning/noon/evening/night booleans. */
+const medFormToApiBody = (data) => {
+  const slots = ["morning", "noon", "evening", "night"];
+  const times = slots.filter((s) => data[s]);
+  const rest = { ...data };
+  for (const s of slots) delete rest[s];
+  return { ...rest, times };
+};
 
 export default function App() {
   const [houses, setHouses] = useState([]);
@@ -242,7 +251,7 @@ export default function App() {
   const createMed = async (patientId, medData) => {
     const created = await authFetch("/api/meds", {
       method: "POST",
-      body: JSON.stringify({ patientId, ...medData }),
+      body: JSON.stringify({ patientId, ...medFormToApiBody(medData) }),
     });
     setMeds((prev) => [...prev, toFrontendMed(created)]);
     return created;
@@ -251,7 +260,7 @@ export default function App() {
   const updateMed = async (id, medData) => {
     const updated = await authFetch(`/api/meds/${id}`, {
       method: "PATCH",
-      body: JSON.stringify(medData),
+      body: JSON.stringify(medFormToApiBody(medData)),
     });
     setMeds((prev) => prev.map((m) => (m.id === id ? toFrontendMed(updated) : m)));
     return updated;
