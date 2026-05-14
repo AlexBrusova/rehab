@@ -34,16 +34,30 @@ export default function Patients({
     admitDate: "",
     addiction: "",
     notes: "",
-    roomId: "r4",
+    roomId: "",
   });
   const addPatient = async () => {
-    if (!newP.name) {
+    if (!newP.name?.trim()) {
       toast("⚠️ Please fill Name");
       return;
     }
+    if (!newP.dob?.trim()) {
+      toast("⚠️ Please fill Date of Birth (required by server)");
+      return;
+    }
+    const admitDate =
+      newP.admitDate?.trim() || new Date().toLocaleDateString("en-GB");
     try {
-      await onAddPatient(newP);
-      setNewP({ name: "", dob: "", idNum: "", admitDate: "", addiction: "", notes: "", roomId: "" });
+      await onAddPatient({ ...newP, admitDate });
+      setNewP({
+        name: "",
+        dob: "",
+        idNum: "",
+        admitDate: "",
+        addiction: "",
+        notes: "",
+        roomId: rooms[0]?.id || "",
+      });
       setShowAdd(false);
       toast("✅ Patient added successfully");
     } catch {
@@ -292,7 +306,18 @@ export default function Patients({
             color="teal"
             size="sm"
             style={{ marginRight: "auto" }}
-            onClick={() => setShowAdd(true)}
+            onClick={() => {
+              setNewP({
+                name: "",
+                dob: "",
+                idNum: "",
+                admitDate: "",
+                addiction: "",
+                notes: "",
+                roomId: rooms[0]?.id || "",
+              });
+              setShowAdd(true);
+            }}
           >
             + Add Patient
           </Btn>

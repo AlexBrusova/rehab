@@ -15,11 +15,13 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 | Layer | Technology |
 |-------|-----------|
 | Frontend | React + Vite (PWA) |
-| Backend | Node.js + Express + TypeScript |
-| Database | PostgreSQL (via Prisma ORM) |
+| Backend API | Kotlin + Spring Boot 3 |
+| Database | PostgreSQL |
+| Schema / migrations | Prisma (`db/` package) |
+| Cache (houses list) | Caffeine (local) / Redis TTL 1d (Docker profile `docker`) |
 | Auth | JWT (12-hour tokens) |
 | Frontend hosting | Vercel |
-| Backend hosting | Railway |
+| Backend hosting | Railway (or any JVM host) |
 
 ---
 
@@ -55,24 +57,27 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 
 ## Project Structure
 
+Full navigation map (packages, tests, monitoring): **[`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md)**.
+
 ```
 rehab/
-├── app/          # React frontend (Vite PWA)
-│   └── src/
-│       ├── pages/        # Screen components
-│       ├── components/   # Shared UI components
-│       └── data/         # Constants, colors
-├── server/       # Express backend (TypeScript)
-│   └── src/
-│       ├── routes/       # API route handlers
-│       ├── middleware/   # Auth middleware
-│       └── lib/          # Prisma client
-├── docs/
-│   ├── api.md            # Full API documentation
-│   ├── business-en.md   # Business documentation (English)
-│   └── business-ru.md   # Business documentation (Russian)
+├── app/                 # React + Vite (PWA) — see docs/PROJECT_STRUCTURE.md
+├── backend/             # Kotlin + Spring Boot REST API
+├── db/                  # Prisma schema & migrations (PostgreSQL)
+│   └── prisma/
+│       └── schema.prisma
+├── docs/                # api.md, business-*.md, PROJECT_STRUCTURE.md
+├── docker-compose.yml   # Postgres, Redis, API, frontend, Prometheus, Grafana, Loki, Promtail
+├── Makefile             # make / make up / make down / make e2e / …
+├── monitoring/          # Prometheus, Loki, Grafana provisioning, Promtail
+│   ├── prometheus/
+│   ├── loki/
+│   ├── promtail/
+│   └── grafana/
 └── README.md
 ```
+
+`app/src/`: `pages/` (screens), `components/ui/`, `lib/api.js`, `data/`, `hooks/`; `app/e2e/` — Playwright tests.
 
 ---
 
@@ -88,13 +93,57 @@ Full API reference: [`docs/api.md`](docs/api.md)
 
 ## Running Locally
 
-### Backend
+### Database schema (Prisma)
 ```bash
-cd server
+cd db
 npm install
+cp .env.example .env   # set DATABASE_URL
 npx prisma generate
-npm run dev
+npx prisma migrate dev   # or: npx prisma db push
 ```
+
+### Backend API (Kotlin)
+```bash
+cd backend
+./gradlew bootRun
+```
+Uses port **4000** by default (`PORT` / `application.yml`). JDBC URL: `jdbc:postgresql://...` (see `backend/.env.example`).
+
+### Docker (full stack: Postgres, Redis, API, UI, metrics & logs)
+
+Requires [Docker Desktop](https://www.docker.com/products/docker-desktop/) (or Docker Engine + Compose v2) running.
+
+```bash
+# from repo root — build images (first time or after dependency changes)
+docker compose build --no-cache
+docker compose up -d
+```
+
+| Service | URL / port | Notes |
+|--------|------------|--------|
+| Web UI | **http://localhost:8080** | nginx + PWA; proxies `/api`, `/health`, `/actuator` to the API |
+| API | **http://localhost:4000** | Kotlin Spring Boot |
+| Redis | `redis:6379` (internal) | Spring cache, **TTL 1 day** for cache `houses` |
+| Prometheus | **http://localhost:9090** | Scrapes `GET /actuator/prometheus` on the API |
+| Grafana | **http://localhost:3000** | Login `admin` / `admin` — datasources: Prometheus + Loki; dashboard *Rehab API overview* |
+| Loki | **http://localhost:3100** | Log store (Promtail pushes Docker container logs for this Compose project) |
+
+```bash
+curl -s http://localhost:4000/health
+curl -s -X POST http://localhost:4000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"org_manager1","password":"1234"}'
+```
+
+**Logs:** Promtail reads stdout/stderr of Compose services (filter: `com.docker.compose.project` = project name, usually the directory name, e.g. `rehab`). Explore logs in Grafana → Explore → Loki.
+
+Stop and remove volumes (DB + Prometheus + Grafana + Loki):
+
+```bash
+docker compose down -v
+```
+
+Profile **`docker`**: Hibernate `ddl-auto: update`, demo seed when the user table is empty (same demo passwords as in tests). **Caching:** Redis with **1 day** TTL for `GET /api/houses` (cache name `houses`). Local `./gradlew bootRun` uses **Caffeine** with the same TTL (no Redis required).
 
 ### Frontend
 ```bash
@@ -103,7 +152,20 @@ npm install
 npm run dev
 ```
 
-Set `VITE_API_URL` in `app/.env` to point to your backend.
+Set `VITE_API_URL` in `app/.env` to your API (e.g. `http://localhost:4000`), or leave empty and use the Vite dev proxy to the same port.
+
+### E2E tests (Playwright)
+
+From `app/` with the API running on port **4000** (e.g. `./gradlew bootRun` in `backend/`, or Docker UI on **8080** with `PLAYWRIGHT_BASE_URL=http://127.0.0.1:8080` and `PLAYWRIGHT_SKIP_WEBSERVER=1`):
+
+```bash
+cd app
+npm install
+npx playwright install chromium   # once per machine
+npm run test:e2e
+```
+
+`playwright.config.ts` starts Vite on **5173** unless `PLAYWRIGHT_SKIP_WEBSERVER` is set. Service workers are blocked in tests so the PWA cache does not mask API data.
 
 ---
 
@@ -126,11 +188,13 @@ Set `VITE_API_URL` in `app/.env` to point to your backend.
 | שכבה | טכנולוגיה |
 |------|-----------|
 | צד לקוח | React + Vite (PWA) |
-| צד שרת | Node.js + Express + TypeScript |
-| מסד נתונים | PostgreSQL (דרך Prisma ORM) |
+| צד שרת API | Kotlin + Spring Boot 3 |
+| מסד נתונים | PostgreSQL |
+| סכמה / מיגרציות | Prisma (חבילת `db/`) |
+| מטמון (רשימת בתים) | Caffeine מקומית / Redis TTL יום (פרופיל `docker`) |
 | אימות | JWT (תוקף 12 שעות) |
 | אחסון צד לקוח | Vercel |
-| אחסון צד שרת | Railway |
+| אחסון צד שרת | Railway (או כל סביבת JVM) |
 
 ---
 
@@ -166,22 +230,19 @@ Set `VITE_API_URL` in `app/.env` to point to your backend.
 
 ## מבנה הפרויקט
 
+מפת ניווט מלאה: **[`docs/PROJECT_STRUCTURE.md`](docs/PROJECT_STRUCTURE.md)** (כולל חבילות backend, בדיקות, ניטור).
+
 ```
 rehab/
-├── app/          # צד לקוח React (Vite PWA)
-│   └── src/
-│       ├── pages/        # רכיבי מסכים
-│       ├── components/   # רכיבי UI משותפים
-│       └── data/         # קבועים, צבעים
-├── server/       # צד שרת Express (TypeScript)
-│   └── src/
-│       ├── routes/       # מטפלי נתיבי API
-│       ├── middleware/   # Middleware אימות
-│       └── lib/          # Prisma client
-├── docs/
-│   ├── api.md            # תיעוד API מלא
-│   ├── business-en.md   # תיעוד עסקי (אנגלית)
-│   └── business-ru.md   # תיעוד עסקי (רוסית)
+├── app/                 # React + Vite (PWA)
+├── backend/             # Kotlin + Spring Boot API
+├── db/
+│   └── prisma/
+│       └── schema.prisma
+├── docs/                # api.md, business-*.md, PROJECT_STRUCTURE.md
+├── docker-compose.yml
+├── Makefile
+├── monitoring/
 └── README.md
 ```
 
@@ -199,12 +260,39 @@ rehab/
 
 ## הרצה מקומית
 
-### צד שרת
+### סכמת מסד (Prisma)
 ```bash
-cd server
+cd db
 npm install
+cp .env.example .env   # הגדר DATABASE_URL
 npx prisma generate
-npm run dev
+npx prisma migrate dev   # או: npx prisma db push
+```
+
+### צד שרת API (Kotlin)
+```bash
+cd backend
+./gradlew bootRun
+```
+
+### Docker (PostgreSQL, Redis, API, UI, ניטור ולוגים)
+
+נדרש Docker Desktop (או Engine + Compose v2) פעיל. מהשורש של ה-repo:
+
+```bash
+docker compose build --no-cache
+docker compose up -d
+```
+
+- **http://localhost:8080** — ממשק (nginx)  
+- **http://localhost:4000** — API  
+- **http://localhost:9090** — Prometheus  
+- **http://localhost:3000** — Grafana (`admin` / `admin`)  
+- **http://localhost:3100** — Loki  
+לוגים של קונטיינרים נאספים ל-Loki (Promtail). מטמון Redis לרשימת בתים: **TTL יום אחד**.
+
+```bash
+docker compose down -v
 ```
 
 ### צד לקוח
@@ -214,4 +302,4 @@ npm install
 npm run dev
 ```
 
-הגדר `VITE_API_URL` ב-`app/.env` כך שיצביע לצד השרת שלך.
+הגדר `VITE_API_URL` ב-`app/.env` כך שיצביע ל-API, או השאר ריק והשתמש ב-proxy של Vite.

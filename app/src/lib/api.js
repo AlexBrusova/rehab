@@ -1,4 +1,11 @@
-const BASE = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { V } from "../data/validationLimits";
+
+/** Пустая строка (Docker + nginx) → запросы на тот же origin, `/api` проксируется. */
+const envBase = import.meta.env.VITE_API_URL;
+const BASE =
+  envBase === undefined || envBase === null || String(envBase).trim() === ""
+    ? ""
+    : String(envBase).replace(/\/$/, "");
 
 export const getToken = () => localStorage.getItem("token");
 export const setToken = (t) => localStorage.setItem("token", t);
@@ -14,10 +21,16 @@ export const removeStoredUser = () => {
 };
 
 export async function login(username, password) {
+  const u = String(username ?? "").trim();
+  const p = String(password ?? "");
+  if (!u || !p) throw new Error("Invalid username or password");
+  if (u.length > V.USERNAME_MAX || p.length > V.PASSWORD_MAX) {
+    throw new Error("Invalid username or password");
+  }
   const res = await fetch(`${BASE}/api/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username: u, password: p }),
   });
   if (!res.ok) throw new Error("Invalid username or password");
   return res.json();
@@ -35,7 +48,7 @@ export async function authFetch(path, options = {}) {
   if (res.status === 401) {
     removeStoredUser();
     window.location.reload();
-    return;
+    throw new Error("Unauthorized");
   }
   if (!res.ok) throw new Error(await res.text());
   return res.json();

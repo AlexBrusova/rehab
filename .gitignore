@@ -1,16 +1,20 @@
 # Dependencies
 node_modules/
 app/node_modules/
-server/node_modules/
+db/node_modules/
 
 # Build
 app/dist/
-server/dist/
+
+# Playwright
+app/playwright-report/
+app/test-results/
+app/blob-report/
 
 # Env
 .env
 app/.env
-server/.env
+db/.env
 
 # OS
 .DS_Store

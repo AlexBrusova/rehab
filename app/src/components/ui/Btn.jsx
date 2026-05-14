@@ -1,6 +1,6 @@
 import { C } from "../../data/constants";
 
-export default function Btn({ onClick, color = "blue", size = "md", children, style, disabled }) {
+export default function Btn({ onClick, color = "blue", size = "md", children, style, disabled, ...rest }) {
   const bg = {
     blue: C.blue,
     teal: C.teal,
@@ -13,6 +13,7 @@ export default function Btn({ onClick, color = "blue", size = "md", children, st
   const col = { outline: C.mid }[color] || "#fff";
   return (
     <button
+      {...rest}
       onClick={onClick}
       disabled={disabled}
       style={{

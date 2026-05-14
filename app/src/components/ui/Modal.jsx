@@ -17,6 +17,9 @@ export default function Modal({ onClose, title, children, width = 420 }) {
       }}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
         style={{
           background: "#fff",
           borderRadius: isMobile ? "16px 16px 0 0" : 16,

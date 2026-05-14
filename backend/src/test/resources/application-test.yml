@@ -1,0 +1,29 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  flyway:
+    enabled: false
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
+
+resilience4j:
+  retry:
+    instances:
+      db-read:
+        max-attempts: 1
+        wait-duration: 1ms
+
+jwt:
+  secret: test-jwt-secret-min-32-chars-long-for-ci!!
+
+logging:
+  level:
+    root: WARN
+    com.rehabcenter: INFO
+    org.springframework.web: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.testcontainers: INFO
