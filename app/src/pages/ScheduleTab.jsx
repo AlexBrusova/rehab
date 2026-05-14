@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeFreeText } from "../lib/inputSanitize";
 import { Card, CT, Btn, Modal, FL, FI } from "../components/ui";
 
 const COUNSELOR_COLORS = ["#0d7377","#1e5fa8","#5c2d91","#c55a11","#375623","#c00000","#7b3f00","#006d6d"];
@@ -240,6 +242,8 @@ export default function ScheduleTab({
               value={slotData.note}
               onChange={(v) => setSlotData((d) => ({ ...d, note: v }))}
               placeholder="e.g.: until 15:00 only"
+              sanitize={(s) => sanitizeFreeText(s, V.SHIFT_LABEL_MAX)}
+              maxLength={V.SHIFT_LABEL_MAX}
             />{" "}
           </FL>{" "}
         </Modal>

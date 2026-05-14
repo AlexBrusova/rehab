@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -74,6 +75,7 @@ class UserController(
     @GetMapping
     fun list() = users.findAllByOrderByNameAsc()
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateUserRequest): ResponseEntity<Any> {
         val now = Instant.now()
@@ -107,6 +109,7 @@ class UserController(
         return ResponseEntity.status(201).body(users.save(u))
     }
 
+    @Transactional
     @PatchMapping("/{id}")
     fun patch(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

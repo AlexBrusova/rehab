@@ -2,6 +2,9 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { Badge, Card, CT, Alrt, Stat, Th, Td } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
+import PatientProfile from "./PatientProfile";
+
+const patientDays = (p) => p.daysInRehab ?? p.days ?? 0;
 
 export default function Dashboard({
   patients,
@@ -57,6 +60,8 @@ export default function Dashboard({
           canEditMeds={false}
           onClose={() => setProfilePid(null)}
           toast={() => {}}
+          consequences={consequences}
+          finance={[]}
           onUpdatePatient={() => {}}
           onAddMed={() => {}}
           onSaveMed={() => {}}
@@ -325,12 +330,13 @@ export default function Dashboard({
           <tbody>
             {" "}
             {[...patients]
-              .sort((a, b) => b.days - a.days)
+              .sort((a, b) => patientDays(b) - patientDays(a))
               .map((p) => {
                 const cons = activeConsByPat(p.id);
                 return (
                   <tr
                     key={p.id}
+                    data-testid="dashboard-status-patient-row"
                     onClick={() => setProfilePid(p.id)}
                     style={{
                       background: p.alert ? "#fff8f2" : "transparent",
@@ -373,7 +379,7 @@ export default function Dashboard({
                             padding: "2px 5px",
                             borderRadius: 6,
                           }}
-                          title={cons.map((c) => c.desc).join(", ")}
+                          title={cons.map((c) => c.description || c.desc).join(", ")}
                         >
                           ⛔ Consequence
                         </span>
@@ -382,7 +388,7 @@ export default function Dashboard({
                     <Td
                       style={{ fontWeight: 900, color: C.teal, fontSize: 15 }}
                     >
-                      {p.days}
+                      {patientDays(p)}
                     </Td>{" "}
                     <Td>
                       <Badge

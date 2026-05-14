@@ -1,8 +1,8 @@
 package com.rehabcenter.config
 
-import java.util.concurrent.Callable
 import org.slf4j.LoggerFactory
 import org.springframework.cache.Cache
+import java.util.concurrent.Callable
 
 /**
  * Двухуровневый кеш: основной (Redis) и локальный fallback (Caffeine).

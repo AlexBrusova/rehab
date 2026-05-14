@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeFreeText } from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, FTA, VoiceBtn } from "../components/ui";
 
 export default function Summary({
@@ -94,6 +96,8 @@ export default function Summary({
                   onChange={(v) => setT(g.id, v)}
                   placeholder="Add Note about the group..."
                   rows={2}
+                  sanitize={sanitizeFreeText}
+                  maxLength={V.NOTE_MAX}
                 />{" "}
               </div>{" "}
             </div>
@@ -112,6 +116,8 @@ export default function Summary({
             onChange={(v) => setT("general", v)}
             placeholder="Summarize today: Events unusual, general atmosphere..."
             rows={6}
+            sanitize={sanitizeFreeText}
+            maxLength={V.NOTE_MAX}
           />{" "}
         </Card>{" "}
       </div>{" "}
@@ -198,6 +204,8 @@ export default function Summary({
                 onChange={(v) => setT(p.id, v)}
                 placeholder={`Daily Summary – ${p.name}...`}
                 rows={2}
+                sanitize={sanitizeFreeText}
+                maxLength={V.NOTE_MAX}
               />{" "}
             </div>{" "}
           </div>

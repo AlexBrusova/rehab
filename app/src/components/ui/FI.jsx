@@ -1,12 +1,33 @@
 import { C } from "../../data/constants";
 
-export default function FI({ value, onChange, placeholder, type = "text" }) {
+/**
+ * Поле ввода: опционально `sanitize(value)` при изменении и `maxLength`.
+ * Пробрасывает остальные атрибуты на `<input>` (pattern, inputMode, autoComplete, …).
+ */
+export default function FI({
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  maxLength,
+  sanitize,
+  title,
+  ...rest
+}) {
+  const handle = (e) => {
+    let v = e.target.value;
+    if (sanitize) v = sanitize(v);
+    if (maxLength != null) v = String(v).slice(0, maxLength);
+    onChange(v);
+  };
   return (
     <input
       type={type}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      maxLength={maxLength ?? undefined}
+      onChange={handle}
       placeholder={placeholder || ""}
+      title={title}
       style={{
         width: "100%",
         padding: "8px 12px",
@@ -17,6 +38,7 @@ export default function FI({ value, onChange, placeholder, type = "text" }) {
         direction: "ltr",
         boxSizing: "border-box",
       }}
+      {...rest}
     />
   );
 }

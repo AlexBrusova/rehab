@@ -23,6 +23,8 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 | Frontend hosting | Vercel |
 | Backend hosting | Railway (or any JVM host) |
 
+**Railway:** set the service **Root Directory** to `backend` (not `server` — that folder was removed). Build is Dockerfile-based; details in [`backend/README.md`](backend/README.md#деплой-railway--heroku).
+
 ---
 
 ## Key Features
@@ -195,6 +197,8 @@ npm run test:e2e
 | אימות | JWT (תוקף 12 שעות) |
 | אחסון צד לקוח | Vercel |
 | אחסון צד שרת | Railway (או כל סביבת JVM) |
+
+**Railway:** ב־Root Directory של השירות יש לבחור **`backend`** (לא `server` — התיקייה הוסרה). פירוט ב־[`backend/README.md`](backend/README.md).
 
 ---
 

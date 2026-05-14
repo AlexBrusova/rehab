@@ -75,6 +75,7 @@ class GroupController(
         val attendance: List<AttendanceRow>? = null,
     )
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateGroupBody): ResponseEntity<Any> {
         val now = Instant.now()
@@ -119,6 +120,7 @@ class GroupController(
         val attendance: List<PatchAttendanceRow>? = null,
     )
 
+    @Transactional
     @PatchMapping("/{id}")
     fun patch(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

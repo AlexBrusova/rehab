@@ -38,6 +38,7 @@ import com.rehabcenter.repo.TherapySessionRepository
 import com.rehabcenter.repo.UserRepository
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
+import org.springframework.cache.CacheManager
 import org.springframework.context.annotation.Profile
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
@@ -69,6 +70,7 @@ class RehabDemoSeeder(
     private val therapySessions: TherapySessionRepository,
     private val residentGroups: ResidentGroupRepository,
     private val passwordEncoder: PasswordEncoder,
+    private val cacheManager: CacheManager,
 ) : ApplicationRunner {
 
     @Transactional
@@ -93,6 +95,7 @@ class RehabDemoSeeder(
             therapySessions = therapySessions,
             residentGroups = residentGroups,
         )
+        cacheManager.getCache("houses")?.clear()
     }
 }
 
@@ -644,11 +647,11 @@ object RehabSeedContent {
                     date = yesterdayShort,
                     generalText = "Quiet day overall; one resident needed extra check-in after lunch.",
                     patientSummaries =
-                        linkedMapOf(
-                            "p1" to "Participated well in morning group.",
-                            "p2" to "Slightly anxious — follow up tomorrow.",
-                            "p3" to "Good engagement in house chores.",
-                        ),
+                    linkedMapOf(
+                        "p1" to "Participated well in morning group.",
+                        "p2" to "Slightly anxious — follow up tomorrow.",
+                        "p3" to "Good engagement in house chores.",
+                    ),
                     notifiedAt = "20:15",
                     createdAt = now,
                 ),
@@ -659,10 +662,10 @@ object RehabSeedContent {
                     date = d2Short,
                     generalText = "Weekly goals review completed.",
                     patientSummaries =
-                        linkedMapOf(
-                            "p1" to "On track with therapy homework.",
-                            "p2" to "Reported better sleep.",
-                        ),
+                    linkedMapOf(
+                        "p1" to "On track with therapy homework.",
+                        "p2" to "Reported better sleep.",
+                    ),
                     notifiedAt = "19:45",
                     createdAt = now,
                 ),
@@ -770,11 +773,11 @@ object RehabSeedContent {
             leaderId = "u4",
             notes = "Demo group from seed",
             attendance =
-                listOf(
-                    "p1" to "present",
-                    "p2" to "absent",
-                    "p3" to "present",
-                ),
+            listOf(
+                "p1" to "present",
+                "p2" to "absent",
+                "p3" to "present",
+            ),
         )
         saveGroup(
             id = "g-demo-2",
@@ -784,11 +787,11 @@ object RehabSeedContent {
             leaderId = "u5",
             notes = "Afternoon session",
             attendance =
-                listOf(
-                    "p1" to "present",
-                    "p2" to "present",
-                    "p3" to "absent",
-                ),
+            listOf(
+                "p1" to "present",
+                "p2" to "present",
+                "p3" to "absent",
+            ),
         )
         saveGroup(
             id = "g-demo-3",

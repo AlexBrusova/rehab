@@ -33,3 +33,38 @@ export const MANAGER_NAV_IDS = [
   "manage",
   "therapy",
 ] as const;
+
+/** `NAV_CFG.org_manager` — no therapy tab. */
+export const ORG_MANAGER_NAV_IDS = [
+  "dashboard",
+  "patients",
+  "rooms",
+  "medmanager",
+  "medications",
+  "groups",
+  "phones",
+  "absences",
+  "summary",
+  "shifts",
+  "consequences",
+  "finance",
+  "manage",
+] as const;
+
+export const COUNSELOR_NAV_IDS = [
+  "dashboard",
+  "patients",
+  "rooms",
+  "medications",
+  "groups",
+  "phones",
+  "absences",
+  "summary",
+  "shifts",
+  "finance",
+  "consequences",
+] as const;
+
+export const DOCTOR_NAV_IDS = ["dashboard", "patients", "medmanager"] as const;
+
+export const THERAPIST_NAV_IDS = ["dashboard", "patients", "groups", "therapy"] as const;

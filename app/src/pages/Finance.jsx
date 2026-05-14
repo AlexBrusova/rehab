@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { C, pName } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  isValidMoneyAmount,
+  sanitizeFreeText,
+  sanitizeMoneyAmount,
+} from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -39,7 +45,7 @@ export default function Finance({
     .reduce((a, f) => a + f.amount, 0);
   const addPatientTx = async () => {
     if (!effectiveSelPat) { toast("⚠️ Please select a patient"); return; }
-    if (!newTx.amount || isNaN(newTx.amount)) {
+    if (!isValidMoneyAmount(newTx.amount)) {
       toast("⚠️ Please enter a valid Amount");
       return;
     }
@@ -71,7 +77,7 @@ export default function Finance({
     .filter((f) => f.type === "withdrawal")
     .reduce((a, f) => a + f.amount, 0);
   const addCashTx = async () => {
-    if (!newCashTx.amount || isNaN(newCashTx.amount)) {
+    if (!isValidMoneyAmount(newCashTx.amount)) {
       toast("⚠️ Please enter a valid Amount");
       return;
     }
@@ -84,7 +90,7 @@ export default function Finance({
     } catch { toast("❌ Failed to record cashbox transaction"); }
   };
   const submitCount = async () => {
-    if (!countAmount || isNaN(countAmount)) {
+    if (!isValidMoneyAmount(countAmount)) {
       toast("⚠️ Please enter the amount you counted");
       return;
     }
@@ -124,7 +130,10 @@ export default function Finance({
               value={newTx.amount}
               onChange={(v) => setNewTx((t) => ({ ...t, amount: v }))}
               placeholder="500"
-              type="number"
+              type="text"
+              inputMode="decimal"
+              sanitize={sanitizeMoneyAmount}
+              maxLength={14}
             />
           </FL>{" "}
           <FL label="Category">
@@ -143,6 +152,8 @@ export default function Finance({
               value={newTx.note}
               onChange={(v) => setNewTx((t) => ({ ...t, note: v }))}
               placeholder="Short description"
+              sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+              maxLength={V.SHORT_LABEL}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -174,7 +185,10 @@ export default function Finance({
               value={newCashTx.amount}
               onChange={(v) => setNewCashTx((t) => ({ ...t, amount: v }))}
               placeholder="500"
-              type="number"
+              type="text"
+              inputMode="decimal"
+              sanitize={sanitizeMoneyAmount}
+              maxLength={14}
             />
           </FL>{" "}
           <FL label="Category">
@@ -193,6 +207,8 @@ export default function Finance({
               value={newCashTx.note}
               onChange={(v) => setNewCashTx((t) => ({ ...t, note: v }))}
               placeholder="Short description"
+              sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+              maxLength={V.SHORT_LABEL}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -235,13 +251,16 @@ export default function Finance({
           <FL label="Actual amount counted (₪) ⭐">
             <FI
               value={countAmount}
-              onChange={setCountAmount}
+              onChange={(v) => setCountAmount(v)}
               placeholder="Enter the amount you counted"
-              type="number"
+              type="text"
+              inputMode="decimal"
+              sanitize={sanitizeMoneyAmount}
+              maxLength={14}
             />
           </FL>{" "}
           {countAmount &&
-            !isNaN(countAmount) &&
+            isValidMoneyAmount(countAmount) &&
             (() => {
               const diff = Number(countAmount) - cbBalance;
               if (diff !== 0)
@@ -286,6 +305,8 @@ export default function Finance({
               onChange={setCountNotes}
               placeholder="Notes for count..."
               rows={2}
+              sanitize={sanitizeFreeText}
+              maxLength={V.NOTE_MAX}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>

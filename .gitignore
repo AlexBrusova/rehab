@@ -21,3 +21,17 @@ db/.env
 
 # Logs
 *.log
+
+# AI agent tooling
+.agents/
+skills-lock.json
+CLAUDE.md
+.claude/
+.cursor/
+.cursorrules
+.github/copilot-instructions.md
+
+# LLM knowledge base (per-developer, not shared)
+memory-compiler/
+claude-memory-compiler/
+context/

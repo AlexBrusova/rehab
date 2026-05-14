@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import { sanitizeFreeText, sanitizeTopic } from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FS, FTA } from "../components/ui";
 
 export default function Groups({
@@ -121,6 +123,8 @@ export default function Groups({
               value={eventData.desc}
               onChange={(v) => setEventData((e) => ({ ...e, desc: v }))}
               rows={2}
+              sanitize={sanitizeFreeText}
+              maxLength={V.NOTE_MAX}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -263,9 +267,11 @@ export default function Groups({
             <input
               autoFocus
               value={quickTopic}
-              onChange={(e) => setQuickTopic(e.target.value)}
+              onChange={(e) => setQuickTopic(sanitizeTopic(e.target.value))}
               onKeyDown={(e) => e.key === "Enter" && openGroup()}
               placeholder="e.g.: Group Therapy, Skills workshop..."
+              maxLength={V.TOPIC_MAX}
+              title="Group topic"
               style={{
                 width: "100%",
                 padding: "9px 12px",
@@ -445,6 +451,8 @@ export default function Groups({
                   value={editEventData.desc}
                   onChange={(v) => setEditEventData((e) => ({ ...e, desc: v }))}
                   rows={2}
+                  sanitize={sanitizeFreeText}
+                  maxLength={V.NOTE_MAX}
                 />
               </FL>{" "}
               <div style={{ display: "flex", gap: 8 }}>
@@ -545,6 +553,8 @@ export default function Groups({
               onChange={(v) => setEditNote(v)}
               placeholder="General notes about the group..."
               rows={3}
+              sanitize={sanitizeFreeText}
+              maxLength={V.NOTE_MAX}
             />{" "}
             <div style={{ marginTop: 10 }}>
               <Btn

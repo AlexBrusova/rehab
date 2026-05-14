@@ -30,6 +30,8 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       register-mbeans: true
+      # PostgreSQL: не держать соединение вечно при блокировках / тяжёлых запросах (см. jpa query timeout 60s).
+      connection-init-sql: SET SESSION lock_timeout = '15s'; SET SESSION statement_timeout = '60s'
   jpa:
     open-in-view: false
     hibernate:

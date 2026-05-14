@@ -1,5 +1,11 @@
 import { useState } from "react";
 import { C } from "../data/constants";
+import { V } from "../data/validationLimits";
+import {
+  sanitizeRoomBuilding,
+  sanitizeRoomCapacity,
+  sanitizeRoomNumber,
+} from "../lib/inputSanitize";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -35,8 +41,22 @@ export default function Rooms({
       toast("⚠️ Please fill building and room number");
       return;
     }
+    const cap = parseInt(String(newR.capacity || "1"), 10);
+    if (
+      Number.isNaN(cap) ||
+      cap < V.ROOM_CAPACITY_MIN ||
+      cap > V.ROOM_CAPACITY_MAX
+    ) {
+      toast(`⚠️ Capacity must be ${V.ROOM_CAPACITY_MIN}–${V.ROOM_CAPACITY_MAX}`);
+      return;
+    }
     try {
-      await onAddRoom(newR);
+      await onAddRoom({
+        ...newR,
+        number: String(newR.number).trim(),
+        building: String(newR.building).trim(),
+        capacity: cap,
+      });
       setNewR({ number: "", building: "Building A", capacity: "1" });
       setShowAdd(false);
       toast("✅ Room added");
@@ -45,8 +65,21 @@ export default function Rooms({
     }
   };
   const saveEdit = async () => {
+    const payload = { ...editData };
+    if (payload.capacity !== undefined && payload.capacity !== "") {
+      const cap = parseInt(String(payload.capacity), 10);
+      if (
+        Number.isNaN(cap) ||
+        cap < V.ROOM_CAPACITY_MIN ||
+        cap > V.ROOM_CAPACITY_MAX
+      ) {
+        toast(`⚠️ Capacity must be ${V.ROOM_CAPACITY_MIN}–${V.ROOM_CAPACITY_MAX}`);
+        return;
+      }
+      payload.capacity = cap;
+    }
     try {
-      await onUpdateRoom(openRoom, editData);
+      await onUpdateRoom(openRoom, payload);
       setEditingRoom(false);
       toast("✅ Room updated");
     } catch {
@@ -214,6 +247,8 @@ export default function Rooms({
                 <FI
                   value={editData.building || ""}
                   onChange={(v) => setEditData((d) => ({ ...d, building: v }))}
+                  sanitize={sanitizeRoomBuilding}
+                  maxLength={V.ROOM_BUILDING_MAX}
                 />
               </div>{" "}
               <div>
@@ -231,6 +266,8 @@ export default function Rooms({
                 <FI
                   value={editData.number || ""}
                   onChange={(v) => setEditData((d) => ({ ...d, number: v }))}
+                  sanitize={sanitizeRoomNumber}
+                  maxLength={V.ROOM_NUMBER_MAX}
                 />
               </div>{" "}
               <div>
@@ -246,9 +283,12 @@ export default function Rooms({
                   Capacity
                 </label>
                 <FI
-                  value={editData.capacity || ""}
+                  value={editData.capacity ?? ""}
                   onChange={(v) => setEditData((d) => ({ ...d, capacity: v }))}
-                  type="number"
+                  sanitize={sanitizeRoomCapacity}
+                  maxLength={2}
+                  inputMode="numeric"
+                  placeholder="1–50"
                 />
               </div>{" "}
             </div>{" "}
@@ -518,6 +558,8 @@ export default function Rooms({
               value={newR.building}
               onChange={(v) => setNewR((r) => ({ ...r, building: v }))}
               placeholder="Building A"
+              sanitize={sanitizeRoomBuilding}
+              maxLength={V.ROOM_BUILDING_MAX}
             />
           </FL>{" "}
           <FL label="Room Number">
@@ -525,6 +567,8 @@ export default function Rooms({
               value={newR.number}
               onChange={(v) => setNewR((r) => ({ ...r, number: v }))}
               placeholder="Room 5"
+              sanitize={sanitizeRoomNumber}
+              maxLength={V.ROOM_NUMBER_MAX}
             />
           </FL>{" "}
           <FL label="Capacity (Patients)">
@@ -532,7 +576,9 @@ export default function Rooms({
               value={newR.capacity}
               onChange={(v) => setNewR((r) => ({ ...r, capacity: v }))}
               placeholder="2"
-              type="number"
+              sanitize={sanitizeRoomCapacity}
+              maxLength={2}
+              inputMode="numeric"
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
