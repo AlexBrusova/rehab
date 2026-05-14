@@ -64,6 +64,7 @@ cd backend
 ## Деплой (Railway / Heroku)
 
 - В монорепозитории в Railway: **Settings → Root Directory** = `backend` (каталог **`server/` больше не существует**; если там остался старый путь, сборка падает с `snapshot-target-unpack/server does not exist`).
+- **Postgres URL:** плагин часто отдаёт `DATABASE_URL` вида `postgresql://…` без префикса `jdbc:`. Можно в переменной написать `jdbc:${{Postgres.DATABASE_URL}}`, либо оставить сырой URL — приложение при старте нормализует его в `jdbc:postgresql://…`.
 - **Config as code:** при Root Directory `backend` достаточно файла `railway.json` в этом каталоге. Если корень репозитория не меняли, в настройках сервиса укажите путь к конфигу: **`/backend/railway.json`** (конфиг не следует за Root Directory — см. [документацию Railway по monorepo](https://docs.railway.com/guides/monorepo)).
 - Сборка: **Dockerfile** в `backend/` (`railway.json`: `builder` = `DOCKERFILE`). Образ стартует через `ENTRYPOINT` из Dockerfile (`java -jar /app/app.jar`).
 - Heroku: по-прежнему см. `Procfile` в этом каталоге (`web: java -jar build/libs/rehab-backend.jar` после slug-сборки Gradle).
