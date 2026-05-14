@@ -6,6 +6,9 @@ package com.rehabcenter.config
  *
  * Also fixes mistaken URLs like `jdbc:postgresql:user:pass@host/db` (missing `//`), where the
  * JDBC driver treats `user:pass@host` as a single hostname.
+ *
+ * Public Railway TCP proxy hostnames (`*.rlwy.net`, e.g. `viaduct.proxy.rlwy.net`) typically
+ * require TLS; we append `sslmode=require` when missing so the driver negotiates SSL.
  */
 object JdbcDatabaseUrlNormalizer {
     fun normalize(raw: String): String {
@@ -28,14 +31,30 @@ object JdbcDatabaseUrlNormalizer {
         }
 
         if (lower.startsWith("jdbc:postgresql://") || lower.startsWith("jdbc:pgsql://")) {
-            return t
+            return withRailwayPublicProxySsl(t)
         }
         if (lower.startsWith("postgresql://")) {
-            return "jdbc:$t"
+            return withRailwayPublicProxySsl("jdbc:$t")
         }
         if (lower.startsWith("postgres://")) {
-            return "jdbc:postgresql://${t.substring("postgres://".length)}"
+            return withRailwayPublicProxySsl("jdbc:postgresql://${t.substring("postgres://".length)}")
         }
         return t
+    }
+
+    /** Public Railway Postgres proxy (`*.rlwy.net`) expects SSL from the client. */
+    private fun withRailwayPublicProxySsl(jdbcUrl: String): String {
+        val l = jdbcUrl.lowercase()
+        if (!l.startsWith("jdbc:postgresql://") && !l.startsWith("jdbc:pgsql://")) {
+            return jdbcUrl
+        }
+        if (!l.contains(".rlwy.net")) {
+            return jdbcUrl
+        }
+        if (l.contains("sslmode=")) {
+            return jdbcUrl
+        }
+        val sep = if (jdbcUrl.contains("?")) "&" else "?"
+        return "$jdbcUrl${sep}sslmode=require"
     }
 }

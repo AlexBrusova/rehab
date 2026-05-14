@@ -38,4 +38,22 @@ class JdbcDatabaseUrlNormalizerTest {
         assertThat(JdbcDatabaseUrlNormalizer.normalize("jdbc:postgresql:postgresql://u@h/db"))
             .isEqualTo("jdbc:postgresql://u@h/db")
     }
+
+    @Test
+    fun `railway public rlwy net url gets sslmode require`() {
+        assertThat(
+            JdbcDatabaseUrlNormalizer.normalize(
+                "postgresql://u:p@viaduct.proxy.rlwy.net:23249/railway",
+            ),
+        ).isEqualTo("jdbc:postgresql://u:p@viaduct.proxy.rlwy.net:23249/railway?sslmode=require")
+    }
+
+    @Test
+    fun `sslmode already set not duplicated`() {
+        assertThat(
+            JdbcDatabaseUrlNormalizer.normalize(
+                "postgresql://u:p@viaduct.proxy.rlwy.net:23249/railway?sslmode=disable",
+            ),
+        ).isEqualTo("jdbc:postgresql://u:p@viaduct.proxy.rlwy.net:23249/railway?sslmode=disable")
+    }
 }
