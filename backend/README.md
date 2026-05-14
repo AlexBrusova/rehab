@@ -19,6 +19,9 @@ Spring Boot 3.3 + Kotlin + Spring Data JPA + PostgreSQL + JWT (Bearer). REST API
 - **Кеш**: `ResilientCacheErrorHandler` — при падении Redis (или другого провайдера) GET не рвёт запрос (идём в БД), ошибки записи в кеш логируются.
 - **Профиль `docker`**: двухуровневый кеш **Redis + Caffeine** (`DockerTieredCacheConfiguration`, `TieredCache`) — при ошибках Redis чтение/запись обслуживается из локального in-process Caffeine (тот же TTL и имена кешей, префикс ключей Redis как в `spring.cache.redis`).
 - **Health**: группа `readiness` (`readinessState`, `db`; в профиле `docker` ещё `redis`), включены `liveness-state` / `readiness-state` для Kubernetes.
+- **PostgreSQL (сессия через Hikari)**: `lock_timeout` 15s и `statement_timeout` 60s (`connection-init-sql` в `application.yml`) — согласовано с `jakarta.persistence.query.timeout`; снимает «вечные» блокировки и запросы.
+- **Транзакции REST**: на всех мутациях (`POST`/`PUT`/`PATCH`/`DELETE`) контроллеров API выставлен `@Transactional`, чтобы несколько обращений к БД в одном запросе (например `Shift`: `save` + `fetchWithCounselorById`, `Room.delete`: проверка + удаление) выполнялись в одной транзакции.
+- **Кеш `houses`**: после демо-сида (`RehabDemoSeeder`, профиль `docker`) вызывается `cacheManager.getCache("houses")?.clear()`, чтобы не отдавать пустой/устаревший список домов до TTL.
 - **Ошибки**: `503` для Redis down, `TransientDataAccessResourceException` и существующие таймауты/транзакции — см. `RestApiExceptionHandler`.
 - **Docker / Redis**: `spring.data.redis.timeout` и `connect-timeout` в `application-docker.yml`.
 

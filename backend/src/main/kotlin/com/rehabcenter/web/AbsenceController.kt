@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -45,6 +46,7 @@ class AbsenceController(
         val endDate: String? = null,
     )
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateAbsenceBody): ResponseEntity<Any> {
         val a =
@@ -70,6 +72,7 @@ class AbsenceController(
         val returnedAt: String? = null,
     )
 
+    @Transactional
     @PatchMapping("/{id}")
     fun patch(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -53,6 +54,7 @@ class RoomController(
         val houseId: String? = null,
     )
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateRoomBody): ResponseEntity<Any> {
         val r =
@@ -76,6 +78,7 @@ class RoomController(
         val capacity: Int? = null,
     )
 
+    @Transactional
     @PatchMapping("/{id}")
     fun patch(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,
@@ -88,6 +91,7 @@ class RoomController(
         return ResponseEntity.ok(rooms.save(r))
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     fun delete(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

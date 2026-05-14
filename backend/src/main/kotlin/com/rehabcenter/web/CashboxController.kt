@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -62,6 +63,7 @@ class CashboxController(
         val balance: Int? = null,
     )
 
+    @Transactional
     @PostMapping
     fun createEntry(@RequestBody @Valid body: CreateEntryBody): ResponseEntity<Any> {
         val e =
@@ -110,6 +112,7 @@ class CashboxController(
         val notes: String? = null,
     )
 
+    @Transactional
     @PostMapping("/counts")
     fun createCount(@RequestBody @Valid body: CreateCountBody): ResponseEntity<Any> {
         val c =

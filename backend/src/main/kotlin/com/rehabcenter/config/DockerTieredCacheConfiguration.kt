@@ -1,7 +1,6 @@
 package com.rehabcenter.config
 
 import com.github.benmanes.caffeine.cache.Caffeine
-import java.time.Duration
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.autoconfigure.cache.CacheProperties
 import org.springframework.cache.CacheManager
@@ -14,6 +13,7 @@ import org.springframework.data.redis.cache.CacheKeyPrefix
 import org.springframework.data.redis.cache.RedisCacheConfiguration
 import org.springframework.data.redis.cache.RedisCacheManager
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import java.time.Duration
 
 /**
  * В профиле [docker]: Redis как основной кеш + Caffeine в памяти процесса как fallback

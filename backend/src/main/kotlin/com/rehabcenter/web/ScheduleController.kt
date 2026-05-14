@@ -7,8 +7,8 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
-import org.springframework.validation.annotation.Validated
 import org.springframework.transaction.annotation.Transactional
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -46,6 +46,7 @@ class ScheduleController(
         val note: String? = null,
     )
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateScheduleBody): ResponseEntity<Any> {
         val s =
@@ -61,6 +62,7 @@ class ScheduleController(
         return ResponseEntity.status(201).body(schedules.save(s))
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     fun delete(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

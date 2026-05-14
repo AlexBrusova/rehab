@@ -11,6 +11,7 @@ object UiValidation {
     const val TOPIC_MAX = 500
     const val DATE_UI_MAX = 32
     const val TIME_HHMM_MAX = 16
+
     /** Время суток в теле медикамента (список `times`). */
     const val MED_TIME_SLOT = "^(morning|noon|evening|night)$"
     const val MED_TIMES_LIST_MAX = 4
@@ -26,6 +27,7 @@ object UiValidation {
     const val SCHEDULE_SHIFT_TYPE_MAX = 32
     const val CONSEQUENCE_TYPE_MAX = 64
     const val HANDOFF_NAME_MAX = 120
+
     /** Часы:минуты 00:00–23:59 (телефоны, касса, выдача лекарств). */
     const val TIME_HHMM_PATTERN = "^([01]\\d|2[0-3]):[0-5]\\d$"
     const val HEX_COLOR = "^#[0-9A-Fa-f]{6}$"

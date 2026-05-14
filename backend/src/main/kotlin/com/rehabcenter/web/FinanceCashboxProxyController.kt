@@ -1,11 +1,11 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.rehabcenter.domain.CashboxCount
 import com.rehabcenter.domain.CashboxEntry
 import com.rehabcenter.repo.CashboxCountRepository
 import com.rehabcenter.repo.CashboxEntryRepository
 import com.rehabcenter.validation.UiValidation
-import com.fasterxml.jackson.annotation.JsonProperty
 import jakarta.validation.Valid
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
@@ -13,6 +13,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -62,6 +63,7 @@ class FinanceCashboxProxyController(
         val balance: Int? = null,
     )
 
+    @Transactional
     @PostMapping("/cashbox")
     fun createCashboxEntry(@RequestBody @Valid body: CreateCashboxEntryBody): ResponseEntity<Any> {
         val e =
@@ -110,6 +112,7 @@ class FinanceCashboxProxyController(
         val notes: String? = null,
     )
 
+    @Transactional
     @PostMapping("/cashbox-counts")
     fun createCashboxCount(@RequestBody @Valid body: CreateCashboxCountBody): ResponseEntity<Any> {
         val c =

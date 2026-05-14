@@ -8,6 +8,7 @@ import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -55,6 +56,7 @@ class PatientController(
         val roomId: String? = null,
     )
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreatePatientBody): ResponseEntity<Any> {
         val p =
@@ -69,9 +71,11 @@ class PatientController(
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             )
-        return ResponseEntity.status(201).body(patients.save(p))
+        patients.save(p)
+        return ResponseEntity.status(201).body(patients.findWithRoomAndMedsById(p.id)!!)
     }
 
+    @Transactional
     @PatchMapping("/{id}")
     fun patch(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,
@@ -106,9 +110,11 @@ class PatientController(
             p.awayType = textOrNull("awayType")
         }
         p.updatedAt = Instant.now()
-        return ResponseEntity.ok(patients.save(p))
+        patients.save(p)
+        return ResponseEntity.ok(patients.findWithRoomAndMedsById(id)!!)
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     fun archive(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

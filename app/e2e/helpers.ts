@@ -13,18 +13,19 @@ export async function loginAsManager(page: Page) {
   await page.goto("/");
   await page.getByTestId("login-username").fill("manager1");
   await page.getByTestId("login-password").fill("1234");
-  await page.getByTestId("login-submit").click();
-  await expect(page.getByTestId("page-title")).toHaveText(/Dashboard/, {
-    timeout: 30_000,
-  });
-  await page.waitForResponse(
+  const patientsResponse = page.waitForResponse(
     (r) =>
       r.request().method() === "GET" &&
       r.url().includes("/api/patients") &&
       r.url().includes("houseId=") &&
       r.ok(),
-    { timeout: 30_000 },
+    { timeout: 60_000 },
   );
+  await page.getByTestId("login-submit").click();
+  await expect(page.getByTestId("page-title")).toHaveText(/Dashboard/, {
+    timeout: 30_000,
+  });
+  await patientsResponse;
 }
 
 export async function openSidebar(page: Page) {

@@ -9,6 +9,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -77,6 +78,7 @@ class MedController(
         val notes: String? = null,
     )
 
+    @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateMedBody): ResponseEntity<Any> {
         val now = Instant.now()
@@ -118,6 +120,7 @@ class MedController(
         val notes: String? = null,
     )
 
+    @Transactional
     @PatchMapping("/{id}")
     fun patch(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,
@@ -136,6 +139,7 @@ class MedController(
         return ResponseEntity.ok(meds.save(m))
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     fun delete(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,

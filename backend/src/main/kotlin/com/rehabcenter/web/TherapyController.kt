@@ -10,6 +10,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.ResponseEntity
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -60,6 +61,7 @@ class TherapyController(
     )
 
     /** Legacy Express `POST /api/therapy` (server-side date, optional counselor note). */
+    @Transactional
     @PostMapping
     fun createExpressSession(@RequestBody @Valid body: LegacyExpressCreateSessionBody): ResponseEntity<Any> {
         val now = Instant.now()
@@ -92,6 +94,7 @@ class TherapyController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(assignments.findByPatientHouseId(houseId))
 
+    @Transactional
     @PostMapping("/assignments")
     fun createAssignment(@RequestBody @Valid body: AssignmentBody): ResponseEntity<Any> {
         val a = TherapistAssignment(patientId = body.patientId!!, therapistId = body.therapistId!!)
@@ -103,6 +106,7 @@ class TherapyController(
         val therapistId: String? = null,
     )
 
+    @Transactional
     @PatchMapping("/assignments/{patientId}")
     fun patchAssignment(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) patientId: String,
@@ -134,6 +138,7 @@ class TherapyController(
         val urgency: String? = "NORMAL",
     )
 
+    @Transactional
     @PostMapping("/sessions")
     fun createSession(@RequestBody @Valid body: CreateSessionBody): ResponseEntity<Any> {
         val now = Instant.now()
@@ -163,6 +168,7 @@ class TherapyController(
         val counselorNote: String? = null,
     )
 
+    @Transactional
     @PatchMapping("/sessions/{id}")
     fun patchSession(
         @PathVariable @Size(min = 1, max = UiValidation.ID_MAX) id: String,
