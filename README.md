@@ -27,7 +27,7 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 
 **Если сборка падает** с `snapshot-target-unpack/server does not exist` или в логах видно **Railpack** вместо Dockerfile: в **Settings → Root Directory** у сервиса всё ещё указан старый путь **`server`** или **`/server`** (после merge PR с Node в `server/` на Kotlin в `backend/` его нужно сменить). Поставьте **`backend`**, в **Config as code** при необходимости укажите **`/backend/railway.json`**. После смены корня Railway соберёт образ из `backend/Dockerfile`.
 
-**Если API падает на старте из‑за БД:** переменная `DATABASE_URL` от Postgres часто без префикса `jdbc:` (`postgresql://…`). Либо задайте `jdbc:${{Postgres.DATABASE_URL}}` в Railway, либо оставьте как есть — бэкенд сам добавляет `jdbc:` при запуске (см. `backend/README.md`).
+**Если API падает на старте из‑за БД:** задайте в Railway **`jdbc:postgresql://${{Postgres.PGUSER}}:${{Postgres.PGPASSWORD}}@${{Postgres.PGHOST}}:${{Postgres.PGPORT}}/${{Postgres.PGDATABASE}}`** или сырой `postgresql://…` / `jdbc:postgresql://…` — бэкенд нормализует URL при запуске (в т.ч. пропущенный `//` после `jdbc:postgresql:`). Подробнее: `backend/README.md`.
 
 ---
 

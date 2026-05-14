@@ -26,4 +26,16 @@ class JdbcDatabaseUrlNormalizerTest {
     fun `empty unchanged`() {
         assertThat(JdbcDatabaseUrlNormalizer.normalize("   ")).isEqualTo("")
     }
+
+    @Test
+    fun `jdbc postgresql missing slashes inserts authority slash`() {
+        assertThat(JdbcDatabaseUrlNormalizer.normalize("jdbc:postgresql:user:secret@db.example:5432/railway"))
+            .isEqualTo("jdbc:postgresql://user:secret@db.example:5432/railway")
+    }
+
+    @Test
+    fun `double postgresql scheme collapsed`() {
+        assertThat(JdbcDatabaseUrlNormalizer.normalize("jdbc:postgresql:postgresql://u@h/db"))
+            .isEqualTo("jdbc:postgresql://u@h/db")
+    }
 }
