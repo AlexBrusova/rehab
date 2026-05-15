@@ -39,6 +39,7 @@ spring:
     properties:
       jakarta.persistence.query.timeout: 60000
       hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         globally_quoted_identifiers: true
         physical_naming_strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
         jdbc:
