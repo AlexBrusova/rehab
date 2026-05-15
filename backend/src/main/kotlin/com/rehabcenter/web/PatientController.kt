@@ -44,15 +44,19 @@ class PatientController(
         }
 
     data class CreatePatientBody(
-        @field:NotBlank @field:Size(max = UiValidation.NAME_MAX)
+        @field:NotBlank(message = "Name is required")
+        @field:Size(max = UiValidation.NAME_MAX, message = "Name must be at most ${UiValidation.NAME_MAX} characters")
         val name: String? = null,
-        @field:NotBlank @field:Size(max = UiValidation.DATE_UI_MAX)
+        @field:NotBlank(message = "Date of birth is required")
+        @field:Size(max = UiValidation.DATE_UI_MAX, message = "Date of birth value is too long")
         val dob: String? = null,
-        @field:NotBlank @field:Size(max = UiValidation.DATE_UI_MAX)
+        @field:NotBlank(message = "Admit date is required")
+        @field:Size(max = UiValidation.DATE_UI_MAX, message = "Admit date value is too long")
         val admitDate: String? = null,
-        @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
+        @field:NotBlank(message = "House is required")
+        @field:Size(max = UiValidation.ID_MAX, message = "House ID is too long")
         val houseId: String? = null,
-        @field:Size(max = UiValidation.ID_MAX)
+        @field:Size(max = UiValidation.ID_MAX, message = "Room ID is too long")
         val roomId: String? = null,
     )
 

@@ -10,7 +10,8 @@
       "ValidationExceptionHandler class is deleted or emptied so only RestApiExceptionHandler handles MethodArgumentNotValidException and ConstraintViolationException",
       "No duplicate @ExceptionHandler declarations exist for the same exception types across @RestControllerAdvice beans",
       "Validation errors return JSON with 'error' and 'fields' keys (matching api.js readApiErrorMessage parser)"
-    ]
+    ],
+    "status": "done"
   },
   {
     "id": 2,
