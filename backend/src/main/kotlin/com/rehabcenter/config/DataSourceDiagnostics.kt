@@ -1,10 +1,10 @@
 package com.rehabcenter.config
 
+import jakarta.annotation.PostConstruct
 import org.slf4j.LoggerFactory
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.env.Environment
-import jakarta.annotation.PostConstruct
 
 /**
  * Logs the resolved datasource URL at startup so we can see exactly what
