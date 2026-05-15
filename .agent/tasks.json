@@ -55,7 +55,8 @@
       "PATCH /api/patients/{id} with an invalid status value returns 400 with a meaningful error body instead of silently ignoring it",
       "PATCH /api/patients/{id} with a name longer than NAME_MAX returns 400 with field error describing the constraint",
       "Silent field-drops (takeIf size checks in patch) are replaced by explicit 400 responses for invalid field values"
-    ]
+    ],
+    "status": "done"
   },
   {
     "id": 5,

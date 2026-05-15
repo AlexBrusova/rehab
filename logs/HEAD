@@ -5,3 +5,4 @@ a47e4f7ab440463d077b2289082a50b210363a53 000000000000000000000000000000000000000
 a47e4f7ab440463d077b2289082a50b210363a53 ccbcd250b12aadc6259a19c658bb2ca9ea899202 s.samusenko <s.samusenko@basis.center> 1778874023 +0300	commit: feat: Remove duplicate ValidationExceptionHandler to fix response format
 ccbcd250b12aadc6259a19c658bb2ca9ea899202 377f887d24de917f777c49d76070920ad75228e9 s.samusenko <s.samusenko@basis.center> 1778874140 +0300	commit: feat: Add human-readable validation messages to CreatePatientBody
 377f887d24de917f777c49d76070920ad75228e9 1824e3581f0b7761ea1347deb8de1e4b84126ce8 s.samusenko <s.samusenko@basis.center> 1778874501 +0300	commit: feat: Validate houseId and roomId existence in PatientController.create
+1824e3581f0b7761ea1347deb8de1e4b84126ce8 211ed34570e1db1fd66f34d3319412b5aeaccad9 s.samusenko <s.samusenko@basis.center> 1778874652 +0300	commit: feat: Add descriptive validation messages to patch endpoint in PatientController

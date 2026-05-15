@@ -1,1 +1,1 @@
-feat: Validate houseId and roomId existence in PatientController.create
+feat: Add descriptive validation messages to patch endpoint in PatientController
