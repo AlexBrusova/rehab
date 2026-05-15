@@ -17,12 +17,14 @@ class JdbcDatabaseUrlEnvironmentPostProcessor : EnvironmentPostProcessor {
         val raw = environment.getProperty("DATABASE_URL")?.trim().orEmpty()
         if (raw.isEmpty()) return
         val normalized = JdbcDatabaseUrlNormalizer.normalize(raw)
-        if (normalized == raw) return
+        System.err.println("[JdbcNormalizer] raw=$raw normalized=$normalized")
+        val props = mutableMapOf("DATABASE_URL" to normalized)
+        if (!normalized.lowercase().startsWith("jdbc:")) {
+            System.err.println("[JdbcNormalizer] ERROR: normalized URL still missing jdbc: prefix")
+        }
+        props["spring.datasource.url"] = normalized
         environment.propertySources.addFirst(
-            MapPropertySource(
-                "rehabDatabaseUrlJdbcPrefix",
-                mapOf("DATABASE_URL" to normalized),
-            ),
+            MapPropertySource("rehabDatabaseUrlJdbcPrefix", props),
         )
     }
 }
