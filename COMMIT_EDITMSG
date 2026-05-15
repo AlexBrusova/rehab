@@ -1,1 +1,1 @@
-feat: Remove duplicate ValidationExceptionHandler to fix response format
+feat: Add human-readable validation messages to CreatePatientBody

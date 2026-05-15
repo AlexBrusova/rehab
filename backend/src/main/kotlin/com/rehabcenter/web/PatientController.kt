@@ -2,11 +2,14 @@ package com.rehabcenter.web
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.rehabcenter.domain.Patient
+import com.rehabcenter.repo.HouseRepository
 import com.rehabcenter.repo.PatientRepository
+import com.rehabcenter.repo.RoomRepository
 import com.rehabcenter.validation.UiValidation
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.transaction.annotation.Transactional
 import org.springframework.validation.annotation.Validated
@@ -19,6 +22,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.server.ResponseStatusException
 import java.time.Instant
 import java.util.UUID
 
@@ -27,6 +31,8 @@ import java.util.UUID
 @RequestMapping("/api/patients")
 class PatientController(
     private val patients: PatientRepository,
+    private val houses: HouseRepository,
+    private val rooms: RoomRepository,
 ) {
     @GetMapping("/archived")
     fun listArchived(
@@ -63,14 +69,27 @@ class PatientController(
     @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreatePatientBody): ResponseEntity<Any> {
+        val houseId = body.houseId!!
+        if (!houses.existsById(houseId)) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "House not found")
+        }
+        val roomId = body.roomId
+        if (roomId != null) {
+            val room = rooms.findById(roomId).orElseThrow {
+                ResponseStatusException(HttpStatus.BAD_REQUEST, "Room not found")
+            }
+            if (room.houseId != houseId) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Room does not belong to the specified house")
+            }
+        }
         val p =
             Patient(
                 id = UUID.randomUUID().toString(),
                 name = body.name!!,
                 dob = body.dob!!,
                 admitDate = body.admitDate!!,
-                houseId = body.houseId!!,
-                roomId = body.roomId,
+                houseId = houseId,
+                roomId = roomId,
                 patientRecordStatus = "active",
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),

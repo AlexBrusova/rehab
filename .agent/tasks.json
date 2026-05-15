@@ -25,7 +25,8 @@
       "Validation error response for missing name returns {\"error\":\"Validation failed\",\"fields\":{\"name\":\"Name is required\"}}",
       "Validation error response for missing dob returns a descriptive message in the 'fields' map",
       "Validation error response for missing houseId returns a descriptive message in the 'fields' map"
-    ]
+    ],
+    "status": "done"
   },
   {
     "id": 3,
