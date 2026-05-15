@@ -18,7 +18,7 @@ class JdbcDatabaseUrlEnvironmentPostProcessor : EnvironmentPostProcessor {
         if (raw.isEmpty()) return
         val normalized = JdbcDatabaseUrlNormalizer.normalize(raw)
         System.err.println("[JdbcNormalizer] raw=$raw normalized=$normalized")
-        val props = mutableMapOf("DATABASE_URL" to normalized)
+        val props = mutableMapOf<String, Any>("DATABASE_URL" to normalized)
         if (!normalized.lowercase().startsWith("jdbc:")) {
             System.err.println("[JdbcNormalizer] ERROR: normalized URL still missing jdbc: prefix")
         }
