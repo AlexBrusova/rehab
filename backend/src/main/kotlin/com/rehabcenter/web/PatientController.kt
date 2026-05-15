@@ -111,23 +111,73 @@ class PatientController(
                 node[field].isNull -> null
                 else -> node[field].asText()
             }
-        textOrNull("name")?.takeIf { it.length <= UiValidation.NAME_MAX }?.let { p.name = it }
-        textOrNull("dob")?.takeIf { it.length <= UiValidation.DATE_UI_MAX }?.let { p.dob = it }
-        textOrNull("admitDate")?.takeIf { it.length <= UiValidation.DATE_UI_MAX }?.let { p.admitDate = it }
-        textOrNull("roomId")?.takeIf { it.length <= UiValidation.ID_MAX }?.let { p.roomId = it }
-        if (node.has("mood") && node["mood"].isNumber) {
-            val m = node["mood"].asInt()
-            if (m in 0..10) p.mood = m
+        textOrNull("name")?.let { name ->
+            if (name.length > UiValidation.NAME_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Name must be at most ${UiValidation.NAME_MAX} characters")
+            }
+            p.name = name
         }
-        if (node.has("alert") && node["alert"].isBoolean) {
+        textOrNull("dob")?.let { dob ->
+            if (dob.length > UiValidation.DATE_UI_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Date of birth value is too long")
+            }
+            p.dob = dob
+        }
+        textOrNull("admitDate")?.let { admitDate ->
+            if (admitDate.length > UiValidation.DATE_UI_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Admit date value is too long")
+            }
+            p.admitDate = admitDate
+        }
+        textOrNull("roomId")?.let { roomId ->
+            if (roomId.length > UiValidation.ID_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Room ID is too long")
+            }
+            p.roomId = roomId
+        }
+        if (node.has("mood")) {
+            if (!node["mood"].isNumber) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Mood must be a number between 0 and 10")
+            }
+            val m = node["mood"].asInt()
+            if (m !in 0..10) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Mood must be between 0 and 10")
+            }
+            p.mood = m
+        }
+        if (node.has("alert")) {
+            if (!node["alert"].isBoolean) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Alert must be a boolean")
+            }
             p.alert = node["alert"].asBoolean()
         }
-        textOrNull("status")?.takeIf { it.matches(Regex(UiValidation.PATIENT_STATUS)) }?.let { p.patientRecordStatus = it }
-        textOrNull("dischargeType")?.takeIf { it.length <= UiValidation.SHORT_LABEL }?.let { p.dischargeType = it }
-        textOrNull("dischargeDate")?.takeIf { it.length <= UiValidation.DATE_UI_MAX }?.let { p.dischargeDate = it }
-        if (node.has("daysInRehab") && node["daysInRehab"].isNumber) {
+        textOrNull("status")?.let { status ->
+            if (!status.matches(Regex(UiValidation.PATIENT_STATUS))) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid status value: must be 'active' or 'archived'")
+            }
+            p.patientRecordStatus = status
+        }
+        textOrNull("dischargeType")?.let { dischargeType ->
+            if (dischargeType.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Discharge type value is too long")
+            }
+            p.dischargeType = dischargeType
+        }
+        textOrNull("dischargeDate")?.let { dischargeDate ->
+            if (dischargeDate.length > UiValidation.DATE_UI_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Discharge date value is too long")
+            }
+            p.dischargeDate = dischargeDate
+        }
+        if (node.has("daysInRehab")) {
+            if (!node["daysInRehab"].isNumber) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Days in rehab must be a number")
+            }
             val d = node["daysInRehab"].asInt()
-            if (d in 0..100_000) p.daysInRehab = d
+            if (d !in 0..100_000) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Days in rehab must be between 0 and 100000")
+            }
+            p.daysInRehab = d
         }
         if (node.has("awayType")) {
             p.awayType = textOrNull("awayType")

@@ -1,1 +1,1 @@
-feat: Add human-readable validation messages to CreatePatientBody
+feat: Validate houseId and roomId existence in PatientController.create

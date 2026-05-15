@@ -41,7 +41,8 @@
       "If roomId is non-null and does not exist in DB, controller throws ResponseStatusException(HttpStatus.BAD_REQUEST, 'Room not found') before saving",
       "If roomId is provided and belongs to a different house than houseId, controller throws ResponseStatusException(HttpStatus.BAD_REQUEST, 'Room does not belong to the specified house')",
       "POST /api/patients with valid houseId still returns 201 with patient body"
-    ]
+    ],
+    "status": "done"
   },
   {
     "id": 4,
