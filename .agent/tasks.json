@@ -75,6 +75,7 @@
       "POST /api/patients with all valid fields returns 201 and persisted patient",
       "PATCH /api/patients/{id} with status='invalid_value' returns 400",
       "All new tests pass and existing PatientsIT tests still pass"
-    ]
+    ],
+    "status": "done"
   }
 ]
