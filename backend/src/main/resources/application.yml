@@ -104,6 +104,6 @@ logging:
     org.hibernate.SQL: WARN
     org.hibernate.orm.jdbc.bind: WARN
     org.hibernate.engine.transaction: WARN
-    com.zaxxer.hikari: WARN
+    com.zaxxer.hikari: DEBUG
     org.apache.catalina: WARN
     org.apache.tomcat: WARN
