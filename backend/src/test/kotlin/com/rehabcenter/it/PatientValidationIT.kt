@@ -130,6 +130,28 @@ class PatientValidationIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `POST patients with extra fields idNum addiction notes returns 201`() {
+        val token = managerToken()
+        val body = mapOf(
+            "name" to "Extra Fields Patient",
+            "dob" to "10/05/1990",
+            "admitDate" to "01/03/2025",
+            "houseId" to "h1",
+            "idNum" to "ID-12345",
+            "addiction" to "alcohol",
+            "notes" to "some extra note from frontend",
+        )
+        val res = rest.exchange(
+            "/api/patients",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+        assertThat(res.body!!["name"]).isEqualTo("Extra Fields Patient")
+    }
+
+    @Test
     fun `POST patients with non-existent roomId returns 400`() {
         val token = managerToken()
         val body = mapOf(
