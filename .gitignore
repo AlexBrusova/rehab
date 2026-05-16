@@ -5,6 +5,8 @@ db/node_modules/
 
 # Build
 app/dist/
+backend/.gradle/
+backend/build/
 
 # Playwright
 app/playwright-report/
