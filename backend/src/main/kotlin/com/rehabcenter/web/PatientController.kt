@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.databind.JsonNode
 import com.rehabcenter.domain.Patient
 import com.rehabcenter.repo.HouseRepository
@@ -49,6 +50,7 @@ class PatientController(
             patients.findByHouseIdAndPatientRecordStatusOrderByNameAsc(houseId, "active")
         }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreatePatientBody(
         @field:NotBlank(message = "Name is required")
         @field:Size(max = UiValidation.NAME_MAX, message = "Name must be at most ${UiValidation.NAME_MAX} characters")

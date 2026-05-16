@@ -16,5 +16,11 @@
     "covered": 66,
     "total": 72,
     "pct": 91.7
+  },
+  {
+    "class": "com/rehabcenter/web/PatientController",
+    "covered": 200,
+    "total": 200,
+    "pct": 100.0
   }
 ]
