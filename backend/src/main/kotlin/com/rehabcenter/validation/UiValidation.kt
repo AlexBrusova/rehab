@@ -41,3 +41,12 @@ object UiValidation {
     const val FINANCE_TYPE = "^(deposit|withdrawal)$"
     const val THERAPY_URGENCY = "^(NORMAL|URGENT|ATTENTION)$"
 }
+
+data class FieldConstraints(
+    val maxLength: Int? = null,
+    val required: Boolean? = null,
+    val pattern: String? = null,
+    val allowedValues: List<String>? = null,
+    val min: Int? = null,
+    val max: Int? = null,
+)
