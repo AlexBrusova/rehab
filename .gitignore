@@ -23,6 +23,7 @@ db/.env
 *.log
 
 # AI agent tooling
+.agent/
 .agents/
 skills-lock.json
 CLAUDE.md
