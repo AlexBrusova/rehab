@@ -23,6 +23,7 @@ class JwtAuthenticationFilter(
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {
         val path = request.requestURI
         if (path == "/health" || path == "/api/auth/login" || path.startsWith("/error")) return true
+        if (path == "/api/field-rules") return true
         if (path.startsWith("/actuator/health")) return true
         if (path == "/actuator/info") return true
         if (environment.acceptsProfiles(Profiles.of("docker")) && path == "/actuator/prometheus") return true

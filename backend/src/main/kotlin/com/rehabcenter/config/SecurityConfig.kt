@@ -48,6 +48,7 @@ class SecurityConfig(
                 it.requestMatchers(
                     "/health",
                     "/api/auth/login",
+                    "/api/field-rules",
                     "/actuator/health",
                     "/actuator/health/**",
                     "/actuator/info",
