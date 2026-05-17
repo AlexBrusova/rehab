@@ -75,8 +75,4 @@ export const usernameRules = {
   hint: "Только a-z, 0-9, точка, дефис, подчёркивание",
 };
 
-export const userFullNameRules = {
-  sanitize: sanitizePersonName,
-  validate: (v) => v.trim().length < 2 ? "Минимум 2 символа" : null,
-  hint: "Имя и фамилия, 2–255 символов",
-};
+export const userFullNameRules = patientNameRules;

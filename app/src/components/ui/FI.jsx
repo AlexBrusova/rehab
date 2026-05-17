@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { C } from "../../data/constants";
+import { C, BADGE_STYLES } from "../../data/constants";
 
 /**
  * Controlled text input. Optional props:
@@ -44,7 +44,7 @@ export default function FI({
     ? error ? C.red : C.green
     : focused ? C.blue : C.border;
   const background = hasValidation && touched
-    ? error ? "#fce8e8" : "#e8f8ef"
+    ? error ? BADGE_STYLES.red.bg : BADGE_STYLES.green.bg
     : "#fff";
 
   return (
