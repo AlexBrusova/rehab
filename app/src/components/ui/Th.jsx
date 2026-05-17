@@ -9,7 +9,7 @@ export default function Th({ children }) {
         fontSize: 11,
         fontWeight: 700,
         color: C.mid,
-        textAlign: "right",
+        textAlign: "left",
         borderBottom: `2px solid ${C.border}`,
       }}
     >
