@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
 
 class RoomsShiftsPhonesConsequencesIT : AbstractIntegrationTest() {
     @Test
