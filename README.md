@@ -46,6 +46,7 @@ The system centralizes all day-to-day operations of a rehab facility into one to
 - **Finances** — patient personal balance + house cashbox with count records
 - **Daily summaries** — end-of-shift reports with per-patient notes
 - **Dashboard** — real-time house overview: mood, alerts, pending items
+- **Input validation** — all form fields validated on both frontend and backend; limits synced via `GET /api/field-rules`
 
 ---
 
@@ -221,6 +222,7 @@ npm run test:e2e
 - **כספים** — יתרה אישית למטופל + קופה בית עם רשומות ספירה
 - **סיכומים יומיים** — דוחות סיום משמרת עם הערות לכל מטופל
 - **לוח בקרה** — סקירת בית בזמן אמת: מצב רוח, התראות, פריטים ממתינים
+- **ולידציית קלט** — כל שדות הטופס מאומתים בצד לקוח ובצד שרת; מגבלות מסונכרנות דרך `GET /api/field-rules`
 
 ---
 
