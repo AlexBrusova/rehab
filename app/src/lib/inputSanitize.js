@@ -31,12 +31,12 @@ export function sanitizeNationalIdDigits(s) {
     .slice(0, 9);
 }
 
-/** Дата ввода DD/MM/YYYY или DD/MM/YY — только цифры и «/», до 10 символов. */
+/** Дата ввода DD/MM/YYYY — автоматически вставляет «/» после дня и месяца. */
 export function sanitizeDateDdMm(s) {
-  let t = String(s ?? "").replace(/[^\d/]/g, "");
-  const segs = t.split("/");
-  if (segs.length > 3) t = `${segs[0]}/${segs[1]}/${segs.slice(2).join("")}`;
-  return t.slice(0, 10);
+  const digits = String(s ?? "").replace(/\D/g, "").slice(0, 8);
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
 }
 
 /**
