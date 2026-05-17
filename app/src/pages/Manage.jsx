@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { V } from "../data/validationLimits";
-import { sanitizePhoneInput } from "../lib/inputSanitize";
+import { sanitizePersonName, sanitizePhoneInput } from "../lib/inputSanitize";
 import { userFullNameRules, usernameRules } from "../lib/fieldRules";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
