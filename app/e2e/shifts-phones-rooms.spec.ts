@@ -20,7 +20,7 @@ test.describe("Shifts, Phones, Rooms — CRUD", () => {
       await numInput.fill("E2E-99");
     }
     const saveBtn = page.getByRole("button", { name: /save|add|create/i }).last();
-    await saveBtn.click();
+    await saveBtn.click({ force: true });
     await post;
     await expectToast(page, /room/i);
   });

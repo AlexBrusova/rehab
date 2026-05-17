@@ -32,11 +32,11 @@ test.describe("Missing module CRUD — happy path", () => {
     const issueBtn = page.getByRole("button", { name: /issue phone|give phone|📱/i }).first();
     if (!(await issueBtn.isVisible({ timeout: 8_000 }).catch(() => false))) return;
     const post = page.waitForResponse(
-      (r) => r.url().includes("/api/phones") && r.request().method() === "POST" && r.ok(),
+      (r) => r.url().includes("/api/phones") && r.request().method() === "POST",
       { timeout: 20_000 },
     );
     await issueBtn.click();
-    const confirmBtn = page.getByRole("button", { name: /confirm|issue|give|ok/i }).first();
+    const confirmBtn = page.getByRole("button", { name: /confirm|issue|give|ok/i }).last();
     if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
       await confirmBtn.click();
     }
@@ -55,7 +55,8 @@ test.describe("Missing module CRUD — happy path", () => {
       { timeout: 20_000 },
     );
     await addMedBtn.click();
-    const nameInput = page.getByPlaceholder(/med name|medication name|name/i).first();
+    const nameInput = page.getByLabel(/medication name/i).first()
+      .or(page.getByPlaceholder(/methadone|e\.g\./i).first());
     if (await nameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await nameInput.fill("E2E Test Med");
     }
@@ -82,7 +83,8 @@ test.describe("Missing module CRUD — happy path", () => {
       { timeout: 20_000 },
     );
     await depositBtn.click();
-    const amountInput = page.getByLabel(/amount/i).first();
+    const amountInput = page.locator('input[type="number"]').first()
+      .or(page.getByPlaceholder(/₪|amount/i).first());
     if (await amountInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await amountInput.fill("50");
     }
@@ -132,16 +134,18 @@ test.describe("Missing module CRUD — happy path", () => {
   test("Distributions: PUT /api/distributions returns 2xx when marking med given", async ({ page }) => {
     await goToScreen(page, "medications");
     await page.waitForLoadState("networkidle");
-    const givenBtn = page
-      .getByRole("button", { name: /given|mark given|✓/i })
-      .first()
-      .or(page.locator("input[type='checkbox']").first());
-    if (!(await givenBtn.isVisible({ timeout: 8_000 }).catch(() => false))) return;
+    // Find the first "received" radio in the distribution table
+    const receivedRadio = page.locator("input[type='radio']").first()
+      .or(page.locator("table input").first());
+    if (!(await receivedRadio.isVisible({ timeout: 8_000 }).catch(() => false))) return;
+    await receivedRadio.click();
+    const finishBtn = page.getByRole("button", { name: /finish distribution/i });
+    if (!(await finishBtn.isVisible({ timeout: 3_000 }).catch(() => false))) return;
     const put = page.waitForResponse(
       (r) => r.url().includes("/api/distributions") && r.request().method() === "PUT",
       { timeout: 20_000 },
     );
-    await givenBtn.click();
+    await finishBtn.click();
     const res = await put;
     expect(res.status()).toBeLessThan(400);
   });
@@ -191,8 +195,9 @@ test.describe("Missing module CRUD — happy path", () => {
 test.describe("Auth — protected routes require login", () => {
   test("fresh browser with no token shows login form", async ({ page }) => {
     await page.context().clearCookies();
-    await page.evaluate(() => localStorage.clear());
     await page.goto("/");
+    await page.evaluate(() => { try { localStorage.clear(); } catch { /* ignore */ } });
+    await page.reload();
     await expect(page.getByTestId("login-submit")).toBeVisible({ timeout: 10_000 });
   });
 });

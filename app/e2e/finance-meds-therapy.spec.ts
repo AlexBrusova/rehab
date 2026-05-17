@@ -59,6 +59,11 @@ test.describe("Finance, Meds, Therapy — CRUD", () => {
       const options = await patientSelect.locator("option").count();
       if (options > 1) await patientSelect.selectOption({ index: 1 });
     }
+    // Fill required session topic field
+    const topicInput = page.getByPlaceholder(/trauma processing|session topic/i).first();
+    if (await topicInput.isVisible({ timeout: 2000 }).catch(() => false)) {
+      await topicInput.fill("E2E test session");
+    }
     const saveBtn = page.getByRole("button", { name: /save|create|add/i }).last();
     if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
       await saveBtn.click();
