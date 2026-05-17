@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Phone
 import com.rehabcenter.repo.PhoneRepository
 import com.rehabcenter.validation.UiValidation
@@ -37,6 +38,7 @@ class PhoneController(
             phones.findByPatientHouseId(houseId)
         }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreatePhoneBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -63,6 +65,7 @@ class PhoneController(
         return ResponseEntity.status(201).body(phones.save(p))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchPhoneBody(
         @field:Pattern(regexp = UiValidation.PHONE_STATUS)
         val status: String? = null,

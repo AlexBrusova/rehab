@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.DailySummary
 import com.rehabcenter.repo.DailySummaryRepository
 import com.rehabcenter.validation.UiValidation
@@ -33,6 +34,7 @@ class DailySummaryController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(summaries.search(houseId, date?.takeIf { it.isNotBlank() }))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateSummaryBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val counselorId: String? = null,
@@ -65,6 +67,7 @@ class DailySummaryController(
         return ResponseEntity.status(201).body(summaries.save(s))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchSummaryBody(
         @field:Size(max = UiValidation.NOTE_MAX)
         val generalText: String? = null,

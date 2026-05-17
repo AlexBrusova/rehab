@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.TherapistAssignment
 import com.rehabcenter.domain.TherapySession
 import com.rehabcenter.repo.TherapistAssignmentRepository
@@ -43,6 +44,7 @@ class TherapyController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(sessions.findByPatientHouseId(houseId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class LegacyExpressCreateSessionBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -81,6 +83,7 @@ class TherapyController(
         return ResponseEntity.status(201).body(sessions.save(s))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class AssignmentBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -101,6 +104,7 @@ class TherapyController(
         return ResponseEntity.status(201).body(assignments.save(a))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchAssignmentBody(
         @field:Size(min = 1, max = UiValidation.ID_MAX)
         val therapistId: String? = null,
@@ -123,6 +127,7 @@ class TherapyController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(sessions.findByPatientIdOrderByDateDescCreatedAtDesc(patientId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateSessionBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -157,6 +162,7 @@ class TherapyController(
         return ResponseEntity.status(201).body(sessions.save(s))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchSessionBody(
         @field:Size(max = UiValidation.TOPIC_MAX)
         val topic: String? = null,

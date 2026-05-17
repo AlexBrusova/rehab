@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Consequence
 import com.rehabcenter.repo.ConsequenceRepository
 import com.rehabcenter.validation.UiValidation
@@ -37,6 +38,7 @@ class ConsequenceController(
             consequences.findByHouseIdOrderByCreatedAtDesc(houseId)
         }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateConsequenceBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -68,6 +70,7 @@ class ConsequenceController(
         return ResponseEntity.status(201).body(consequences.save(c))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchConsequenceBody(
         @field:Pattern(regexp = UiValidation.CONSEQUENCE_STATUS)
         val status: String? = null,

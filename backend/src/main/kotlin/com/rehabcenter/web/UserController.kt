@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.AppUser
 import com.rehabcenter.repo.UserRepository
 import com.rehabcenter.validation.UiValidation
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
 import java.util.UUID
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class CreateUserRequest(
     @field:NotBlank @field:Size(max = UiValidation.NAME_MAX)
     val name: String? = null,
@@ -43,6 +45,7 @@ data class CreateUserRequest(
     val password: String? = null,
 )
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 data class PatchUserRequest(
     @field:Size(max = UiValidation.NAME_MAX)
     val name: String? = null,

@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.ShiftDist
 import com.rehabcenter.repo.ShiftDistRepository
 import com.rehabcenter.validation.UiValidation
@@ -29,6 +30,7 @@ class ShiftDistributionController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(shiftDist.findByHouseIdAndDate(houseId, date))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class UpsertBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,

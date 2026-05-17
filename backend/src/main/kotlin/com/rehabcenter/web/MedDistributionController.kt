@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.MedDistribution
 import com.rehabcenter.repo.MedDistributionRepository
 import com.rehabcenter.validation.UiValidation
@@ -34,6 +35,7 @@ class MedDistributionController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(distributions.findByPatientIdAndDateOrderByTimeAsc(patientId, date))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateDistributionBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -63,6 +65,7 @@ class MedDistributionController(
         return ResponseEntity.status(201).body(distributions.save(d))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchDistributionBody(
         val given: Boolean? = null,
         @field:Size(max = UiValidation.TIME_HHMM_MAX)

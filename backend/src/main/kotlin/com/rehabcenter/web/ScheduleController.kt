@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.CounselorSchedule
 import com.rehabcenter.repo.CounselorScheduleRepository
 import com.rehabcenter.validation.UiValidation
@@ -33,6 +34,7 @@ class ScheduleController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(schedules.findByHouseIdOrderByDateAscCounselorIdAsc(houseId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateScheduleBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val houseId: String? = null,
@@ -72,6 +74,7 @@ class ScheduleController(
         return ResponseEntity.ok(mapOf("ok" to true))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class AssignScheduleBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val houseId: String? = null,

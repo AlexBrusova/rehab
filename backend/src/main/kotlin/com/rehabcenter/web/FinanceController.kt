@@ -1,6 +1,7 @@
 package com.rehabcenter.web
 
 import com.fasterxml.jackson.annotation.JsonAlias
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Finance
 import com.rehabcenter.repo.FinanceRepository
 import com.rehabcenter.validation.UiValidation
@@ -45,6 +46,7 @@ class FinanceController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(finances.findByPatientIdOrderByDateDescCreatedAtDesc(patientId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateFinanceBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -75,11 +77,11 @@ class FinanceController(
                 id = UUID.randomUUID().toString(),
                 patientId = body.patientId!!,
                 type = body.type!!,
-                amount = body.amount!!,
+                amount = body.amount ?: 0,
                 source = body.source ?: "",
                 note = body.note ?: "",
                 date = body.date!!,
-                balance = body.balance!!,
+                balance = body.balance ?: 0,
                 createdAt = Instant.now(),
             )
         return ResponseEntity.status(201).body(finances.save(f))

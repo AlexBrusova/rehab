@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Med
 import com.rehabcenter.error.ApiBusinessException
 import com.rehabcenter.repo.MedRepository
@@ -57,6 +58,7 @@ class MedController(
         @RequestParam @NotBlank @Size(max = UiValidation.ID_MAX) patientId: String,
     ): ResponseEntity<Any> = ResponseEntity.ok(meds.findByPatientIdOrderByCreatedAtAsc(patientId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateMedBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -101,6 +103,7 @@ class MedController(
         return ResponseEntity.status(201).body(meds.save(m))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class MedPatchBody(
         @field:Size(max = UiValidation.MED_NAME_MAX)
         val name: String? = null,
