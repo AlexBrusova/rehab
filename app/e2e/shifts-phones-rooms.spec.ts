@@ -8,19 +8,25 @@ test.describe("Shifts, Phones, Rooms — CRUD", () => {
 
   test("Rooms: create room returns 201 and appears in list", async ({ page }) => {
     await goToScreen(page, "rooms");
-    const addBtn = page.getByRole("button", { name: /\+ Add Room|\+ New Room/i });
+    const addBtn = page.getByRole("button", { name: /\+ Add Room/i });
     if (!(await addBtn.isVisible({ timeout: 5000 }).catch(() => false))) return;
-    const post = page.waitForResponse(
-      (r) => r.url().includes("/api/rooms") && r.request().method() === "POST",
-    );
     await addBtn.click();
-    // Fill room number if input appears
-    const numInput = page.getByPlaceholder(/room number|number/i).first();
+    // Both building and room number are required fields
+    const buildingInput = page.getByPlaceholder(/Building A/i).first();
+    if (await buildingInput.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await buildingInput.fill("Building A");
+    }
+    const numInput = page.getByPlaceholder(/Room 5/i).first();
     if (await numInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await numInput.fill("E2E-99");
     }
-    const saveBtn = page.getByRole("button", { name: /save|add|create/i }).last();
-    await saveBtn.click({ force: true });
+    const post = page.waitForResponse(
+      (r) => r.url().includes("/api/rooms") && r.request().method() === "POST",
+    );
+    // Save button text is "✓ Add"
+    const saveBtn = page.getByRole("button", { name: /✓ Add/i }).first();
+    await saveBtn.waitFor({ state: "visible", timeout: 3000 });
+    await saveBtn.click();
     const roomRes = await post;
     expect(roomRes.status()).toBeLessThan(400);
     await expectToast(page, /room/i);

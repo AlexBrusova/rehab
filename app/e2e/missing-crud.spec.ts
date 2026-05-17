@@ -29,17 +29,24 @@ test.describe("Missing module CRUD — happy path", () => {
   test("Phones: POST /api/phones returns 201 when issuing phone", async ({ page }) => {
     await goToScreen(page, "phones");
     await page.waitForLoadState("networkidle");
-    const issueBtn = page.getByRole("button", { name: /issue phone|give phone|📱/i }).first();
+    // Button text is "📱 Issued"
+    const issueBtn = page.getByRole("button", { name: /Issued/i }).first();
     if (!(await issueBtn.isVisible({ timeout: 8_000 }).catch(() => false))) return;
+    await issueBtn.click();
+    // Select first available patient — required or API call won't fire
+    const patientSelect = page.locator("select").first();
+    if (!(await patientSelect.isVisible({ timeout: 3000 }).catch(() => false))) return;
+    const optCount = await patientSelect.locator("option").count();
+    if (optCount < 2) return; // no patients available
+    await patientSelect.selectOption({ index: 1 });
     const post = page.waitForResponse(
       (r) => r.url().includes("/api/phones") && r.request().method() === "POST",
       { timeout: 20_000 },
     );
-    await issueBtn.click();
-    const confirmBtn = page.getByRole("button", { name: /confirm|issue|give|ok/i }).last();
-    if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await confirmBtn.click({ force: true });
-    }
+    // Confirm button text is "✓ Issued" — scope inside modal to avoid backdrop interference
+    const confirmBtn = page.getByRole("button", { name: /✓ Issued/i }).first();
+    await confirmBtn.waitFor({ state: "visible", timeout: 3000 });
+    await confirmBtn.click();
     await post;
     await expectToast(page, /phone/i);
   });
@@ -48,26 +55,31 @@ test.describe("Missing module CRUD — happy path", () => {
   test("Meds: POST /api/meds returns 2xx when adding med", async ({ page }) => {
     await goToScreen(page, "medmanager");
     await page.waitForLoadState("networkidle");
-    const addMedBtn = page.getByRole("button", { name: /\+ (add )?med/i }).first();
-    if (!(await addMedBtn.isVisible({ timeout: 8_000 }).catch(() => false))) return;
+    // Must select a patient first — otherwise "+ Add Medication" is hidden
+    const patientBtn = page.locator("button").filter({ hasText: /Medications/ }).first();
+    if (!(await patientBtn.isVisible({ timeout: 8_000 }).catch(() => false))) return;
+    await patientBtn.click();
+    const addMedBtn = page.getByRole("button", { name: /\+ Add Medication/i }).first();
+    if (!(await addMedBtn.isVisible({ timeout: 5_000 }).catch(() => false))) return;
     const post = page.waitForResponse(
       (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
       { timeout: 20_000 },
     );
     await addMedBtn.click();
-    const nameInput = page.getByLabel(/medication name/i).first()
-      .or(page.getByPlaceholder(/methadone|e\.g\./i).first());
+    // Placeholder is "e.g.: Methadone"
+    const nameInput = page.getByPlaceholder(/methadone|e\.g\./i).first();
     if (await nameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await nameInput.fill("E2E Test Med");
-      await nameInput.dispatchEvent("input");
     }
-    const doseInput = page.getByPlaceholder(/dose|mg/i).first();
+    // Dose placeholder is "40"
+    const doseInput = page.getByPlaceholder("40").first();
     if (await doseInput.isVisible({ timeout: 2000 }).catch(() => false)) {
       await doseInput.fill("10");
     }
-    const saveBtn = page.getByRole("button", { name: /save|add|✓/i }).last();
+    // Save button text is "✓ Add"
+    const saveBtn = page.getByRole("button", { name: /✓ Add/i }).first();
     if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await saveBtn.click({ force: true });
+      await saveBtn.click();
       const res = await post;
       expect(res.status()).toBeLessThan(400);
     }
