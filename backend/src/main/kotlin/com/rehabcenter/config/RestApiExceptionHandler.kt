@@ -168,7 +168,19 @@ class RestApiExceptionHandler {
     fun fallback(ex: Exception): ResponseEntity<Map<String, Any?>> {
         log.error("Unhandled exception", ex)
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-            mapOf("error" to "Internal server error"),
+            mapOf("error" to "Internal server error", "details" to deepestMessage(ex)),
         )
+    }
+
+    /** Walks the cause chain and returns the deepest non-null, non-blank message. */
+    private fun deepestMessage(ex: Throwable): String? {
+        var current: Throwable? = ex
+        var result: String? = null
+        while (current != null) {
+            val msg = current.message
+            if (!msg.isNullOrBlank()) result = msg
+            current = current.cause
+        }
+        return result
     }
 }

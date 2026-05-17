@@ -57,7 +57,6 @@ class Patient(
     var roomId: String? = null,
     @Column(nullable = false)
     var houseId: String = "",
-    /** DB column `status` (active | archived). Hidden from JSON — see [getStatus]. */
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @Column(name = "status", nullable = false)
     var patientRecordStatus: String = "active",

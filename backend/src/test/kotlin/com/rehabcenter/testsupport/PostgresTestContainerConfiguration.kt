@@ -15,4 +15,5 @@ class PostgresTestContainerConfiguration {
             .withDatabaseName("rehab_test")
             .withUsername("test")
             .withPassword("test")
+            .withInitScript("db/test-init.sql")
 }
