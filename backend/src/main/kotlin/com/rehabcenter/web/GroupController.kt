@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.GroupAttendance
 import com.rehabcenter.domain.GroupAttendanceId
 import com.rehabcenter.domain.ResidentGroup
@@ -39,6 +40,7 @@ class GroupController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(groups.search(houseId, date?.takeIf { it.isNotBlank() }))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class AttendanceRow(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -46,6 +48,7 @@ class GroupController(
         val status: String? = null,
     )
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchAttendanceRow(
         @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -53,6 +56,7 @@ class GroupController(
         val status: String? = null,
     )
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateGroupBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val houseId: String? = null,
@@ -106,6 +110,7 @@ class GroupController(
         return ResponseEntity.status(201).body(groups.save(g))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchGroupBody(
         @field:Size(max = UiValidation.TOPIC_MAX)
         val topic: String? = null,
@@ -153,6 +158,7 @@ class GroupController(
         return ResponseEntity.ok(groups.save(g))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PutAttendanceBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,

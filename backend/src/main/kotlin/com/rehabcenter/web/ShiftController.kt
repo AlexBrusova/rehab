@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Shift
 import com.rehabcenter.repo.ShiftRepository
 import com.rehabcenter.validation.UiValidation
@@ -37,6 +38,7 @@ class ShiftController(
         return shifts.search(h, d)
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateShiftBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val houseId: String? = null,
@@ -78,6 +80,7 @@ class ShiftController(
         return ResponseEntity.status(201).body(withCounselor)
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class ShiftPatchBody(
         @field:Pattern(regexp = UiValidation.SHIFT_STATUS)
         val status: String? = null,

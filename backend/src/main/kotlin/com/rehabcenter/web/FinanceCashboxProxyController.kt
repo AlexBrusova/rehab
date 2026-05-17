@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.rehabcenter.domain.CashboxCount
 import com.rehabcenter.domain.CashboxEntry
@@ -37,6 +38,7 @@ class FinanceCashboxProxyController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(entries.findByHouseIdOrderByCreatedAtDesc(houseId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateCashboxEntryBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val houseId: String? = null,
@@ -89,6 +91,7 @@ class FinanceCashboxProxyController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(counts.findByHouseIdOrderByCreatedAtDesc(houseId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateCashboxCountBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val houseId: String? = null,

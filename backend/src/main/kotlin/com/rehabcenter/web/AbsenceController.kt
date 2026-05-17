@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Absence
 import com.rehabcenter.repo.AbsenceRepository
 import com.rehabcenter.validation.UiValidation
@@ -33,6 +34,7 @@ class AbsenceController(
     ): ResponseEntity<Any> =
         ResponseEntity.ok(absences.findByHouseIdOrderByCreatedAtDesc(houseId))
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateAbsenceBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
@@ -63,6 +65,7 @@ class AbsenceController(
         return ResponseEntity.status(201).body(absences.save(a))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchAbsenceBody(
         @field:Pattern(regexp = UiValidation.ABSENCE_STATUS)
         val status: String? = null,

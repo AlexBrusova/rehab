@@ -1,5 +1,6 @@
 package com.rehabcenter.web
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Room
 import com.rehabcenter.error.ApiBusinessException
 import com.rehabcenter.repo.PatientRepository
@@ -43,6 +44,7 @@ class RoomController(
             rooms.findByHouseIdOrderByBuildingAscNumberAsc(houseId)
         }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class CreateRoomBody(
         @field:NotBlank @field:Size(max = UiValidation.ROOM_NUMBER_MAX)
         val number: String? = null,
@@ -69,6 +71,7 @@ class RoomController(
         return ResponseEntity.status(201).body(rooms.save(r))
     }
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     data class PatchRoomBody(
         @field:Size(min = 1, max = UiValidation.ROOM_NUMBER_MAX)
         val number: String? = null,
