@@ -105,6 +105,47 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `GET patients returns 200 and status field is string active or archived`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val res =
+            rest.exchange(
+                "/api/patients?houseId=h1",
+                HttpMethod.GET,
+                HttpEntity<Void>(bearerHeaders(token)),
+                object : ParameterizedTypeReference<List<Map<String, Any?>>>() {},
+            )
+        assertThat(res.statusCode.is2xxSuccessful).isTrue()
+        assertThat(res.body!!).isNotEmpty()
+        res.body!!.forEach { patient ->
+            val status = patient["status"] as? String
+            assertThat(status).isNotNull()
+            assertThat(status).isIn("active", "archived", "away")
+        }
+    }
+
+    @Test
+    fun `POST patient returns 201 and status is active`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val body =
+            mapOf(
+                "name" to "IT Status Test Patient",
+                "dob" to "01/01/1992",
+                "admitDate" to "01/01/2025",
+                "houseId" to "h1",
+            )
+        val res =
+            rest.exchange(
+                "/api/patients",
+                HttpMethod.POST,
+                HttpEntity(body, headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+        assertThat(res.body!!["status"]).isEqualTo("active")
+    }
+
+    @Test
     fun `list archived patients`() {
         val token = rest.obtainToken("manager1", "1234")
         val res =

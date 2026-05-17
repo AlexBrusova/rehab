@@ -79,7 +79,7 @@ model Patient {
   mood        Int           @default(5)
   roomId      String?
   houseId     String
-  status      String        @default("active")
+  status      String        @default("active") @db.Text
   alert       Boolean       @default(false)
   dischargeType String?
   dischargeDate String?
