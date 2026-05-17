@@ -4,6 +4,7 @@ import { V } from "../data/validationLimits";
 import { roomNumberRules, roomBuildingRules, roomCapacityRules } from "../lib/fieldRules";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
+import { sanitizeRoomBuilding, sanitizeRoomNumber, sanitizeRoomCapacity } from "../lib/inputSanitize";
 
 export default function Rooms({
   rooms,
