@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.HttpEntity
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
 
 class RoomsShiftsPhonesConsequencesIT : AbstractIntegrationTest() {
     @Test
@@ -67,5 +68,139 @@ class RoomsShiftsPhonesConsequencesIT : AbstractIntegrationTest() {
             )
         assertThat(res.statusCode.is2xxSuccessful).isTrue()
         assertThat(res.body!!.any { it.id == "c-demo-1" }).isTrue()
+    }
+
+    @Test
+    fun `POST rooms ignores unknown extra fields and returns 201`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val body = mapOf(
+            "number" to "Room 99",
+            "building" to "Building Z",
+            "capacity" to 3,
+            "houseId" to "h1",
+            // extra unknown fields:
+            "id" to "some-id",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "extraField" to "extra",
+        )
+        val res = rest.exchange(
+            "/api/rooms",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+        assertThat(res.body!!["number"]).isEqualTo("Room 99")
+    }
+
+    @Test
+    fun `PATCH rooms ignores unknown extra fields and returns 200`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val patchBody = mapOf(
+            "number" to "Room 1 Updated",
+            "capacity" to 3,
+            // extra unknown fields:
+            "id" to "r1",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "houseId" to "h1",
+            "extraField" to "extra",
+        )
+        val res = rest.exchange(
+            "/api/rooms/r1",
+            HttpMethod.PATCH,
+            HttpEntity(patchBody, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.is2xxSuccessful).isTrue()
+    }
+
+    @Test
+    fun `POST phones ignores unknown extra fields and returns 201`() {
+        val token = rest.obtainToken("counselor1", "1234")
+        val body = mapOf(
+            "patientId" to "p1",
+            "givenAt" to "10:00",
+            "returnBy" to "11:00",
+            // extra unknown fields:
+            "id" to "some-id",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "status" to "active",
+            "extraField" to "extra",
+        )
+        val res = rest.exchange(
+            "/api/phones",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+        assertThat(res.body!!["patientId"]).isEqualTo("p1")
+    }
+
+    @Test
+    fun `PATCH phones ignores unknown extra fields and returns 200`() {
+        val token = rest.obtainToken("counselor1", "1234")
+        val patchBody = mapOf(
+            "status" to "returned",
+            "returnedAt" to "11:05",
+            "late" to false,
+            // extra unknown fields:
+            "id" to "ph-demo-1",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "extraField" to "extra",
+        )
+        val res = rest.exchange(
+            "/api/phones/ph-demo-1",
+            HttpMethod.PATCH,
+            HttpEntity(patchBody, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.is2xxSuccessful).isTrue()
+    }
+
+    @Test
+    fun `POST shifts ignores unknown extra fields and returns 201`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val body = mapOf(
+            "houseId" to "h1",
+            "counselorId" to "u4",
+            "date" to "2025-06-01",
+            "shift" to "24h",
+            "note" to "Test shift",
+            "start" to "08:00",
+            // extra unknown fields:
+            "id" to "some-id",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "status" to "pending",
+            "extraField" to "extra",
+        )
+        val res = rest.exchange(
+            "/api/shifts",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+    }
+
+    @Test
+    fun `PATCH shifts ignores unknown extra fields and returns 200`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val patchBody = mapOf(
+            "status" to "completed",
+            "end" to "08:00",
+            "handedTo" to "u5",
+            // extra unknown fields:
+            "id" to "s-demo-1",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "extraField" to "extra",
+        )
+        val res = rest.exchange(
+            "/api/shifts/s-demo-1",
+            HttpMethod.PATCH,
+            HttpEntity(patchBody, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.is2xxSuccessful).isTrue()
     }
 }

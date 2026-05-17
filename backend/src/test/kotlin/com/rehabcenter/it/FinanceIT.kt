@@ -68,4 +68,68 @@ class FinanceIT : AbstractIntegrationTest() {
             )
         assertThat(res.statusCode.value()).isEqualTo(400)
     }
+
+    @Test
+    fun `POST finance ignores unknown extra fields and returns 201`() {
+        val token = managerToken()
+        val body = validFinanceBody() + mapOf(
+            "id" to "some-id",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "updatedAt" to "2024-01-01T00:00:00Z",
+            "extraField" to "extra",
+        )
+        val res =
+            rest.exchange(
+                "/api/finance",
+                HttpMethod.POST,
+                HttpEntity(body, bearerHeaders(token)),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+    }
+
+    @Test
+    fun `GET finance list by patientId returns 2xx`() {
+        val token = managerToken()
+        val res =
+            rest.exchange(
+                "/api/finance?patientId=p1",
+                HttpMethod.GET,
+                HttpEntity<Void>(bearerHeaders(token)),
+                String::class.java,
+            )
+        assertThat(res.statusCode.is2xxSuccessful).isTrue()
+        assertThat(res.body).contains("f-p1-001")
+    }
+
+    @Test
+    fun `GET finance patient by houseId returns 2xx`() {
+        val token = managerToken()
+        val res =
+            rest.exchange(
+                "/api/finance/patient?houseId=h1",
+                HttpMethod.GET,
+                HttpEntity<Void>(bearerHeaders(token)),
+                String::class.java,
+            )
+        assertThat(res.statusCode.is2xxSuccessful).isTrue()
+    }
+
+    @Test
+    fun `POST finance patient ignores unknown extra fields and returns 201`() {
+        val token = managerToken()
+        val body = validFinanceBody() + mapOf(
+            "id" to "some-id",
+            "createdAt" to "2024-01-01T00:00:00Z",
+            "extraField" to "extra",
+        )
+        val res =
+            rest.exchange(
+                "/api/finance/patient",
+                HttpMethod.POST,
+                HttpEntity(body, bearerHeaders(token)),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+    }
 }
