@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { V } from "../data/validationLimits";
-import {
-  sanitizePersonName,
-  sanitizePhoneInput,
-  sanitizeUsername,
-} from "../lib/inputSanitize";
+import { sanitizePersonName, sanitizePhoneInput } from "../lib/inputSanitize";
+import { userFullNameRules, usernameRules } from "../lib/fieldRules";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 import ScheduleTab from "./ScheduleTab";
@@ -123,7 +120,7 @@ export default function Manage({
               value={newU.name}
               onChange={(v) => setNewU((u) => ({ ...u, name: v }))}
               placeholder="John Doe"
-              sanitize={sanitizePersonName}
+              {...userFullNameRules}
               maxLength={V.NAME_MAX}
             />
           </FL>{" "}
@@ -132,7 +129,7 @@ export default function Manage({
               value={newU.username}
               onChange={(v) => setNewU((u) => ({ ...u, username: v }))}
               placeholder="user123"
-              sanitize={sanitizeUsername}
+              {...usernameRules}
               maxLength={V.USERNAME_MAX}
               autoCapitalize="none"
               spellCheck={false}

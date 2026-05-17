@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { V } from "../data/validationLimits";
-import {
-  sanitizeRoomBuilding,
-  sanitizeRoomCapacity,
-  sanitizeRoomNumber,
-} from "../lib/inputSanitize";
+import { roomNumberRules, roomBuildingRules, roomCapacityRules } from "../lib/fieldRules";
 import { Badge, Card, CT, Btn, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
+import { sanitizeRoomBuilding, sanitizeRoomNumber, sanitizeRoomCapacity } from "../lib/inputSanitize";
 
 export default function Rooms({
   rooms,
@@ -558,8 +555,7 @@ export default function Rooms({
               value={newR.building}
               onChange={(v) => setNewR((r) => ({ ...r, building: v }))}
               placeholder="Building A"
-              sanitize={sanitizeRoomBuilding}
-              maxLength={V.ROOM_BUILDING_MAX}
+              {...roomBuildingRules}
             />
           </FL>{" "}
           <FL label="Room Number">
@@ -567,8 +563,7 @@ export default function Rooms({
               value={newR.number}
               onChange={(v) => setNewR((r) => ({ ...r, number: v }))}
               placeholder="Room 5"
-              sanitize={sanitizeRoomNumber}
-              maxLength={V.ROOM_NUMBER_MAX}
+              {...roomNumberRules}
             />
           </FL>{" "}
           <FL label="Capacity (Patients)">
@@ -576,9 +571,7 @@ export default function Rooms({
               value={newR.capacity}
               onChange={(v) => setNewR((r) => ({ ...r, capacity: v }))}
               placeholder="2"
-              sanitize={sanitizeRoomCapacity}
-              maxLength={2}
-              inputMode="numeric"
+              {...roomCapacityRules}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>

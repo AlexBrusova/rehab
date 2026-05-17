@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { C } from "../data/constants";
 import { V } from "../data/validationLimits";
-import { sanitizeMedDose, sanitizeMedName } from "../lib/inputSanitize";
+import { medNameRules, medDoseRules } from "../lib/fieldRules";
 import { Card, CT, Alrt, Btn, FI, FS } from "../components/ui";
 import EditMedRow from "./EditMedRow";
 import useBreakpoint from "../hooks/useBreakpoint";
@@ -171,7 +171,7 @@ export default function MedManager({
                     value={newMed.name}
                     onChange={(v) => setNewMed((m) => ({ ...m, name: v }))}
                     placeholder="e.g.: Methadone"
-                    sanitize={sanitizeMedName}
+                    {...medNameRules}
                     maxLength={V.MED_NAME_MAX}
                   />
                 </div>{" "}
@@ -190,7 +190,7 @@ export default function MedManager({
                     value={newMed.dose}
                     onChange={(v) => setNewMed((m) => ({ ...m, dose: v }))}
                     placeholder="40"
-                    sanitize={sanitizeMedDose}
+                    {...medDoseRules}
                     maxLength={V.MED_DOSE_MAX}
                   />
                 </div>{" "}
