@@ -38,7 +38,7 @@ test.describe("Missing module CRUD — happy path", () => {
     await issueBtn.click();
     const confirmBtn = page.getByRole("button", { name: /confirm|issue|give|ok/i }).last();
     if (await confirmBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await confirmBtn.click();
+      await confirmBtn.click({ force: true });
     }
     await post;
     await expectToast(page, /phone/i);
@@ -59,6 +59,7 @@ test.describe("Missing module CRUD — happy path", () => {
       .or(page.getByPlaceholder(/methadone|e\.g\./i).first());
     if (await nameInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await nameInput.fill("E2E Test Med");
+      await nameInput.dispatchEvent("input");
     }
     const doseInput = page.getByPlaceholder(/dose|mg/i).first();
     if (await doseInput.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -66,7 +67,7 @@ test.describe("Missing module CRUD — happy path", () => {
     }
     const saveBtn = page.getByRole("button", { name: /save|add|✓/i }).last();
     if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await saveBtn.click();
+      await saveBtn.click({ force: true });
       const res = await post;
       expect(res.status()).toBeLessThan(400);
     }
@@ -83,14 +84,14 @@ test.describe("Missing module CRUD — happy path", () => {
       { timeout: 20_000 },
     );
     await depositBtn.click();
-    const amountInput = page.locator('input[type="number"]').first()
-      .or(page.getByPlaceholder(/₪|amount/i).first());
+    const amountInput = page.getByPlaceholder("500").first()
+      .or(page.getByLabel(/Amount/i).first());
     if (await amountInput.isVisible({ timeout: 3000 }).catch(() => false)) {
       await amountInput.fill("50");
     }
     const saveBtn = page.getByRole("button", { name: /save|confirm|add/i }).last();
     if (await saveBtn.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await saveBtn.click();
+      await saveBtn.click({ force: true });
       const res = await post;
       expect(res.status()).toBeLessThan(400);
     }

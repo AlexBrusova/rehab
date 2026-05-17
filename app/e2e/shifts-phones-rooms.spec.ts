@@ -11,7 +11,7 @@ test.describe("Shifts, Phones, Rooms — CRUD", () => {
     const addBtn = page.getByRole("button", { name: /\+ Add Room|\+ New Room/i });
     if (!(await addBtn.isVisible({ timeout: 5000 }).catch(() => false))) return;
     const post = page.waitForResponse(
-      (r) => r.url().includes("/api/rooms") && r.request().method() === "POST" && r.ok(),
+      (r) => r.url().includes("/api/rooms") && r.request().method() === "POST",
     );
     await addBtn.click();
     // Fill room number if input appears
@@ -21,7 +21,8 @@ test.describe("Shifts, Phones, Rooms — CRUD", () => {
     }
     const saveBtn = page.getByRole("button", { name: /save|add|create/i }).last();
     await saveBtn.click({ force: true });
-    await post;
+    const roomRes = await post;
+    expect(roomRes.status()).toBeLessThan(400);
     await expectToast(page, /room/i);
   });
 
