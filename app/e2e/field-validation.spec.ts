@@ -48,11 +48,11 @@ test.describe("FI field validation — 4 states", () => {
     await expect(buildingError).toBeVisible({ timeout: 3000 });
     await expect(buildingInput).toHaveCSS("border-top-color", "rgb(192, 57, 43)");
 
-    // Capacity 999 → out of range error
+    // Capacity empty → required/range error (sanitizer clamps 999→50 so use empty)
     const capacityInput = page.getByPlaceholder("2").first();
-    await capacityInput.fill("999");
+    await capacityInput.fill("");
     await capacityInput.blur();
-    const capError = page.locator("div").filter({ hasText: /50/i }).first();
+    const capError = page.locator("div").filter({ hasText: /1.{1,5}50/i }).first();
     await expect(capError).toBeVisible({ timeout: 3000 });
     await expect(capacityInput).toHaveCSS("border-top-color", "rgb(192, 57, 43)");
   });
