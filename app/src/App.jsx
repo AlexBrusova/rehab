@@ -65,6 +65,8 @@ export default function App() {
   const [screen, setScreen] = useState("dashboard");
   const [initialPatientId, setInitialPatientId] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [lang, setLang] = useState(() => localStorage.getItem("lang") || "en");
+  const toggleLang = () => setLang((l) => { const next = l === "en" ? "he" : "en"; localStorage.setItem("lang", next); return next; });
   const navTo = (screenId, patientId = null) => {
     setScreen(screenId);
     setInitialPatientId(patientId);
@@ -938,6 +940,38 @@ export default function App() {
             );
           })}{" "}
         </nav>{" "}
+        <div
+          style={{
+            padding: "6px 13px",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <button
+            onClick={toggleLang}
+            title="Switch language"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              background: "rgba(255,255,255,0.07)",
+              border: "1px solid rgba(255,255,255,0.12)",
+              borderRadius: 20,
+              padding: "4px 10px",
+              cursor: "pointer",
+              fontSize: 11,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.6)",
+              width: "100%",
+              justifyContent: "center",
+            }}
+          >
+            <span style={{ opacity: lang === "en" ? 1 : 0.4 }}>EN</span>
+            <span style={{ opacity: 0.3 }}>|</span>
+            <span style={{ opacity: lang === "he" ? 1 : 0.4 }}>עב</span>
+          </button>
+        </div>
         <div
           style={{
             padding: "11px 13px",
