@@ -25,12 +25,16 @@ export const dateDdMmRules = {
     return null;
   },
   hint: "Формат: ДД/ММ/ГГГГ",
+  inputMode: "numeric",
+  maxLength: 10,
 };
 
 export const dateDdMmOptionalRules = {
   sanitize: sanitizeDateDdMm,
   validate: (v) => v.trim() && !isValidDateDdMmYyyy(v.trim()) ? "Формат: ДД/ММ/ГГГГ" : null,
   hint: "Формат: ДД/ММ/ГГГГ (необязательно)",
+  inputMode: "numeric",
+  maxLength: 10,
 };
 
 export const medNameRules = {
@@ -67,11 +71,19 @@ export const roomCapacityRules = {
     return null;
   },
   hint: `Вместимость: ${V.ROOM_CAPACITY_MIN}–${V.ROOM_CAPACITY_MAX} пациентов`,
+  inputMode: "numeric",
+  maxLength: 2,
 };
+
+const USERNAME_RE = /^[a-z0-9._-]+$/i;
 
 export const usernameRules = {
   sanitize: sanitizeUsername,
-  validate: (v) => !v.trim() ? "Введите логин" : null,
+  validate: (v) => {
+    if (!v.trim()) return "Введите логин";
+    if (!USERNAME_RE.test(v.trim())) return "Только a-z, 0-9, точка, дефис, подчёркивание";
+    return null;
+  },
   hint: "Только a-z, 0-9, точка, дефис, подчёркивание",
 };
 

@@ -40,9 +40,10 @@ export default function FI({
   };
 
   const hasValidation = !!validate;
+  const hasHints = hasValidation || !!hint;
   const borderColor = hasValidation && touched
     ? error ? C.red : C.green
-    : focused ? C.blue : C.border;
+    : (hasHints && focused) ? C.blue : C.border;
   const background = hasValidation && touched
     ? error ? BADGE_STYLES.red.bg : BADGE_STYLES.green.bg
     : "#fff";

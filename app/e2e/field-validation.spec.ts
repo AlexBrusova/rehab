@@ -11,7 +11,7 @@ test.describe("FI field validation — 4 states", () => {
     await page.waitForLoadState("networkidle");
 
     const addBtn = page.getByRole("button", { name: /\+ Add Patient|\+ New/i }).first();
-    if (!(await addBtn.isVisible({ timeout: 5000 }).catch(() => false))) return;
+    await expect(addBtn).toBeVisible({ timeout: 5000 });
     await addBtn.click();
 
     const nameInput = page.getByPlaceholder("John Doe").first();
@@ -37,7 +37,7 @@ test.describe("FI field validation — 4 states", () => {
   test("room: building and capacity fields validate on blur", async ({ page }) => {
     await goToScreen(page, "rooms");
     const addBtn = page.getByRole("button", { name: /\+ Add Room/i });
-    if (!(await addBtn.isVisible({ timeout: 5000 }).catch(() => false))) return;
+    await expect(addBtn).toBeVisible({ timeout: 5000 });
     await addBtn.click();
 
     // Clear building (pre-filled with "Building A") then blur → required error
@@ -61,10 +61,10 @@ test.describe("FI field validation — 4 states", () => {
     await goToScreen(page, "medmanager");
     await page.waitForLoadState("networkidle");
     const patBtn = page.locator("button").filter({ hasText: /Medications/ }).first();
-    if (!(await patBtn.isVisible({ timeout: 8000 }).catch(() => false))) return;
+    await expect(patBtn).toBeVisible({ timeout: 8000 });
     await patBtn.click();
     const addBtn = page.getByRole("button", { name: /\+ Add Medication/i }).first();
-    if (!(await addBtn.isVisible({ timeout: 5000 }).catch(() => false))) return;
+    await expect(addBtn).toBeVisible({ timeout: 5000 });
     await addBtn.click();
 
     const nameInput = page.getByPlaceholder(/methadone|e\.g\./i).first();
@@ -79,12 +79,12 @@ test.describe("FI field validation — 4 states", () => {
   test("manage: username field shows hint on focus", async ({ page }) => {
     await goToScreen(page, "manage");
     await page.waitForLoadState("networkidle");
-    const addBtn = page.getByRole("button", { name: /\+ (add |new )?user/i }).first();
-    if (!(await addBtn.isVisible({ timeout: 5000 }).catch(() => false))) return;
+    const addBtn = page.getByRole("button", { name: /add staff member/i }).first();
+    await expect(addBtn).toBeVisible({ timeout: 5000 });
     await addBtn.click();
 
     const usernameInput = page.getByPlaceholder(/user123/i).first();
-    if (!(await usernameInput.isVisible({ timeout: 3000 }).catch(() => false))) return;
+    await expect(usernameInput).toBeVisible({ timeout: 3000 });
     await usernameInput.focus();
     const hint = page.locator("div").filter({ hasText: /подчёркивание/i }).first();
     await expect(hint).toBeVisible({ timeout: 3000 });
