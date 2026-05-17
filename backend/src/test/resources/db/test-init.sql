@@ -1,2 +1,2 @@
-CREATE TYPE "PatientStatus" AS ENUM ('active', 'archived');
-CREATE CAST (character varying AS "PatientStatus") WITH INOUT AS IMPLICIT;
+-- Tests use ddl-auto=create-drop; Hibernate creates Patient.status as VARCHAR — no PG enum needed.
+SELECT 1;

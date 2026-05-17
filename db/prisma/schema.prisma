@@ -79,7 +79,7 @@ model Patient {
   mood        Int           @default(5)
   roomId      String?
   houseId     String
-  status      PatientStatus @default(active)
+  status      String        @default("active")
   alert       Boolean       @default(false)
   dischargeType String?
   dischargeDate String?
@@ -102,11 +102,6 @@ model Patient {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-enum PatientStatus {
-  active
-  archived
 }
 
 model Room {
