@@ -2,12 +2,15 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { V } from "../data/validationLimits";
 import {
-  sanitizePersonName,
   sanitizeNationalIdDigits,
-  sanitizeDateDdMm,
   isValidDateDdMmYyyy,
   sanitizeFreeText,
 } from "../lib/inputSanitize";
+import {
+  patientNameRules,
+  dateDdMmRules,
+  dateDdMmOptionalRules,
+} from "../lib/fieldRules";
 import { Badge, Card, Btn, Th, Td, Modal, FL, FI, FS, FTA } from "../components/ui";
 import PatientProfile from "./PatientProfile";
 
@@ -121,10 +124,8 @@ export default function Patients({
             <FI
               value={newP.name}
               onChange={(v) => setNewP((p) => ({ ...p, name: v }))}
-              sanitize={sanitizePersonName}
-              maxLength={V.NAME_MAX}
+              {...patientNameRules}
               placeholder="John Doe"
-              title="Letters and spaces; max 255 characters"
             />
           </FL>{" "}
           <FL label="ID number ⭐">
@@ -142,22 +143,16 @@ export default function Patients({
             <FI
               value={newP.dob}
               onChange={(v) => setNewP((p) => ({ ...p, dob: v }))}
-              sanitize={sanitizeDateDdMm}
-              maxLength={10}
-              inputMode="numeric"
+              {...dateDdMmRules}
               placeholder="DD/MM/YYYY"
-              title="Format DD/MM/YYYY"
             />
           </FL>{" "}
           <FL label="Date Login">
             <FI
               value={newP.admitDate}
               onChange={(v) => setNewP((p) => ({ ...p, admitDate: v }))}
-              sanitize={sanitizeDateDdMm}
-              maxLength={10}
-              inputMode="numeric"
+              {...dateDdMmOptionalRules}
               placeholder="DD/MM/YYYY (empty = today)"
-              title="Format DD/MM/YYYY or empty for today"
             />
           </FL>{" "}
           <FL label="Room">
