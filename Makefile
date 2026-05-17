@@ -38,9 +38,9 @@ ps:
 logs:
 	$(RUN) logs -f --tail=100
 
-## e2e: Playwright UI tests (needs API :4000; starts Vite from app/ unless PLAYWRIGHT_SKIP_WEBSERVER=1)
+## e2e: Playwright UI tests against the running Docker stack (UI :8080, API :4000)
 e2e:
-	cd "$(ROOT)/app" && npm run test:e2e
+	cd "$(ROOT)/app" && PLAYWRIGHT_BASE_URL=http://localhost:8080 PLAYWRIGHT_SKIP_WEBSERVER=1 npm run test:e2e
 
 help:
 	@echo "Rehab Docker stack — run from anywhere: make -f path/to/rehab/Makefile <target>"
