@@ -741,6 +741,96 @@ Returns daily summaries for a house, optionally filtered by date.
 
 ---
 
+## Field Rules
+
+### GET /api/field-rules
+Returns validation constraints for all UI fields. Used by the frontend to keep client-side validation in sync with the backend.
+
+**No authentication required.**
+
+**Response 200:**
+```json
+{
+  "login": {
+    "username": { "required": true, "maxLength": 64 },
+    "password": { "required": true, "maxLength": 128 }
+  },
+  "patient": {
+    "name": { "required": true, "maxLength": 120 },
+    "dob": { "maxLength": 20 },
+    "admitDate": { "maxLength": 20 }
+  },
+  "med": {
+    "name": { "required": true, "maxLength": 100 },
+    "dose": { "maxLength": 20 },
+    "unit": { "maxLength": 10 }
+  }
+  // ... other entity groups
+}
+```
+
+Each entry has the shape `{ required?: boolean, maxLength?: int, min?: int, max?: int, pattern?: string }`.
+
+---
+
+## Absences
+
+Dedicated absence records with an approval workflow. Separate from the `awayType` field on Patient (which controls real-time status). An absence record logs the full leave event including dates and approval.
+
+### GET /api/absences?houseId=:id
+Returns all absence records for a house, sorted newest first.
+
+**Response 200:**
+```json
+[
+  {
+    "id": "uuid...",
+    "patientId": "clppp...",
+    "houseId": "clyyy...",
+    "type": "Home Visit",
+    "startDate": "11/05/2025",
+    "endDate": "12/05/2025",
+    "status": "pending",
+    "approvedBy": null,
+    "returnedAt": null,
+    "createdAt": "2025-05-11T10:00:00Z"
+  }
+]
+```
+
+**Status values:** `pending`, `approved`, `returned`  
+**Type values:** `Home Visit`, `Errands`, `Therapy Medical`, `Other`
+
+### POST /api/absences
+Create a new absence record.
+
+**Request body:**
+```json
+{
+  "patientId": "clppp...",
+  "houseId": "clyyy...",
+  "type": "Home Visit",
+  "startDate": "11/05/2025",
+  "endDate": "12/05/2025"
+}
+```
+**Response 201:** Created absence object.
+
+### PATCH /api/absences/:id
+Approve an absence or mark the patient as returned.
+
+**Request body (any subset):**
+```json
+{
+  "status": "approved",
+  "approvedBy": "Jonathan Barak",
+  "returnedAt": "12/05/2025 14:30"
+}
+```
+**Response 200:** Updated absence object.
+
+---
+
 ## Roles Reference
 
 | Role | Value | Description |
@@ -763,6 +853,9 @@ To mark as returned: `PATCH /api/patients/:id` with `{ "awayType": null }`
 
 ### ShiftDist table
 The `ShiftDist` model is in `db/prisma/schema.prisma` (composite primary key `(patientId, shift, date)`). Apply schema with `cd db && npx prisma migrate dev` (or `prisma db push`). The Kotlin API exposes it at `GET/PUT /api/distributions`.
+
+### Absence table
+The `Absence` entity stores dedicated absence records with a full approval workflow. Alongside `awayType` on Patient (real-time status flag), `Absence` keeps a historical log of each leave event with start/end dates, type, and approval status.
 
 ### Schema evolution
 PostgreSQL schema is owned by **Prisma** in the `db/` package. The Kotlin service uses JPA `ddl-auto: validate` in the default profile — after pulling changes, run Prisma migrations before starting the backend.

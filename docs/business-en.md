@@ -181,7 +181,9 @@ Manages patient leave from the facility.
 - Mark patient as returned when they come back
 - While absent, patient does NOT appear in Medication Distribution, Groups, or Phones
 
-**Implementation:** Absence is tracked via the `awayType` field on the Patient record. When set, the patient appears with status `"away"` throughout the system. On return, `awayType` is cleared.
+**Implementation:** Absences use a two-layer system:
+1. `awayType` field on Patient — real-time flag controlling whether the patient appears in operational views (Distribution, Groups, Phones). Set when absence starts, cleared on return.
+2. `Absence` entity — full audit record per absence event with start/end dates, type, approval status (`pending` → `approved`), and return timestamp.
 
 **Absence types:** Home Visit · Errands · Therapy Medical · Other
 
@@ -212,6 +214,15 @@ End-of-shift report written by the counselor.
 - Write individual notes for each patient
 - Submit the summary (timestamped)
 - Managers can view all submitted summaries by date
+
+### 3.15 Input Validation
+
+All user inputs are validated both on the frontend and on the backend:
+
+- **Frontend:** Each form field has character limits and format checks applied before submission. Validation rules are fetched from the backend at startup via `GET /api/field-rules`, keeping client and server in sync.
+- **Backend:** All API endpoints validate incoming data using Jakarta Bean Validation (Spring Boot). Invalid requests return HTTP 400 with a descriptive error.
+
+Key limits: patient name up to 120 characters, free-text notes up to 500 characters, medication name up to 100 characters, monetary amounts up to 9,999,999.
 
 ---
 
@@ -262,6 +273,7 @@ End-of-shift report written by the counselor.
 10. Each patient has exactly one assigned therapist (or none)
 11. The counselor schedule supports one counselor per house per day; assigning a new one replaces the previous
 12. Schedule editing is available to managers and org managers only
+13. All form inputs are validated on the frontend before submission and re-validated by the backend — character limits and format constraints are enforced at both layers.
 
 ---
 
@@ -288,6 +300,7 @@ End-of-shift report written by the counselor.
 | TherapistAssignment | patientId, therapistId — one per patient |
 | TherapySession | patientId, therapistId, date, topic, urgency |
 | DailySummary | counselorId, houseId, date, generalText, patientSummaries |
+| Absence | patientId, houseId, type, startDate, endDate, status, approvedBy, returnedAt |
 
 ---
 
