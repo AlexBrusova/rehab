@@ -274,6 +274,8 @@ export default function MedManager({
                   med={m}
                   onSave={(upd) => saveMed(m.id, upd)}
                   onCancel={() => setEditMed(null)}
+                  t={t}
+                  dir={dir}
                 />
               ) : (
                 <div

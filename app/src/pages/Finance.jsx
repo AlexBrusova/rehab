@@ -20,6 +20,8 @@ export default function Finance({
   onAddPatientTx,
   onAddCashTx,
   onAddCashboxCount,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [tab, setTab] = useState("patients");
@@ -44,9 +46,9 @@ export default function Finance({
     .filter((f) => f.type === "withdrawal")
     .reduce((a, f) => a + f.amount, 0);
   const addPatientTx = async () => {
-    if (!effectiveSelPat) { toast("⚠️ Please select a patient"); return; }
+    if (!effectiveSelPat) { toast(t('finance.toastSelectPatient')); return; }
     if (!isValidMoneyAmount(newTx.amount)) {
-      toast("⚠️ Please enter a valid Amount");
+      toast(t('finance.toastAmountInvalid'));
       return;
     }
     const amt = Number(newTx.amount);
@@ -54,8 +56,8 @@ export default function Finance({
       await onAddPatientTx(effectiveSelPat, newTx.type, amt, newTx.cat, newTx.note, balance);
       setNewTx({ type: "deposit", amount: "", cat: "Family", note: "" });
       setShowAdd(null);
-      toast(`✅ ${newTx.type === "deposit" ? "Deposit" : "Withdrawal"} recorded`);
-    } catch { toast("❌ Failed to record transaction"); }
+      toast(newTx.type === "deposit" ? t('finance.toastDepositRecorded') : t('finance.toastWithdrawalRecorded'));
+    } catch { toast(t('finance.toastAddFailed')); }
   }; /* ── CASHBOX TAB ── */
   const [showCashTx, setShowCashTx] = useState(null);
   const [showCount, setShowCount] = useState(false);
@@ -78,7 +80,7 @@ export default function Finance({
     .reduce((a, f) => a + f.amount, 0);
   const addCashTx = async () => {
     if (!isValidMoneyAmount(newCashTx.amount)) {
-      toast("⚠️ Please enter a valid Amount");
+      toast(t('finance.toastAmountInvalid'));
       return;
     }
     const amt = Number(newCashTx.amount);
@@ -86,12 +88,12 @@ export default function Finance({
       await onAddCashTx(activeHouseId, newCashTx.type, amt, newCashTx.cat, newCashTx.note, cbBalance);
       setNewCashTx({ type: "deposit", amount: "", cat: "Misc. Income", note: "" });
       setShowCashTx(null);
-      toast(`✅ ${newCashTx.type === "deposit" ? "Income" : "Withdrawal"} to Cashbox recorded`);
-    } catch { toast("❌ Failed to record cashbox transaction"); }
+      toast(newCashTx.type === "deposit" ? t('finance.toastCashboxIncomeRecorded') : t('finance.toastCashboxWithdrawalRecorded'));
+    } catch { toast(t('finance.toastCashboxAddFailed')); }
   };
   const submitCount = async () => {
     if (!isValidMoneyAmount(countAmount)) {
-      toast("⚠️ Please enter the amount you counted");
+      toast(t('finance.toastCountAmountRequired'));
       return;
     }
     const counted = Number(countAmount);
@@ -103,12 +105,12 @@ export default function Finance({
       setCountNotes("");
       toast(
         diff === 0
-          ? "✅ Cashbox count OK – all balanced"
+          ? t('finance.toastCountOk')
           : diff > 0
             ? `⚠️ Surplus of ₪${diff}`
             : `⚠️ Missing ₪${Math.abs(diff)}`,
       );
-    } catch { toast("❌ Failed to save cashbox count"); }
+    } catch { toast(t('finance.toastCountFailed')); }
   };
   return (
     <div>
@@ -119,41 +121,44 @@ export default function Finance({
           onClose={() => setShowAdd(null)}
           title={
             showAdd === "deposit"
-              ? "💰 Deposit to Patient"
-              : "💸 Withdrawal from Patient"
+              ? t('finance.depositToPatientTitle')
+              : t('finance.withdrawalFromPatientTitle')
           }
           width={380}
         >
           {" "}
-          <FL label="Amount (₪)">
+          <FL label={t('finance.amountLabel')}>
             <FI
               value={newTx.amount}
               onChange={(v) => setNewTx((t) => ({ ...t, amount: v }))}
-              placeholder="500"
+              placeholder={t('finance.amountPlaceholder')}
               type="text"
               inputMode="decimal"
               sanitize={sanitizeMoneyAmount}
               maxLength={14}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Category">
+          <FL label={t('finance.categoryLabel')}>
             <FS
               value={newTx.cat}
               onChange={(v) => setNewTx((t) => ({ ...t, cat: v }))}
               options={
                 showAdd === "deposit"
-                  ? ["Family", "Opening", "Other"]
-                  : ["Hygiene", "Shopping", "Medications", "Other"]
+                  ? [t('finance.depositCategoryFamily'), t('finance.depositCategoryOpening'), t('finance.depositCategoryOther')]
+                  : [t('finance.withdrawalCategoryHygiene'), t('finance.withdrawalCategoryShopping'), t('finance.withdrawalCategoryMedications'), t('finance.withdrawalCategoryOther')]
               }
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Note">
+          <FL label={t('finance.noteLabel')}>
             <FI
               value={newTx.note}
               onChange={(v) => setNewTx((t) => ({ ...t, note: v }))}
-              placeholder="Short description"
+              placeholder={t('finance.notePlaceholder')}
               sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
               maxLength={V.SHORT_LABEL}
+              dir={dir}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -161,10 +166,10 @@ export default function Finance({
               color={showAdd === "deposit" ? "teal" : "red"}
               onClick={addPatientTx}
             >
-              ✓ Save
+              {t('finance.saveButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowAdd(null)}>
-              Cancel
+              {t('finance.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -174,41 +179,44 @@ export default function Finance({
           onClose={() => setShowCashTx(null)}
           title={
             showCashTx === "deposit"
-              ? "🏦 Deposit to Cashbox"
-              : "💸 Withdrawal from Cashbox"
+              ? t('finance.depositToCashboxTitle')
+              : t('finance.withdrawalFromCashboxTitle')
           }
           width={380}
         >
           {" "}
-          <FL label="Amount (₪)">
+          <FL label={t('finance.amountLabel')}>
             <FI
               value={newCashTx.amount}
               onChange={(v) => setNewCashTx((t) => ({ ...t, amount: v }))}
-              placeholder="500"
+              placeholder={t('finance.amountPlaceholder')}
               type="text"
               inputMode="decimal"
               sanitize={sanitizeMoneyAmount}
               maxLength={14}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Category">
+          <FL label={t('finance.categoryLabel')}>
             <FS
               value={newCashTx.cat}
               onChange={(v) => setNewCashTx((t) => ({ ...t, cat: v }))}
               options={
                 showCashTx === "deposit"
-                  ? ["Misc. Income", "Donation", "Family payment", "Other"]
-                  : ["Equipment", "Food", "Maintenance", "Salary", "Other"]
+                  ? [t('finance.cashboxDepositCategoryMiscIncome'), t('finance.cashboxDepositCategoryDonation'), t('finance.cashboxDepositCategoryFamilyPayment'), t('finance.depositCategoryOther')]
+                  : [t('finance.cashboxWithdrawalCategoryEquipment'), t('finance.cashboxWithdrawalCategoryFood'), t('finance.cashboxWithdrawalCategoryMaintenance'), t('finance.cashboxWithdrawalCategorySalary'), t('finance.withdrawalCategoryOther')]
               }
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Note">
+          <FL label={t('finance.noteLabel')}>
             <FI
               value={newCashTx.note}
               onChange={(v) => setNewCashTx((t) => ({ ...t, note: v }))}
-              placeholder="Short description"
+              placeholder={t('finance.notePlaceholder')}
               sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
               maxLength={V.SHORT_LABEL}
+              dir={dir}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -216,10 +224,10 @@ export default function Finance({
               color={showCashTx === "deposit" ? "teal" : "red"}
               onClick={addCashTx}
             >
-              ✓ Save
+              {t('finance.saveButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowCashTx(null)}>
-              Cancel
+              {t('finance.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -227,7 +235,7 @@ export default function Finance({
       {showCount && (
         <Modal
           onClose={() => setShowCount(false)}
-          title="🔢 Cashbox Count – Shift Handoff"
+          title={t('finance.cashboxCountTitle')}
           width={400}
         >
           {" "}
@@ -242,21 +250,22 @@ export default function Finance({
           >
             {" "}
             <div style={{ fontSize: 12, color: C.mid, marginBottom: 4 }}>
-              System Expected Balance:
+              {t('finance.expectedBalance')}
             </div>{" "}
             <div style={{ fontSize: 24, fontWeight: 900, color: C.teal }}>
               ₪{cbBalance.toLocaleString()}
             </div>{" "}
           </div>{" "}
-          <FL label="Actual amount counted (₪) ⭐">
+          <FL label={t('finance.actualAmountLabel')}>
             <FI
               value={countAmount}
               onChange={(v) => setCountAmount(v)}
-              placeholder="Enter the amount you counted"
+              placeholder={t('finance.actualAmountPlaceholder')}
               type="text"
               inputMode="decimal"
               sanitize={sanitizeMoneyAmount}
               maxLength={14}
+              dir={dir}
             />
           </FL>{" "}
           {countAmount &&
@@ -278,8 +287,8 @@ export default function Finance({
                     }}
                   >
                     {diff > 0
-                      ? `✅ Surplus: +₪${diff}`
-                      : `⚠️ Deficit: -₪${Math.abs(diff)}`}
+                      ? `${t('finance.surplus')}${diff}`
+                      : `${t('finance.deficit')}${Math.abs(diff)}`}
                   </div>
                 );
               return (
@@ -295,26 +304,27 @@ export default function Finance({
                     marginBottom: 12,
                   }}
                 >
-                  ✅ Amount matches!
+                  {t('finance.amountMatches')}
                 </div>
               );
             })()}{" "}
-          <FL label="Notes">
+          <FL label={t('finance.notesLabel')}>
             <FTA
               value={countNotes}
               onChange={setCountNotes}
-              placeholder="Notes for count..."
+              placeholder={t('finance.notesPlaceholder')}
               rows={2}
               sanitize={sanitizeFreeText}
               maxLength={V.NOTE_MAX}
+              dir={dir}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="teal" onClick={submitCount}>
-              ✓ Sign the Count
+              {t('finance.signCountButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowCount(false)}>
-              Cancel
+              {t('finance.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -333,8 +343,8 @@ export default function Finance({
       >
         {" "}
         {[
-          ["patients", "👤 Patient Funds"],
-          ["cashbox", "🏦 Center Cashbox"],
+          ["patients", t('finance.patientFundsTab')],
+          ["cashbox", t('finance.centerCashboxTab')],
         ].map(([v, l]) => (
           <button
             key={v}
@@ -362,7 +372,7 @@ export default function Finance({
           {" "}
           {!isManager && (
             <Alrt type="teal" icon="💡">
-              Patient funds – view and management for the shift
+              {t('finance.patientFundsInfo')}
             </Alrt>
           )}{" "}
           <div
@@ -386,12 +396,13 @@ export default function Finance({
                   marginBottom: 4,
                 }}
               >
-                Select Patient
+                {t('finance.selectPatientLabel')}
               </label>{" "}
               <FS
                 value={effectiveSelPat}
                 onChange={setSelPat}
                 options={patients.map((p) => ({ v: p.id, l: p.name }))}
+                dir={dir}
               />{" "}
             </div>{" "}
             <Btn
@@ -402,7 +413,7 @@ export default function Finance({
                 setShowAdd("deposit");
               }}
             >
-              + Deposit
+              {t('finance.depositButtonFull')}
             </Btn>{" "}
             <Btn
               color="red"
@@ -412,13 +423,13 @@ export default function Finance({
                 setShowAdd("withdrawal");
               }}
             >
-              + Withdrawal
+              {t('finance.withdrawalButtonFull')}
             </Btn>{" "}
           </div>{" "}
           <Card>
             {" "}
             <CT icon="💰" bg="#e8f0fb">
-              Account – {pName(patients, effectiveSelPat)}
+              {t('finance.accountTitle')} {pName(patients, effectiveSelPat)}
             </CT>{" "}
             <div
               style={{
@@ -431,21 +442,21 @@ export default function Finance({
               {" "}
               {[
                 [
-                  "Total Deposits",
+                  t('finance.totalDeposits'),
                   `₪${totalIn.toLocaleString()}`,
                   C.green,
                   "#e8f8ef",
                   "#b8e8cb",
                 ],
                 [
-                  "Total Expenses",
+                  t('finance.totalExpenses'),
                   `₪${totalOut.toLocaleString()}`,
                   C.red,
                   "#fce8e8",
                   "#f0b8b8",
                 ],
                 [
-                  "Balance",
+                  t('finance.balanceLabel'),
                   `₪${balance.toLocaleString()}`,
                   C.blue,
                   "#e8f0fb",
@@ -487,12 +498,12 @@ export default function Finance({
             >
               <thead>
                 <tr>
-                  <Th>Date</Th>
-                  <Th>Type</Th>
-                  <Th>Amount</Th>
-                  <Th>Category</Th>
-                  <Th>Note</Th>
-                  <Th>Balance</Th>
+                  <Th>{t('finance.dateColumn')}</Th>
+                  <Th>{t('finance.typeColumn')}</Th>
+                  <Th>{t('finance.amountColumn')}</Th>
+                  <Th>{t('finance.categoryColumn')}</Th>
+                  <Th>{t('finance.noteColumn')}</Th>
+                  <Th>{t('finance.balanceColumn')}</Th>
                 </tr>
               </thead>
               <tbody>
@@ -509,7 +520,7 @@ export default function Finance({
                         color: f.type === "deposit" ? C.green : C.red,
                       }}
                     >
-                      {f.type === "deposit" ? "↑ Deposit" : "↓ Withdrawal"}
+                      {f.type === "deposit" ? t('finance.depositArrow') : t('finance.withdrawalArrow')}
                     </Td>{" "}
                     <Td
                       style={{
@@ -556,7 +567,7 @@ export default function Finance({
             <div>
               {" "}
               <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>
-                Center Cashbox Balance
+                {t('finance.centerCashboxBalance')}
               </div>{" "}
               <div
                 style={{
@@ -569,7 +580,7 @@ export default function Finance({
                 ₪{cbBalance.toLocaleString()}
               </div>{" "}
               <div style={{ fontSize: 12, opacity: 0.6, marginTop: 4 }}>
-                last updated: {houseCashbox[0]?.date} {houseCashbox[0]?.time}
+                {t('finance.lastUpdated')} {houseCashbox[0]?.date} {houseCashbox[0]?.time}
               </div>{" "}
             </div>{" "}
             <div
@@ -582,10 +593,10 @@ export default function Finance({
             >
               {" "}
               <div style={{ fontSize: 12, opacity: 0.7 }}>
-                ↑ Income: <strong>₪{cbIn.toLocaleString()}</strong>
+                {t('finance.incomeLabel')} <strong>₪{cbIn.toLocaleString()}</strong>
               </div>{" "}
               <div style={{ fontSize: 12, opacity: 0.7 }}>
-                ↓ Withdrawn: <strong>₪{cbOut.toLocaleString()}</strong>
+                {t('finance.withdrawnLabel')} <strong>₪{cbOut.toLocaleString()}</strong>
               </div>{" "}
             </div>{" "}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -598,7 +609,7 @@ export default function Finance({
                   setShowCashTx("deposit");
                 }}
               >
-                + Income
+                + {t('finance.incomeButton')}
               </Btn>{" "}
               <Btn
                 color="red"
@@ -608,10 +619,10 @@ export default function Finance({
                   setShowCashTx("withdrawal");
                 }}
               >
-                + Withdrawal
+                + {t('finance.withdrawalButton')}
               </Btn>{" "}
               <Btn color="orange" size="sm" onClick={() => setShowCount(true)}>
-                🔢 Counted Cashbox
+                {t('finance.countedCashboxButton')}
               </Btn>{" "}
             </div>{" "}
           </div>{" "}
@@ -623,7 +634,7 @@ export default function Finance({
             <Card>
               {" "}
               <CT icon="📋" bg="#e8f0fb">
-                Cashbox Transactions
+                {t('finance.cashboxTransactions')}
               </CT>{" "}
               <table
                 style={{
@@ -634,13 +645,13 @@ export default function Finance({
               >
                 <thead>
                   <tr>
-                    <Th>Date</Th>
-                    <Th>Time</Th>
-                    <Th>Type</Th>
-                    <Th>Amount</Th>
-                    <Th>Category</Th>
-                    <Th>recorded by</Th>
-                    <Th>Balance</Th>
+                    <Th>{t('finance.dateColumn')}</Th>
+                    <Th>{t('finance.timeColumn')}</Th>
+                    <Th>{t('finance.typeColumn')}</Th>
+                    <Th>{t('finance.amountColumn')}</Th>
+                    <Th>{t('finance.categoryColumn')}</Th>
+                    <Th>{t('finance.recordedByColumn')}</Th>
+                    <Th>{t('finance.balanceColumn')}</Th>
                   </tr>
                 </thead>
                 <tbody>
@@ -658,7 +669,7 @@ export default function Finance({
                           color: f.type === "deposit" ? C.green : C.red,
                         }}
                       >
-                        {f.type === "deposit" ? "↑ Income" : "↓ Withdrawal"}
+                        {f.type === "deposit" ? t('finance.cashboxIncomeArrow') : t('finance.withdrawalArrow')}
                       </Td>{" "}
                       <Td
                         style={{
@@ -686,7 +697,7 @@ export default function Finance({
             <Card>
               {" "}
               <CT icon="🔢" bg="#fef3e8">
-                counts Cashbox
+                {t('finance.cashboxCounts')}
               </CT>{" "}
               {houseCounts.length === 0 && (
                 <div
@@ -697,7 +708,7 @@ export default function Finance({
                     fontSize: 13,
                   }}
                 >
-                  No counts yet
+                  {t('finance.noCountsYet')}
                 </div>
               )}{" "}
               {houseCounts.map((cc) => {
@@ -729,11 +740,11 @@ export default function Finance({
                           {cc.date} {cc.time}
                         </div>{" "}
                         <div style={{ fontSize: 12, color: C.soft }}>
-                          Counted by: {cc.countedBy}
+                          {t('finance.countedByLabel')} {cc.countedBy}
                         </div>{" "}
                       </div>{" "}
                       <Badge type={hasDiff ? "orange" : "green"}>
-                        {hasDiff ? `Diff: ₪${cc.diff}` : "OK ✓"}
+                        {hasDiff ? `${t('finance.diffBadge')} ₪${cc.diff}` : t('finance.okBadge')}
                       </Badge>{" "}
                     </div>{" "}
                     <div
@@ -753,7 +764,7 @@ export default function Finance({
                         }}
                       >
                         <div style={{ color: C.soft, marginBottom: 2 }}>
-                          Expected
+                          {t('finance.expectedLabel')}
                         </div>
                         <div style={{ fontWeight: 700 }}>
                           ₪{cc.expected?.toLocaleString() || "—"}
@@ -767,7 +778,7 @@ export default function Finance({
                         }}
                       >
                         <div style={{ color: C.soft, marginBottom: 2 }}>
-                          Counted
+                          {t('finance.countedLabel')}
                         </div>
                         <div
                           style={{
