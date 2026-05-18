@@ -63,10 +63,13 @@ class IdempotencyFilter : OncePerRequestFilter() {
             }
 
             if (cached != null) {
-                // Replay cached response
-                response.status = 200
+                // Replay cached response — stored as "status\nbody"
+                val newline = cached.indexOf('\n')
+                val cachedStatus = if (newline > 0) cached.substring(0, newline).toIntOrNull() ?: 200 else 200
+                val cachedBody = if (newline > 0) cached.substring(newline + 1) else cached
+                response.status = cachedStatus
                 response.contentType = "application/json;charset=UTF-8"
-                response.writer.write(cached)
+                response.writer.write(cachedBody)
                 return
             }
 
@@ -77,8 +80,8 @@ class IdempotencyFilter : OncePerRequestFilter() {
             chain.doFilter(request, wrapper)
 
             val responseBody = String(wrapper.contentAsByteArray, Charsets.UTF_8)
-            if (response.status in 200..299 && responseBody.isNotBlank()) {
-                template.opsForValue().set(redisKey, responseBody, TTL)
+            if (wrapper.status in 200..299 && responseBody.isNotBlank()) {
+                template.opsForValue().set(redisKey, "${wrapper.status}\n$responseBody", TTL)
             } else {
                 // Request failed — remove pending marker so client can retry
                 template.delete(redisKey)
