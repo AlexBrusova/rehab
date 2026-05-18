@@ -5,6 +5,8 @@ import { sanitizeFreeText, sanitizeTopic } from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FS, FTA } from "../components/ui";
 
 export default function Groups({
+  t = (k) => k,
+  dir = "ltr",
   patients,
   groups,
   setGroups,
@@ -38,11 +40,11 @@ export default function Groups({
   const cycleAtt = (pid) => {
     const states = ["present", "late", "absent"];
     const next = states[(states.indexOf(getAtt(pid)) + 1) % 3];
-    onUpsertAttendance(activeGroup, pid, next).catch(() => toast("❌ Failed to update attendance"));
+    onUpsertAttendance(activeGroup, pid, next).catch(() => toast(t('groups.toastAttendanceFailed')));
   };
   const openGroup = async () => {
     if (!quickTopic.trim()) {
-      toast("⚠️ Please enter a Topic");
+      toast(t('groups.toastTopicRequired'));
       return;
     }
     try {
@@ -50,15 +52,15 @@ export default function Groups({
       setActiveGroup(created.id);
       setShowQuickOpen(false);
       setQuickTopic("");
-      toast("✅ Group opened");
-    } catch { toast("❌ Failed to open group"); }
+      toast(t('groups.toastGroupOpened'));
+    } catch { toast(t('groups.toastGroupOpenFailed')); }
   };
   const closeGroup = async () => {
     try {
       await onUpdateGroup(activeGroup, { status: "done" });
       setActiveGroup(null);
-      toast("✅ Group closed");
-    } catch { toast("❌ Failed to close group"); }
+      toast(t('groups.toastGroupClosed'));
+    } catch { toast(t('groups.toastGroupCloseFailed')); }
   };
   const [editGroupId, setEditGroupId] = useState(null);
   const editG = groups.find((g) => g.id === editGroupId);
@@ -68,7 +70,7 @@ export default function Groups({
   const cycleEditAtt = (pid) => {
     const states = ["present", "late", "absent"];
     const next = states[(states.indexOf(getEditAtt(pid)) + 1) % 3];
-    onUpsertAttendance(editGroupId, pid, next).catch(() => toast("❌ Failed to update attendance"));
+    onUpsertAttendance(editGroupId, pid, next).catch(() => toast(t('groups.toastAttendanceFailed')));
   };
   const [editNote, setEditNote] = useState("");
   const [editEventPat, setEditEventPat] = useState(null);
@@ -79,15 +81,15 @@ export default function Groups({
   const closeEdit = () => {
     setEditGroupId(null);
   };
-  const attPropsEdit = {
-    present: { l: "✓ Present", bg: "#e8f8ef", c: C.green },
-    late: { l: "⏰ Late", bg: "#fef3e8", c: C.orange },
-    absent: { l: "✗ Absent", bg: "#fce8e8", c: C.red },
+  const attLabels = {
+    present: t('groups.statusPresent'),
+    late: t('groups.statusLate'),
+    absent: t('groups.statusAbsent'),
   };
-  const attProps = {
-    present: { l: "✓ Present", bg: "#e8f8ef", c: C.green },
-    late: { l: "⏰ Late", bg: "#fef3e8", c: C.orange },
-    absent: { l: "✗ Absent", bg: "#fce8e8", c: C.red },
+  const attColors = {
+    present: { bg: "#e8f8ef", c: C.green },
+    late: { bg: "#fef3e8", c: C.orange },
+    absent: { bg: "#fce8e8", c: C.red },
   };
   const presentCount = activePats.filter(
     (p) => getAtt(p.id) === "present",
@@ -102,24 +104,26 @@ export default function Groups({
       {showEvent && (
         <Modal
           onClose={() => setShowEvent(null)}
-          title={`Event – ${patients.find((p) => p.id === showEvent)?.name}`}
+          title={`${t('groups.eventTitle')} ${patients.find((p) => p.id === showEvent)?.name}`}
           width={360}
         >
           {" "}
-          <FL label="Type">
+          <FL label={t('groups.eventTypeLabel')}>
             <FS
+              dir={dir}
               value={eventData.type}
               onChange={(v) => setEventData((e) => ({ ...e, type: v }))}
               options={[
-                { v: "exit", l: "🚪 Unauthorized Exit" },
-                { v: "disturbance", l: "⚠️ Disruption" },
-                { v: "removal", l: "🚫 Withdrawal" },
-                { v: "note", l: "📝 Note" },
+                { v: "exit", l: t('groups.eventTypeExit') },
+                { v: "disturbance", l: t('groups.eventTypeDisturbance') },
+                { v: "removal", l: t('groups.eventTypeRemoval') },
+                { v: "note", l: t('groups.eventTypeNote') },
               ]}
             />
           </FL>{" "}
-          <FL label="Description">
+          <FL label={t('groups.descriptionLabel')}>
             <FTA
+              dir={dir}
               value={eventData.desc}
               onChange={(v) => setEventData((e) => ({ ...e, desc: v }))}
               rows={2}
@@ -132,15 +136,15 @@ export default function Groups({
             <Btn
               color="orange"
               onClick={() => {
-                toast("✅ Event recorded");
+                toast(t('groups.toastEventRecorded'));
                 setShowEvent(null);
                 setEventData({ type: "disturbance", desc: "" });
               }}
             >
-              ✓ Save
+              {t('groups.saveEventButton')}
             </Btn>{" "}
             <Btn color="outline" onClick={() => setShowEvent(null)}>
-              Cancel
+              {t('groups.cancelButton')}
             </Btn>{" "}
           </div>{" "}
         </Modal>
@@ -170,24 +174,24 @@ export default function Groups({
                 {cur.topic}
               </div>{" "}
               <div style={{ fontSize: 12, opacity: 0.75 }}>
-                {cur.time} &nbsp;|&nbsp; {activePats.length} Patients
+                {cur.time} &nbsp;|&nbsp; {activePats.length} {t('groups.patientsCountLabel')}
                 &nbsp;|&nbsp; ✓ {presentCount} &nbsp; ⏰ {lateCount} &nbsp; ✗{" "}
                 {absentCount}
               </div>{" "}
             </div>{" "}
             <Btn color="orange" size="sm" onClick={closeGroup}>
-              ✓ Close Group
+              {t('groups.closeGroupButton')}
             </Btn>{" "}
           </div>{" "}
           <Alrt type="teal" icon="💡">
-            Default: everyone Present. Tap once to toggle.
+            {t('groups.attendanceDefault')}
           </Alrt>{" "}
           {/* Attendance list – fast single-tap */}{" "}
           <Card style={{ marginBottom: 12 }}>
             {" "}
             {activePats.map((p) => {
               const s = getAtt(p.id);
-              const ap = attProps[s];
+              const ap = attColors[s];
               return (
                 <div
                   key={p.id}
@@ -217,7 +221,7 @@ export default function Groups({
                       fontFamily: "inherit",
                     }}
                   >
-                    Event
+                    {t('groups.eventButton')}
                   </button>{" "}
                   {/* Attendance cycle button */}{" "}
                   <button
@@ -236,7 +240,7 @@ export default function Groups({
                       textAlign: "center",
                     }}
                   >
-                    {ap.l}
+                    {attLabels[s]}
                   </button>{" "}
                 </div>
               );
@@ -249,7 +253,7 @@ export default function Groups({
         <Card style={{ marginBottom: 14, border: `2px solid ${C.teal}` }}>
           {" "}
           <CT icon="🗣️" bg="#e3f7f8">
-            Open Group
+            {t('groups.openGroupTitle')}
           </CT>{" "}
           <div style={{ marginBottom: 10 }}>
             {" "}
@@ -262,14 +266,15 @@ export default function Groups({
                 marginBottom: 4,
               }}
             >
-              Group Topic
+              {t('groups.groupTopicLabel')}
             </label>{" "}
             <input
               autoFocus
+              dir={dir}
               value={quickTopic}
               onChange={(e) => setQuickTopic(sanitizeTopic(e.target.value))}
               onKeyDown={(e) => e.key === "Enter" && openGroup()}
-              placeholder="e.g.: Group Therapy, Skills workshop..."
+              placeholder={t('groups.groupTopicPlaceholder')}
               maxLength={V.TOPIC_MAX}
               title="Group topic"
               style={{
@@ -279,7 +284,6 @@ export default function Groups({
                 borderRadius: 8,
                 fontSize: 14,
                 fontFamily: "inherit",
-                direction: "ltr",
                 boxSizing: "border-box",
                 fontWeight: 600,
               }}
@@ -305,7 +309,7 @@ export default function Groups({
                   marginBottom: 4,
                 }}
               >
-                Time
+                {t('groups.timeLabel')}
               </label>{" "}
               <input
                 value={quickTime}
@@ -332,15 +336,15 @@ export default function Groups({
                   marginBottom: 4,
                 }}
               >
-                Type
+                {t('groups.typeLabel')}
               </label>{" "}
               <div style={{ display: "flex", gap: 6 }}>
                 {" "}
                 {[
-                  ["therapeutic", "Therapeutic"],
-                  ["activity", "active"],
-                  ["general", "General"],
-                  ["other", "Other"],
+                  ["therapeutic", t('groups.typeTherapeutic')],
+                  ["activity", t('groups.typeActivity')],
+                  ["general", t('groups.typeGeneral')],
+                  ["other", t('groups.typeOther')],
                 ].map(([v, l]) => (
                   <div
                     key={v}
@@ -367,10 +371,10 @@ export default function Groups({
           <div style={{ display: "flex", gap: 8 }}>
             {" "}
             <Btn color="teal" onClick={openGroup}>
-              ▶ Open and mark Attendance
+              {t('groups.openAndMarkAttendance')}
             </Btn>{" "}
             <Btn color="outline" onClick={() => setShowQuickOpen(false)}>
-              Cancel
+              {t('groups.cancelButton')}
             </Btn>{" "}
           </div>{" "}
         </Card>
@@ -391,7 +395,7 @@ export default function Groups({
             }}
           >
             {" "}
-            + Open New Group{" "}
+            + {t('groups.openNewGroupButton')}{" "}
           </Btn>{" "}
         </div>
       )}{" "}
@@ -421,33 +425,35 @@ export default function Groups({
                 fontFamily: "inherit",
               }}
             >
-              ← Back
+              {t('groups.editClosedGroupBack')}
             </button>{" "}
             <div style={{ fontWeight: 800, fontSize: 16 }}>{editG.topic}</div>{" "}
             <span style={{ fontSize: 12, color: C.soft }}>{editG.time}</span>{" "}
-            <Badge type="gray">Closed – editing</Badge>{" "}
+            <Badge type="gray">{t('groups.editClosedGroupBadge')}</Badge>{" "}
           </div>{" "}
           {/* Edit event on patient */}{" "}
           {editEventPat && (
             <Card style={{ marginBottom: 12, border: `2px solid ${C.orange}` }}>
               {" "}
               <CT icon="⚡" bg="#fef3e8">
-                Event – {patients.find((p) => p.id === editEventPat)?.name}
+                {`${t('groups.eventTitle')} ${patients.find((p) => p.id === editEventPat)?.name}`}
               </CT>{" "}
-              <FL label="Type">
+              <FL label={t('groups.eventTypeLabel')}>
                 <FS
+                  dir={dir}
                   value={editEventData.type}
                   onChange={(v) => setEditEventData((e) => ({ ...e, type: v }))}
                   options={[
-                    { v: "exit", l: "🚪 Unauthorized Exit" },
-                    { v: "disturbance", l: "⚠️ Disruption" },
-                    { v: "removal", l: "🚫 Withdrawal" },
-                    { v: "note", l: "📝 Note" },
+                    { v: "exit", l: t('groups.eventTypeExit') },
+                    { v: "disturbance", l: t('groups.eventTypeDisturbance') },
+                    { v: "removal", l: t('groups.eventTypeRemoval') },
+                    { v: "note", l: t('groups.eventTypeNote') },
                   ]}
                 />
               </FL>{" "}
-              <FL label="Description">
+              <FL label={t('groups.descriptionLabel')}>
                 <FTA
+                  dir={dir}
                   value={editEventData.desc}
                   onChange={(v) => setEditEventData((e) => ({ ...e, desc: v }))}
                   rows={2}
@@ -461,19 +467,19 @@ export default function Groups({
                   color="orange"
                   size="sm"
                   onClick={() => {
-                    toast("✅ Event updated");
+                    toast(t('groups.toastEventUpdated'));
                     setEditEventPat(null);
                     setEditEventData({ type: "disturbance", desc: "" });
                   }}
                 >
-                  ✓ Save Event
+                  {t('groups.saveEventButton')}
                 </Btn>{" "}
                 <Btn
                   color="outline"
                   size="sm"
                   onClick={() => setEditEventPat(null)}
                 >
-                  Cancel
+                  {t('groups.cancelButton')}
                 </Btn>{" "}
               </div>{" "}
             </Card>
@@ -481,14 +487,14 @@ export default function Groups({
           <Card style={{ marginBottom: 12 }}>
             {" "}
             <CT icon="👥" bg="#e3f7f8">
-              Edit Attendance
+              {t('groups.editAttendanceTitle')}
             </CT>{" "}
             <Alrt type="teal" icon="💡">
-              Tap once to toggle Status. Click "Event" to log an Event.
+              {t('groups.editAttendanceTip')}
             </Alrt>{" "}
             {activePats.map((p) => {
               const s = getEditAtt(p.id);
-              const ap = attPropsEdit[s];
+              const ap = attColors[s];
               return (
                 <div
                   key={p.id}
@@ -520,7 +526,7 @@ export default function Groups({
                       fontFamily: "inherit",
                     }}
                   >
-                    Event
+                    {t('groups.eventButton')}
                   </button>{" "}
                   <button
                     onClick={() => cycleEditAtt(p.id)}
@@ -537,7 +543,7 @@ export default function Groups({
                       color: ap.c,
                     }}
                   >
-                    {ap.l}
+                    {attLabels[s]}
                   </button>{" "}
                 </div>
               );
@@ -546,12 +552,13 @@ export default function Groups({
           <Card>
             {" "}
             <CT icon="📝" bg="#f0f2f5">
-              Group Notes
+              {t('groups.groupNotesTitle')}
             </CT>{" "}
             <FTA
+              dir={dir}
               value={editNote || editG.notes || ""}
               onChange={(v) => setEditNote(v)}
-              placeholder="General notes about the group..."
+              placeholder={t('groups.groupNotesPlaceholder')}
               rows={3}
               sanitize={sanitizeFreeText}
               maxLength={V.NOTE_MAX}
@@ -563,12 +570,12 @@ export default function Groups({
                 onClick={async () => {
                   try {
                     await onUpdateGroup(editGroupId, { notes: editNote });
-                    toast("✅ Group updated");
+                    toast(t('groups.toastGroupUpdated'));
                     closeEdit();
-                  } catch { toast("❌ Failed to save notes"); }
+                  } catch { toast(t('groups.toastGroupUpdateFailed')); }
                 }}
               >
-                ✓ Finish Edit
+                {t('groups.finishEditButton')}
               </Btn>
             </div>{" "}
           </Card>{" "}
@@ -578,7 +585,7 @@ export default function Groups({
         <Card>
           {" "}
           <CT icon="📋" bg="#f0f2f5">
-            Groups Today
+            {t('groups.groupsTodayTitle')}
           </CT>{" "}
           {groups.length === 0 && (
             <div
@@ -589,7 +596,7 @@ export default function Groups({
                 fontSize: 13,
               }}
             >
-              No groups yet today
+              {t('groups.noGroupsYet')}
             </div>
           )}{" "}
           {[...groups].reverse().map((g) => (
@@ -634,7 +641,7 @@ export default function Groups({
               <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                 {" "}
                 {g.id === activeGroup && g.status === "active" && (
-                  <Badge type="teal">Active now</Badge>
+                  <Badge type="teal">{t('groups.groupsActiveBadge')}</Badge>
                 )}{" "}
                 <Badge
                   type={
@@ -647,10 +654,10 @@ export default function Groups({
                 >
                   {" "}
                   {g.status === "done"
-                    ? "Closed ✏️"
+                    ? t('groups.groupsClosedLabel')
                     : g.status === "active"
-                      ? "Active"
-                      : "planned"}{" "}
+                      ? t('groups.statusActiveBadge')
+                      : t('groups.statusPlannedBadge')}{" "}
                 </Badge>{" "}
               </div>{" "}
             </div>
