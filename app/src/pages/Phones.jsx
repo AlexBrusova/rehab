@@ -4,6 +4,8 @@ import { Badge, Card, CT, Btn, Th, Td, Modal, FL, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Phones({
+  t = (k) => k,
+  dir = "ltr",
   patients,
   phones,
   setPhones,
@@ -21,28 +23,28 @@ export default function Phones({
   const [issueData, setIssueData] = useState({ patientId: "", duration: 15 });
   const [now, setNow] = useState(new Date());
   useEffect(() => {
-    const t = setInterval(() => setNow(new Date()), 15000);
-    return () => clearInterval(t);
+    const timer = setInterval(() => setNow(new Date()), 15000);
+    return () => clearInterval(timer);
   }, []);
-  const toMinutes = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const toMinutes = (s) => { const [h, m] = s.split(":").map(Number); return h * 60 + m; };
   const nowMin = now.getHours() * 60 + now.getMinutes();
   const isLate = (ph) => ph.returnBy && nowMin > toMinutes(ph.returnBy);
   const lateCount = housePhones.filter(isLate).length;
   const activePats = patients.filter((p) => p.status === "active");
   const issuePhone = async () => {
-    if (!issueData.patientId) { toast("⚠️ Please select a patient"); return; }
+    if (!issueData.patientId) { toast(t('phones.toastSelectPatient')); return; }
     try {
       await onIssue(issueData.patientId, issueData.duration);
       setShowIssue(false);
       toast(`📱 Phone issued to ${pName(patients, issueData.patientId)} for ${issueData.duration} min`);
-    } catch { toast("❌ Failed to issue phone"); }
+    } catch { toast(t('phones.toastIssueFailed')); }
   };
   const returnPhone = async (id) => {
     const ph = phones.find((p) => p.id === id);
     try {
       await onReturn(id);
       toast(`✅ ${pName(patients, ph.patientId)} returned`);
-    } catch { toast("❌ Failed to return phone"); }
+    } catch { toast(t('phones.toastReturnFailed')); }
   };
   return (
     <div>
@@ -50,18 +52,19 @@ export default function Phones({
       {showIssue && (
         <Modal
           onClose={() => setShowIssue(false)}
-          title="📱 Issue Phone"
+          title={t('phones.issuePhoneTitle')}
           width={380}
         >
           {" "}
-          <FL label="Patient">
+          <FL label={t('phones.patientLabel')}>
             <FS
+              dir={dir}
               value={issueData.patientId}
               onChange={(v) => setIssueData((i) => ({ ...i, patientId: v }))}
               options={activePats.map((p) => ({ v: p.id, l: p.name }))}
             />
           </FL>{" "}
-          <FL label="Allocated Time">
+          <FL label={t('phones.allocatedTimeLabel')}>
             {" "}
             <div style={{ display: "flex", gap: 10 }}>
               {" "}
@@ -90,7 +93,7 @@ export default function Phones({
                     {d}
                   </div>{" "}
                   <div style={{ fontSize: 11, color: C.soft }}>
-                    minutes
+                    {t('phones.minutesLabel')}
                   </div>{" "}
                 </div>
               ))}{" "}
@@ -98,10 +101,10 @@ export default function Phones({
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="teal" onClick={issuePhone}>
-              ✓ Issued
+              {t('phones.issuedButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowIssue(false)}>
-              Cancel
+              {t('phones.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -165,7 +168,7 @@ export default function Phones({
                 marginBottom: 4,
               }}
             >
-              in use now
+              {t('phones.inUseNowLabel')}
             </div>
             <div style={{ fontSize: 28, fontWeight: 900 }}>
               {housePhones.length}
@@ -188,7 +191,7 @@ export default function Phones({
                 marginBottom: 4,
               }}
             >
-              Overdue
+              {t('phones.overdueLabel')}
             </div>
             <div
               style={{
@@ -205,16 +208,16 @@ export default function Phones({
           {" "}
           <div>
             <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 3 }}>
-              Issued Phone
+              {t('phones.issuedPhoneTitle')}
             </div>
-            <div style={{ fontSize: 12, color: C.soft }}>15 or 30 minutes</div>
+            <div style={{ fontSize: 12, color: C.soft }}>{t('phones.issuedPhoneDescription')}</div>
           </div>{" "}
           <Btn
             color="teal"
             style={{ marginRight: "auto" }}
             onClick={() => setShowIssue(true)}
           >
-            📱 Issued
+            {t('phones.issueButton')}
           </Btn>{" "}
         </Card>{" "}
       </div>{" "}
@@ -222,7 +225,7 @@ export default function Phones({
         <Card style={{ marginBottom: 16 }}>
           {" "}
           <CT icon="📱" bg="#e3f7f8">
-            Phones In Use
+            {t('phones.phonesInUseTitle')}
           </CT>{" "}
           {housePhones.map((ph) => {
             const givenMin = ph.givenAt ? toMinutes(ph.givenAt) : nowMin;
@@ -275,7 +278,7 @@ export default function Phones({
                       {pName(patients, ph.patientId)}
                     </div>{" "}
                     <div style={{ fontSize: 12, color: C.soft }}>
-                      Issued: {ph.givenAt} | Return by: {ph.returnBy}
+                      {t('phones.issuedAt')} {ph.givenAt} | {t('phones.returnBy')} {ph.returnBy}
                     </div>{" "}
                   </div>{" "}
                   <div style={{ textAlign: "center" }}>
@@ -294,7 +297,7 @@ export default function Phones({
                       {late ? `+${el - duration}` : rem}
                     </div>{" "}
                     <div style={{ fontSize: 10, color: late ? C.red : C.soft }}>
-                      {late ? "minutes overdue" : "remaining"}
+                      {late ? t('phones.minutesOverdueLabel') : t('phones.remainingLabel')}
                     </div>{" "}
                   </div>{" "}
                   <Btn
@@ -302,7 +305,7 @@ export default function Phones({
                     size="sm"
                     onClick={() => returnPhone(ph.id)}
                   >
-                    ✓ returned
+                    {t('phones.returnedButton')}
                   </Btn>{" "}
                 </div>{" "}
                 <div
@@ -332,19 +335,19 @@ export default function Phones({
       <Card>
         {" "}
         <CT icon="📋" bg="#f0f2f5">
-          History
+          {t('phones.historyTitle')}
         </CT>{" "}
         <table
           style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
         >
           <thead>
             <tr>
-              <Th>Patient</Th>
-              <Th>Date</Th>
-              <Th>Issued</Th>
-              <Th>Allocated</Th>
-              <Th>Returned</Th>
-              <Th>Status</Th>
+              <Th>{t('phones.patientColumn')}</Th>
+              <Th>{t('phones.dateColumn')}</Th>
+              <Th>{t('phones.issuedColumn')}</Th>
+              <Th>{t('phones.allocatedColumn')}</Th>
+              <Th>{t('phones.returnedColumn')}</Th>
+              <Th>{t('phones.statusColumn')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -360,7 +363,7 @@ export default function Phones({
                 <Td>{r.returnedAt || "—"}</Td>{" "}
                 <Td>
                   <Badge type={r.late ? "orange" : "green"}>
-                    {r.late ? "⚠ Late" : "✓ On time"}
+                    {r.late ? t('phones.lateStatus') : t('phones.onTimeStatus')}
                   </Badge>
                 </Td>{" "}
               </tr>
