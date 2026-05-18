@@ -4,8 +4,6 @@ import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.LoggerFactory
-import org.springframework.core.env.Environment
-import org.springframework.core.env.Profiles
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContextHolder
@@ -15,7 +13,6 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class JwtAuthenticationFilter(
     private val jwtService: JwtService,
-    private val environment: Environment,
 ) : OncePerRequestFilter() {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -26,7 +23,7 @@ class JwtAuthenticationFilter(
         if (path == "/api/field-rules") return true
         if (path.startsWith("/actuator/health")) return true
         if (path == "/actuator/info") return true
-        if (environment.acceptsProfiles(Profiles.of("docker")) && path == "/actuator/prometheus") return true
+        if (path == "/actuator/prometheus") return true
         return false
     }
 
