@@ -276,7 +276,7 @@ export default function Groups({
               onKeyDown={(e) => e.key === "Enter" && openGroup()}
               placeholder={t('groups.groupTopicPlaceholder')}
               maxLength={V.TOPIC_MAX}
-              title="Group topic"
+              title={t('groups.groupTopicLabel')}
               style={{
                 width: "100%",
                 padding: "9px 12px",
