@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { C } from "./data/constants";
 import { V } from "./data/validationLimits";
 import { sanitizeUsername, stripControlChars } from "./lib/inputSanitize";
@@ -187,3 +188,9 @@ export default function Login({ onLogin, t = (k) => k, dir = "ltr" }) {
     </div>
   );
 }
+
+Login.propTypes = {
+  onLogin: PropTypes.func.isRequired,
+  t: PropTypes.func,
+  dir: PropTypes.string,
+};

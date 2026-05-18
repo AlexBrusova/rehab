@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { C } from "../../data/constants";
 
 export default function FS({ value, onChange, options, dir = "ltr" }) {
@@ -23,3 +24,10 @@ export default function FS({ value, onChange, options, dir = "ltr" }) {
     </select>
   );
 }
+
+FS.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  options: PropTypes.array,
+  dir: PropTypes.string,
+};

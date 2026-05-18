@@ -237,7 +237,7 @@ export default function PatientProfile({
           {pMeds.map((m) => (
             <div key={m.id}>
               {editMed === m.id ? (
-                <EditMedRow med={m} onSave={(upd) => saveMed(m.id, upd)} onCancel={() => setEditMed(null)} />
+                <EditMedRow med={m} onSave={(upd) => saveMed(m.id, upd)} onCancel={() => setEditMed(null)} t={t} dir={dir} />
               ) : (
                 <div style={{ display: "flex", alignItems: "center", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "#fff", marginBottom: 8, gap: 10 }}>
                   <span style={{ fontSize: 18 }}>💊</span>

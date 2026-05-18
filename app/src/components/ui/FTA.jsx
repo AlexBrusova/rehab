@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { C } from "../../data/constants";
 
 export default function FTA({
@@ -40,3 +41,14 @@ export default function FTA({
     />
   );
 }
+
+FTA.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  rows: PropTypes.number,
+  maxLength: PropTypes.number,
+  sanitize: PropTypes.func,
+  title: PropTypes.string,
+  dir: PropTypes.string,
+};

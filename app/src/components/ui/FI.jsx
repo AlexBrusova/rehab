@@ -1,4 +1,5 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { C, BADGE_STYLES } from "../../data/constants";
 
 /**
@@ -89,3 +90,16 @@ export default function FI({
     </div>
   );
 }
+
+FI.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  type: PropTypes.string,
+  maxLength: PropTypes.number,
+  sanitize: PropTypes.func,
+  validate: PropTypes.func,
+  hint: PropTypes.string,
+  title: PropTypes.string,
+  dir: PropTypes.string,
+};
