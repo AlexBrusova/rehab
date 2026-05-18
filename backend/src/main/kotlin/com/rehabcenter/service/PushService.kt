@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.security.Security
+import java.util.Base64
 
 @Service
 class PushSender(
@@ -25,16 +26,9 @@ class PushSender(
     init {
         Security.addProvider(org.bouncycastle.jce.provider.BouncyCastleProvider())
         if (vapidPublicKey.isBlank() || vapidPrivateKey.isBlank()) {
-            val kp = Utils.generateVAPIDKeyPair()
-            val pub = java.util.Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(Utils.savePublicKey(kp.public as java.security.interfaces.ECPublicKey))
-            val priv = java.util.Base64.getUrlEncoder().withoutPadding()
-                .encodeToString(Utils.savePrivateKey(kp.private as java.security.interfaces.ECPrivateKey))
-            log.warn("=== VAPID keys not configured. Add to env vars: ===")
-            log.warn("VAPID_PUBLIC_KEY={}", pub)
-            log.warn("VAPID_PRIVATE_KEY={}", priv)
-            log.warn("VAPID_SUBJECT=mailto:admin@rehab.app")
-            log.warn("=== Push notifications are DISABLED until keys are set ===")
+            log.warn("=== VAPID keys not configured — push notifications DISABLED ===")
+            log.warn("Generate keys with: npx web-push generate-vapid-keys")
+            log.warn("Then set env vars: VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_SUBJECT")
         }
     }
 
@@ -47,7 +41,7 @@ class PushSender(
             svc.setSubject(vapidSubject)
             svc
         } catch (e: Exception) {
-            log.error("Failed to initialize PushService", e)
+            log.error("Failed to initialize PushService: {}", e.message)
             null
         }
     }
@@ -58,7 +52,9 @@ class PushSender(
         val svc = pushService ?: return
         try {
             val payload = mapper.writeValueAsString(mapOf("title" to title, "body" to body, "url" to url))
-            val notification = Notification(sub.endpoint, sub.p256dh, sub.auth, payload)
+            val userPublicKey = Utils.loadPublicKey(sub.p256dh)
+            val authBytes = Base64.getUrlDecoder().decode(sub.auth)
+            val notification = Notification(sub.endpoint, userPublicKey, authBytes, payload.toByteArray(Charsets.UTF_8))
             svc.send(notification)
         } catch (e: Exception) {
             log.warn("Push send failed for endpoint {}: {}", sub.endpoint.take(60), e.message)
