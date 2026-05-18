@@ -17,6 +17,7 @@ export default function FI({
   validate,
   hint,
   title,
+  dir = "ltr",
   ...rest
 }) {
   const [touched, setTouched] = useState(false);
@@ -59,6 +60,7 @@ export default function FI({
         onBlur={handleBlur}
         placeholder={placeholder || ""}
         title={title}
+        dir={dir}
         style={{
           width: "100%",
           padding: "8px 12px",
@@ -66,7 +68,6 @@ export default function FI({
           borderRadius: 8,
           fontSize: 13,
           fontFamily: "inherit",
-          direction: "ltr",
           boxSizing: "border-box",
           background,
           transition: "border-color 0.15s, background 0.15s",

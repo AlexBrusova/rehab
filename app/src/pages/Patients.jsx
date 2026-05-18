@@ -32,6 +32,8 @@ export default function Patients({
   onAddMed,
   onSaveMed,
   onRemoveMed,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const [filter, setFilter] = useState("active");
   const [showAdd, setShowAdd] = useState(false);
@@ -49,22 +51,22 @@ export default function Patients({
   });
   const addPatient = async () => {
     if (!newP.name?.trim()) {
-      toast("⚠️ Please fill Name");
+      toast(t('patients.toastNameRequired'));
       return;
     }
     if (!newP.dob?.trim()) {
-      toast("⚠️ Please fill Date of Birth (required by server)");
+      toast(t('patients.toastDOBRequired'));
       return;
     }
     if (!isValidDateDdMmYyyy(newP.dob.trim())) {
-      toast("⚠️ Date of Birth must be a valid calendar date (DD/MM/YYYY)");
+      toast(t('patients.toastDOBInvalid'));
       return;
     }
     const admitRaw = newP.admitDate?.trim();
     const admitDate =
       admitRaw || new Date().toLocaleDateString("en-GB");
     if (admitRaw && !isValidDateDdMmYyyy(admitRaw)) {
-      toast("⚠️ Admission date must be valid (DD/MM/YYYY) or leave empty for today");
+      toast(t('patients.toastAdmitInvalid'));
       return;
     }
     try {
@@ -79,30 +81,30 @@ export default function Patients({
         roomId: rooms[0]?.id || "",
       });
       setShowAdd(false);
-      toast("✅ Patient added successfully");
+      toast(t('patients.toastPatientAdded'));
     } catch {
-      toast("❌ Failed to add patient");
+      toast(t('patients.toastPatientAddFailed'));
     }
   };
   const discharge = async () => {
     if (!dischargeType) {
-      toast("⚠️ Please select a discharge reason");
+      toast(t('patients.toastDischargeReasonRequired'));
       return;
     }
     try {
       await onArchivePatient(showDischarge, dischargeType);
       setShowDischarge(null);
       setDischargeType("");
-      toast("✅ Treatment completed");
+      toast(t('patients.toastTreatmentCompleted'));
     } catch {
-      toast("❌ Failed to discharge patient");
+      toast(t('patients.toastDischargeFailed'));
     }
   };
   const canEditMeds = user.role === "manager" || user.role === "doctor";
   const dt = {
-    success: { l: "✅ Successful discharge", t: "green" },
-    self: { l: "🚪 Self-discharge", t: "orange" },
-    escape: { l: "🏃 Escape", t: "red" },
+    success: { l: t('patients.successDischargeLongLabel'), t: "green" },
+    self: { l: t('patients.selfDischargeLongLabel'), t: "orange" },
+    escape: { l: t('patients.escapeLongLabel'), t: "red" },
   }; /* Sort by Admission Date oldest first */
   const parseDate = (d) => {
     if (!d) return 0;
@@ -118,45 +120,50 @@ export default function Patients({
     <div>
       {" "}
       {showAdd && (
-        <Modal onClose={() => setShowAdd(false)} title="➕ Add New Patient">
+        <Modal onClose={() => setShowAdd(false)} title={t('patients.addNewPatientTitle')}>
           {" "}
-          <FL label="Name Full ⭐">
+          <FL label={t('patients.nameLabelFull')}>
             <FI
+              dir={dir}
               value={newP.name}
               onChange={(v) => setNewP((p) => ({ ...p, name: v }))}
               {...patientNameRules}
-              placeholder="John Doe"
+              placeholder={t('patients.namePlaceholder')}
             />
           </FL>{" "}
-          <FL label="ID number ⭐">
+          <FL label={t('patients.idNumberLabel')}>
             <FI
+              dir={dir}
               value={newP.idNum}
               onChange={(v) => setNewP((p) => ({ ...p, idNum: v }))}
               sanitize={sanitizeNationalIdDigits}
               maxLength={9}
               inputMode="numeric"
-              placeholder="000000000"
-              title="Digits only, up to 9"
+              placeholder={t('patients.idNumberPlaceholder')}
+              title={t('patients.idNumberTitle')}
             />
           </FL>{" "}
-          <FL label="Date of Birth">
+          <FL label={t('patients.dateOfBirthLabel')}>
             <FI
+              dir={dir}
               value={newP.dob}
               onChange={(v) => setNewP((p) => ({ ...p, dob: v }))}
               {...dateDdMmRules}
-              placeholder="DD/MM/YYYY"
+              placeholder={t('patients.dateOfBirthPlaceholder')}
             />
           </FL>{" "}
-          <FL label="Date Login">
+          <FL label={t('patients.dateLoginLabel')}>
             <FI
+              dir={dir}
               value={newP.admitDate}
               onChange={(v) => setNewP((p) => ({ ...p, admitDate: v }))}
               {...dateDdMmOptionalRules}
-              placeholder="DD/MM/YYYY (empty = today)"
+              placeholder={t('patients.dateLoginPlaceholder')}
             />
           </FL>{" "}
-          <FL label="Room">
+          <FL label={t('patients.roomLabel')}>
             <FS
+              dir={dir}
               value={newP.roomId}
               onChange={(v) => setNewP((p) => ({ ...p, roomId: v }))}
               options={rooms.map((r) => ({
@@ -165,31 +172,33 @@ export default function Patients({
               }))}
             />
           </FL>{" "}
-          <FL label="Addiction Type">
+          <FL label={t('patients.addictionTypeLabel')}>
             <FI
+              dir={dir}
               value={newP.addiction}
               onChange={(v) => setNewP((p) => ({ ...p, addiction: v }))}
               sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
               maxLength={V.SHORT_LABEL}
-              placeholder="e.g.: alcohol and gambling"
+              placeholder={t('patients.addictionTypePlaceholder')}
             />
           </FL>{" "}
-          <FL label="Notes">
+          <FL label={t('patients.notesLabel')}>
             <FTA
+              dir={dir}
               value={newP.notes}
               onChange={(v) => setNewP((p) => ({ ...p, notes: v }))}
               sanitize={(s) => sanitizeFreeText(s, V.NOTE_MAX)}
               maxLength={V.NOTE_MAX}
-              placeholder="Relevant info..."
+              placeholder={t('patients.notesPlaceholder')}
               rows={2}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="teal" onClick={addPatient}>
-              ✓ Add
+              {t('patients.addButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowAdd(false)}>
-              Cancel
+              {t('patients.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -200,7 +209,7 @@ export default function Patients({
             setShowDischarge(null);
             setDischargeType("");
           }}
-          title="End Treatment"
+          title={t('patients.endTreatmentTitle')}
         >
           {" "}
           <div style={{ fontSize: 13, color: C.mid, marginBottom: 16 }}>
@@ -238,7 +247,7 @@ export default function Patients({
           ))}{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
             <Btn color="red" onClick={discharge}>
-              ✓ Confirm Discharge
+              {t('patients.confirmDischargeButton')}
             </Btn>
             <Btn
               color="outline"
@@ -247,7 +256,7 @@ export default function Patients({
                 setDischargeType("");
               }}
             >
-              Cancel
+              {t('patients.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -292,8 +301,8 @@ export default function Patients({
         >
           {" "}
           {[
-            ["active", "Active"],
-            ["archive", "Archive"],
+            ["active", t('patients.activeTab')],
+            ["archive", t('patients.archiveTab')],
           ].map(([v, l]) => (
             <button
               key={v}
@@ -350,7 +359,7 @@ export default function Patients({
               setShowAdd(true);
             }}
           >
-            + Add Patient
+            {t('patients.addPatientButton')}
           </Btn>
         )}{" "}
       </div>{" "}
@@ -366,20 +375,20 @@ export default function Patients({
         >
           <thead>
             <tr>
-              <Th>Name</Th>
-              <Th>Admission</Th>
-              <Th>Days in Center</Th>
+              <Th>{t('patients.tableHeaderName')}</Th>
+              <Th>{t('patients.tableHeaderAdmission')}</Th>
+              <Th>{t('patients.tableHeaderDaysInCenter')}</Th>
               {filter === "active" ? (
                 <>
-                  <Th>Status</Th>
+                  <Th>{t('patients.tableHeaderStatus')}</Th>
                   {(user.role === "manager" || user.role === "org_manager") && (
                     <Th></Th>
                   )}
                 </>
               ) : (
                 <>
-                  <Th>Discharge Reason</Th>
-                  <Th>Date</Th>
+                  <Th>{t('patients.tableHeaderDischargeReason')}</Th>
+                  <Th>{t('patients.tableHeaderDate')}</Th>
                 </>
               )}
             </tr>
@@ -467,7 +476,7 @@ export default function Patients({
                         {p.status === "away" ? (
                           <Badge type="yellow">🏠 {p.awayType}</Badge>
                         ) : (
-                          <Badge type="green">✓ Active</Badge>
+                          <Badge type="green">{t('patients.patientActiveStatus')}</Badge>
                         )}
                       </Td>{" "}
                       {(user.role === "manager" ||
@@ -478,7 +487,7 @@ export default function Patients({
                             size="sm"
                             onClick={() => setShowDischarge(p.id)}
                           >
-                            End
+                            {t('patients.endButton')}
                           </Btn>
                         </Td>
                       )}{" "}

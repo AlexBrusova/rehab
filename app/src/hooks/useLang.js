@@ -3,9 +3,16 @@ import { he } from '../i18n/he'
 
 const dicts = { en, he }
 
-export function useLang(lang) {
+/**
+ * @param {string} lang - locale code ('en' | 'he')
+ * @returns {{ t: (key: string) => string, dir: 'ltr' | 'rtl' }}
+ */
+export default function useLang(lang) {
   const dict = dicts[lang] ?? dicts.en
-  const t = (key) => key.split('.').reduce((o, k) => o?.[k], dict) ?? key
+  const t = (key) => {
+    const val = key.split('.').reduce((o, k) => o?.[k], dict)
+    return typeof val === 'string' ? val : key
+  }
   const dir = lang === 'he' ? 'rtl' : 'ltr'
   return { t, dir }
 }

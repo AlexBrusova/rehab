@@ -1,10 +1,11 @@
 import { C } from "../../data/constants";
 
-export default function FS({ value, onChange, options }) {
+export default function FS({ value, onChange, options, dir = "ltr" }) {
   return (
     <select
       value={value}
       onChange={(e) => onChange(e.target.value)}
+      dir={dir}
       style={{
         width: "100%",
         padding: "9px 12px",
@@ -12,7 +13,6 @@ export default function FS({ value, onChange, options }) {
         borderRadius: 8,
         fontSize: 13,
         fontFamily: "inherit",
-        direction: "ltr",
       }}
     >
       {options.map((o) => (

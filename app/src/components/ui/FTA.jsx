@@ -8,6 +8,7 @@ export default function FTA({
   maxLength,
   sanitize,
   title,
+  dir = "ltr",
   ...rest
 }) {
   const handle = (e) => {
@@ -24,6 +25,7 @@ export default function FTA({
       placeholder={placeholder || ""}
       rows={rows}
       title={title}
+      dir={dir}
       style={{
         width: "100%",
         padding: "9px 12px",
@@ -31,7 +33,6 @@ export default function FTA({
         borderRadius: 8,
         fontSize: 13,
         fontFamily: "inherit",
-        direction: "ltr",
         resize: "vertical",
         boxSizing: "border-box",
       }}
