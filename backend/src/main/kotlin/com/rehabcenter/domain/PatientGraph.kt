@@ -12,6 +12,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.Instant
@@ -36,6 +37,8 @@ class Room(
     var house: House? = null,
     @Column(nullable = false)
     var createdAt: Instant = Instant.now(),
+    @Version
+    var version: Long = 0,
 )
 
 @Entity
@@ -78,6 +81,8 @@ class Patient(
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
     var updatedAt: Instant = Instant.now(),
+    @Version
+    var version: Long = 0,
 ) {
     /** Matches legacy Node API: away residents surface as status "away". */
     @get:JsonProperty("status")

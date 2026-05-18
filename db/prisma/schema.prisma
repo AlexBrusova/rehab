@@ -52,6 +52,7 @@ model User {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  version   BigInt   @default(0)
 }
 
 enum Role {
@@ -102,6 +103,7 @@ model Patient {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  version   BigInt   @default(0)
 }
 
 model Room {
@@ -115,6 +117,7 @@ model Room {
   patients Patient[]
 
   createdAt DateTime @default(now())
+  version   BigInt   @default(0)
 }
 
 model Med {
