@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { C, NAV_CFG, TITLES } from "./data/constants";
+import { C, NAV_CFG } from "./data/constants";
 import useBreakpoint from "./hooks/useBreakpoint";
 import usePushNotifications from "./hooks/usePushNotifications";
+import useLang from "./hooks/useLang";
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
@@ -83,6 +84,15 @@ export default function App() {
   const [toastMsg, showToast] = useToast();
   const { isMobile } = useBreakpoint();
   const push = usePushNotifications(activeHouseId);
+  const { t, dir } = useLang(lang);
+  const SECTION_KEY = {
+    Main: 'sections.main',
+    Daily: 'sections.daily',
+    Management: 'sections.management',
+    Shift: 'sections.shift',
+    Medical: 'sections.medicalSection',
+    'Emotional Therapy': 'sections.emotionalTherapy',
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -465,7 +475,7 @@ export default function App() {
   };
 
   if (!user)
-    return <Login onLogin={handleLogin} />;
+    return <Login onLogin={handleLogin} t={t} dir={dir} />;
   const allowedHouseIds = (user.allowedHouses || []).map((a) => a.houseId || a);
   const allowedHouses = houses.filter(
     (h) => user.allHousesAccess || allowedHouseIds.includes(h.id),
@@ -520,6 +530,8 @@ export default function App() {
           setPatients={setPatients}
           rooms={houseRooms}
           user={user}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -544,6 +556,8 @@ export default function App() {
           onAddMed={createMed}
           onSaveMed={updateMed}
           onRemoveMed={deleteMed}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -559,6 +573,8 @@ export default function App() {
           onUpdateRoom={updateRoom}
           onDeleteRoom={deleteRoom}
           onUpdatePatient={updatePatient}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -570,6 +586,8 @@ export default function App() {
           toast={showToast}
           onMarkAway={markPatientAway}
           onReturn={markPatientReturned}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -583,6 +601,8 @@ export default function App() {
           onAddMed={createMed}
           onSaveMed={updateMed}
           onRemoveMed={deleteMed}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -595,6 +615,8 @@ export default function App() {
           user={user}
           toast={showToast}
           onSetStatus={setDistributionStatus}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -610,6 +632,8 @@ export default function App() {
           onCreateGroup={createGroup}
           onUpdateGroup={updateGroup}
           onUpsertAttendance={upsertAttendance}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -624,6 +648,8 @@ export default function App() {
           toast={showToast}
           onIssue={issuePhone}
           onReturn={returnPhone}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -636,6 +662,8 @@ export default function App() {
           user={user}
           toast={showToast}
           onSave={createSummary}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -650,6 +678,8 @@ export default function App() {
           toast={showToast}
           onCreateShift={createShift}
           onUpdateShift={updateShift}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -664,6 +694,8 @@ export default function App() {
           toast={showToast}
           onAdd={createConsequence}
           onUpdate={updateConsequence}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -680,6 +712,8 @@ export default function App() {
           onAddPatientTx={createPatientTx}
           onAddCashTx={createCashTx}
           onAddCashboxCount={createCashboxCount}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -702,6 +736,8 @@ export default function App() {
           houses={houses}
           onAddUser={createUser}
           onUpdateUser={updateUser}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -713,6 +749,8 @@ export default function App() {
           user={user}
           toast={showToast}
           onAddSession={createTherapySession}
+          t={t}
+          dir={dir}
         />
       </ErrorBoundary>
     ),
@@ -726,12 +764,12 @@ export default function App() {
   ).length;
   return (
     <div
+      dir={dir}
       style={{
         display: "flex",
         minHeight: "100vh",
         background: C.bg,
         fontFamily: "'Heebo','Segoe UI',sans-serif",
-        direction: "ltr",
       }}
     >
       {" "}
@@ -917,7 +955,7 @@ export default function App() {
                       textTransform: "uppercase",
                     }}
                   >
-                    {item.section}
+                    {t(SECTION_KEY[item.section] ?? item.section)}
                   </div>
                 )}{" "}
                 <div
@@ -950,7 +988,7 @@ export default function App() {
                   >
                     {item.icon}
                   </span>{" "}
-                  {item.label}{" "}
+                  {t('nav.' + item.id)}{" "}
                   {dynamicBadge > 0 && (
                     <span
                       style={{
@@ -1171,7 +1209,7 @@ export default function App() {
             data-testid="page-title"
             style={{ fontSize: 15, fontWeight: 800, color: C.text, flex: 1 }}
           >
-            {TITLES[screen]}
+            {t('titles.' + screen)}
           </div>{" "}
           {/* House indicator in topbar */}{" "}
           {canSwitchHouses ? (
