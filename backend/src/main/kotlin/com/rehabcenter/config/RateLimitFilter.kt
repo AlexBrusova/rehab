@@ -35,9 +35,9 @@ class RateLimitFilter : OncePerRequestFilter() {
 
         private data class Limit(val requests: Long, val windowSeconds: Long)
 
-        private val AUTH_LIMIT = Limit(5, 60)
-        private val WRITE_LIMIT = Limit(30, 60)
-        private val READ_LIMIT = Limit(200, 60)
+        private val AUTH_LIMIT = Limit(30, 60)
+        private val WRITE_LIMIT = Limit(100, 60)
+        private val READ_LIMIT = Limit(300, 60)
     }
 
     override fun doFilterInternal(
