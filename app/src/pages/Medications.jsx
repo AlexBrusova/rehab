@@ -379,7 +379,7 @@ export default function Medications({ t = (k) => k, dir = "ltr", patients, meds,
           {" "}
           {t('medications.distributionTitle')} {shiftLabel[shift]}{" "}
           <Badge type="blue" style={{ marginRight: 8 }}>
-            {shiftPats.length} Patients
+            {shiftPats.length} {t('medications.patientCountLabel')}
           </Badge>{" "}
         </CT>{" "}
         <div style={{ overflowX: "auto" }}>

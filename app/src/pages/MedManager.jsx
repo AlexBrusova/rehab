@@ -291,7 +291,7 @@ export default function MedManager({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                         {m.name}
-                        {m.changed && <span style={{ background: C.orange, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>updated</span>}
+                        {m.changed && <span style={{ background: C.orange, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>{t('medManager.updatedBadge')}</span>}
                       </div>
                       <div style={{ fontSize: 12, color: C.mid }}>
                         {m.dose}{m.unit}
