@@ -4,6 +4,7 @@ import useBreakpoint from "./hooks/useBreakpoint";
 import { setToken, setStoredUser, getToken, getStoredUser, removeStoredUser, authFetch } from "./lib/api";
 import useToast from "./hooks/useToast";
 import { Toast, Badge } from "./components/ui";
+import ErrorBoundary from "./components/ui/ErrorBoundary";
 import Login from "./Login";
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
@@ -502,188 +503,216 @@ export default function App() {
   };
   const screenEl = {
     dashboard: (
-      <Dashboard
-        patients={housePatients}
-        meds={houseMeds}
-        consequences={houseConsequences}
-        therapy={houseTherapy}
-        groups={houseGroups}
-        shifts={houseShifts}
-        users={users}
-        phones={phones}
-        activeHouse={activeHouse}
-        onNav={navTo}
-        setPatients={setPatients}
-        rooms={houseRooms}
-        user={user}
-      />
+      <ErrorBoundary key="dashboard" name="Дашборд" onRetry={() => setScreen("dashboard")}>
+        <Dashboard
+          patients={housePatients}
+          meds={houseMeds}
+          consequences={houseConsequences}
+          therapy={houseTherapy}
+          groups={houseGroups}
+          shifts={houseShifts}
+          users={users}
+          phones={phones}
+          activeHouse={activeHouse}
+          onNav={navTo}
+          setPatients={setPatients}
+          rooms={houseRooms}
+          user={user}
+        />
+      </ErrorBoundary>
     ),
     patients: (
-      <Patients
-        patients={housePatients}
-        setPatients={setPatients}
-        archived={archived}
-        meds={houseMeds}
-        rooms={houseRooms}
-        users={users}
-        therapy={houseTherapy}
-        user={user}
-        toast={showToast}
-        initialPatientId={initialPatientId}
-        consequences={houseConsequences}
-        finance={houseFinance}
-        onAddPatient={createPatient}
-        onArchivePatient={archivePatient}
-        onUpdatePatient={updatePatient}
-        onAddMed={createMed}
-        onSaveMed={updateMed}
-        onRemoveMed={deleteMed}
-      />
+      <ErrorBoundary key="patients" name="Пациенты" onRetry={() => setScreen("patients")}>
+        <Patients
+          patients={housePatients}
+          setPatients={setPatients}
+          archived={archived}
+          meds={houseMeds}
+          rooms={houseRooms}
+          users={users}
+          therapy={houseTherapy}
+          user={user}
+          toast={showToast}
+          initialPatientId={initialPatientId}
+          consequences={houseConsequences}
+          finance={houseFinance}
+          onAddPatient={createPatient}
+          onArchivePatient={archivePatient}
+          onUpdatePatient={updatePatient}
+          onAddMed={createMed}
+          onSaveMed={updateMed}
+          onRemoveMed={deleteMed}
+        />
+      </ErrorBoundary>
     ),
     rooms: (
-      <Rooms
-        rooms={houseRooms}
-        setRooms={setRooms}
-        patients={housePatients}
-        setPatients={setPatients}
-        toast={showToast}
-        onAddRoom={createRoom}
-        onUpdateRoom={updateRoom}
-        onDeleteRoom={deleteRoom}
-        onUpdatePatient={updatePatient}
-      />
+      <ErrorBoundary key="rooms" name="Комнаты" onRetry={() => setScreen("rooms")}>
+        <Rooms
+          rooms={houseRooms}
+          setRooms={setRooms}
+          patients={housePatients}
+          setPatients={setPatients}
+          toast={showToast}
+          onAddRoom={createRoom}
+          onUpdateRoom={updateRoom}
+          onDeleteRoom={deleteRoom}
+          onUpdatePatient={updatePatient}
+        />
+      </ErrorBoundary>
     ),
     absences: (
-      <Absences
-        patients={housePatients}
-        user={user}
-        toast={showToast}
-        onMarkAway={markPatientAway}
-        onReturn={markPatientReturned}
-      />
+      <ErrorBoundary key="absences" name="Отсутствия" onRetry={() => setScreen("absences")}>
+        <Absences
+          patients={housePatients}
+          user={user}
+          toast={showToast}
+          onMarkAway={markPatientAway}
+          onReturn={markPatientReturned}
+        />
+      </ErrorBoundary>
     ),
     medmanager: (
-      <MedManager
-        patients={housePatients}
-        meds={houseMeds}
-        user={user}
-        toast={showToast}
-        onAddMed={createMed}
-        onSaveMed={updateMed}
-        onRemoveMed={deleteMed}
-      />
+      <ErrorBoundary key="medmanager" name="Менеджер медикаментов" onRetry={() => setScreen("medmanager")}>
+        <MedManager
+          patients={housePatients}
+          meds={houseMeds}
+          user={user}
+          toast={showToast}
+          onAddMed={createMed}
+          onSaveMed={updateMed}
+          onRemoveMed={deleteMed}
+        />
+      </ErrorBoundary>
     ),
     medications: (
-      <Medications
-        patients={housePatients}
-        meds={houseMeds}
-        dist={dist}
-        user={user}
-        toast={showToast}
-        onSetStatus={setDistributionStatus}
-      />
+      <ErrorBoundary key="medications" name="Медикаменты" onRetry={() => setScreen("medications")}>
+        <Medications
+          patients={housePatients}
+          meds={houseMeds}
+          dist={dist}
+          user={user}
+          toast={showToast}
+          onSetStatus={setDistributionStatus}
+        />
+      </ErrorBoundary>
     ),
     groups: (
-      <Groups
-        patients={housePatients}
-        groups={houseGroups}
-        setGroups={setGroups}
-        attendance={attendance}
-        setAttendance={setAttendance}
-        toast={showToast}
-        onCreateGroup={createGroup}
-        onUpdateGroup={updateGroup}
-        onUpsertAttendance={upsertAttendance}
-      />
+      <ErrorBoundary key="groups" name="Группы" onRetry={() => setScreen("groups")}>
+        <Groups
+          patients={housePatients}
+          groups={houseGroups}
+          setGroups={setGroups}
+          attendance={attendance}
+          setAttendance={setAttendance}
+          toast={showToast}
+          onCreateGroup={createGroup}
+          onUpdateGroup={updateGroup}
+          onUpsertAttendance={upsertAttendance}
+        />
+      </ErrorBoundary>
     ),
     phones: (
-      <Phones
-        patients={housePatients}
-        phones={phones}
-        setPhones={setPhones}
-        phoneHist={phoneHist}
-        setPhoneHist={setPhoneHist}
-        toast={showToast}
-        onIssue={issuePhone}
-        onReturn={returnPhone}
-      />
+      <ErrorBoundary key="phones" name="Телефоны" onRetry={() => setScreen("phones")}>
+        <Phones
+          patients={housePatients}
+          phones={phones}
+          setPhones={setPhones}
+          phoneHist={phoneHist}
+          setPhoneHist={setPhoneHist}
+          toast={showToast}
+          onIssue={issuePhone}
+          onReturn={returnPhone}
+        />
+      </ErrorBoundary>
     ),
     summary: (
-      <Summary
-        patients={housePatients}
-        groups={houseGroups}
-        dailySummary={dailySummary}
-        user={user}
-        toast={showToast}
-        onSave={createSummary}
-      />
+      <ErrorBoundary key="summary" name="Итоги дня" onRetry={() => setScreen("summary")}>
+        <Summary
+          patients={housePatients}
+          groups={houseGroups}
+          dailySummary={dailySummary}
+          user={user}
+          toast={showToast}
+          onSave={createSummary}
+        />
+      </ErrorBoundary>
     ),
     shifts: (
-      <Shifts
-        shifts={houseShifts}
-        setShifts={setShifts}
-        users={users}
-        user={user}
-        patients={housePatients}
-        toast={showToast}
-        onCreateShift={createShift}
-        onUpdateShift={updateShift}
-      />
+      <ErrorBoundary key="shifts" name="Смены" onRetry={() => setScreen("shifts")}>
+        <Shifts
+          shifts={houseShifts}
+          setShifts={setShifts}
+          users={users}
+          user={user}
+          patients={housePatients}
+          toast={showToast}
+          onCreateShift={createShift}
+          onUpdateShift={updateShift}
+        />
+      </ErrorBoundary>
     ),
     consequences: (
-      <Consequences
-        consequences={houseConsequences}
-        setConsequences={setConsequences}
-        patients={housePatients}
-        users={users}
-        user={user}
-        toast={showToast}
-        onAdd={createConsequence}
-        onUpdate={updateConsequence}
-      />
+      <ErrorBoundary key="consequences" name="Последствия" onRetry={() => setScreen("consequences")}>
+        <Consequences
+          consequences={houseConsequences}
+          setConsequences={setConsequences}
+          patients={housePatients}
+          users={users}
+          user={user}
+          toast={showToast}
+          onAdd={createConsequence}
+          onUpdate={updateConsequence}
+        />
+      </ErrorBoundary>
     ),
     finance: (
-      <Finance
-        patients={housePatients}
-        finance={houseFinance}
-        cashbox={cashbox}
-        cashboxCounts={cashboxCounts}
-        user={user}
-        toast={showToast}
-        activeHouseId={houseScopeId}
-        onAddPatientTx={createPatientTx}
-        onAddCashTx={createCashTx}
-        onAddCashboxCount={createCashboxCount}
-      />
+      <ErrorBoundary key="finance" name="Финансы" onRetry={() => setScreen("finance")}>
+        <Finance
+          patients={housePatients}
+          finance={houseFinance}
+          cashbox={cashbox}
+          cashboxCounts={cashboxCounts}
+          user={user}
+          toast={showToast}
+          activeHouseId={houseScopeId}
+          onAddPatientTx={createPatientTx}
+          onAddCashTx={createCashTx}
+          onAddCashboxCount={createCashboxCount}
+        />
+      </ErrorBoundary>
     ),
     manage: (
-      <Manage
-        users={users}
-        setUsers={setUsers}
-        patients={housePatients}
-        user={user}
-        toast={showToast}
-        schedule={schedule}
-        onAssignSchedule={assignScheduleDay}
-        therapistAssignments={therapistAssignments}
-        onAssignTherapist={assignTherapist}
-        onMarkAway={markPatientAway}
-        onReturn={markPatientReturned}
-        shifts={houseShifts}
-        activeHouseId={houseScopeId}
-        houses={houses}
-        onAddUser={createUser}
-        onUpdateUser={updateUser}
-      />
+      <ErrorBoundary key="manage" name="Управление" onRetry={() => setScreen("manage")}>
+        <Manage
+          users={users}
+          setUsers={setUsers}
+          patients={housePatients}
+          user={user}
+          toast={showToast}
+          schedule={schedule}
+          onAssignSchedule={assignScheduleDay}
+          therapistAssignments={therapistAssignments}
+          onAssignTherapist={assignTherapist}
+          onMarkAway={markPatientAway}
+          onReturn={markPatientReturned}
+          shifts={houseShifts}
+          activeHouseId={houseScopeId}
+          houses={houses}
+          onAddUser={createUser}
+          onUpdateUser={updateUser}
+        />
+      </ErrorBoundary>
     ),
     therapy: (
-      <Therapy
-        patients={housePatients}
-        therapy={houseTherapy}
-        user={user}
-        toast={showToast}
-        onAddSession={createTherapySession}
-      />
+      <ErrorBoundary key="therapy" name="Терапия" onRetry={() => setScreen("therapy")}>
+        <Therapy
+          patients={housePatients}
+          therapy={houseTherapy}
+          user={user}
+          toast={showToast}
+          onAddSession={createTherapySession}
+        />
+      </ErrorBoundary>
     ),
   };
   const pendingConsequences = consequences.filter(

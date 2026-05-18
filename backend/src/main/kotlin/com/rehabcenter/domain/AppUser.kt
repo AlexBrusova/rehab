@@ -15,6 +15,7 @@ import jakarta.persistence.ManyToOne
 import jakarta.persistence.MapsId
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
+import jakarta.persistence.Version
 import java.io.Serializable
 import java.time.Instant
 
@@ -82,4 +83,6 @@ class AppUser(
     var createdAt: Instant = Instant.now(),
     @Column(nullable = false)
     var updatedAt: Instant = Instant.now(),
+    @Version
+    var version: Long = 0,
 )

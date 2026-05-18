@@ -23,14 +23,14 @@ spring:
     username: ${DB_USER:}
     password: ${DB_PASSWORD:}
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 2
-      connection-timeout: 30000
-      validation-timeout: 5000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 3000
+      validation-timeout: 3000
+      idle-timeout: 300000
+      max-lifetime: 600000
+      leak-detection-threshold: 60000
       register-mbeans: true
-      # PostgreSQL: не держать соединение вечно при блокировках / тяжёлых запросах (см. jpa query timeout 60s).
       connection-init-sql: SET SESSION lock_timeout = '15s'; SET SESSION statement_timeout = '60s'
   jpa:
     open-in-view: false
@@ -86,6 +86,24 @@ resilience4j:
     instances:
       db-read:
         baseConfig: default
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-duration-threshold: 5s
+        slow-call-rate-threshold: 80
+        ignore-exceptions:
+          - com.rehabcenter.error.ApiBusinessException
+          - org.springframework.web.server.ResponseStatusException
+          - org.springframework.security.access.AccessDeniedException
+          - jakarta.validation.ConstraintViolationException
+          - org.springframework.web.bind.MethodArgumentNotValidException
+    instances:
+      db:
+        base-config: default
 
 logging:
   charset:

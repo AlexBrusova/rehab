@@ -122,39 +122,68 @@ export async function login(username, password) {
   return res.json();
 }
 
+async function withRetry(fn, maxAttempts = 3) {
+  const delays = [0, 1000, 3000];
+  let lastError;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    if (delays[attempt] > 0) {
+      await new Promise((r) => setTimeout(r, delays[attempt]));
+    }
+    try {
+      return await fn();
+    } catch (err) {
+      const isRetryable =
+        err instanceof TypeError ||
+        err?.message?.includes("Network error") ||
+        err?.status === 503;
+      if (!isRetryable || attempt === maxAttempts - 1) throw err;
+      lastError = err;
+    }
+  }
+  throw lastError;
+}
+
 export async function authFetch(path, options = {}) {
   const { signal: userSignal, headers: optHeaders, ...fetchOpts } = options;
-  const { signal, clear } = abortWithTimeout(API_FETCH_TIMEOUT_MS, userSignal);
-  let res;
-  try {
-    res = await fetch(`${BASE}${path}`, {
-      ...fetchOpts,
-      signal,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-        ...(optHeaders || {}),
-      },
-    });
-  } catch (e) {
-    clear();
-    if (e?.name === "AbortError" || e?.name === "TimeoutError") {
-      throw new Error("Request timed out. Check your connection and try again.");
-    }
-    throw new Error(e?.message || "Network error");
-  }
-  clear();
 
-  if (res.status === 401) {
-    removeStoredUser();
-    window.location.reload();
-    throw new Error("Unauthorized");
-  }
-  if (!res.ok) {
-    const msg = await readApiErrorMessage(res);
-    const err = new Error(msg);
-    err.status = res.status;
-    throw err;
-  }
-  return res.json();
+  return withRetry(async () => {
+    const { signal, clear } = abortWithTimeout(API_FETCH_TIMEOUT_MS, userSignal);
+    let res;
+    try {
+      res = await fetch(`${BASE}${path}`, {
+        ...fetchOpts,
+        signal,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getToken()}`,
+          ...(optHeaders || {}),
+        },
+      });
+    } catch (e) {
+      clear();
+      if (e?.name === "AbortError" || e?.name === "TimeoutError") {
+        throw new Error("Request timed out. Check your connection and try again.");
+      }
+      throw new Error(e?.message || "Network error");
+    }
+    clear();
+
+    if (res.status === 401) {
+      removeStoredUser();
+      window.location.reload();
+      throw new Error("Unauthorized");
+    }
+    if (res.status === 503) {
+      const err = new Error("Service temporarily unavailable. Retrying…");
+      err.status = 503;
+      throw err;
+    }
+    if (!res.ok) {
+      const msg = await readApiErrorMessage(res);
+      const err = new Error(msg);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  });
 }

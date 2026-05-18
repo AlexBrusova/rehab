@@ -19,13 +19,13 @@ test.describe("FI field validation — 4 states", () => {
 
     // State ①→②: focus shows blue hint text
     await nameInput.focus();
-    const hint = page.locator("div").filter({ hasText: /символов|2–255/i }).first();
+    const hint = page.locator("div").filter({ hasText: /characters|2–255/i }).first();
     await expect(hint).toBeVisible({ timeout: 3000 });
 
     // State ②→③: blur with 1 char → red error
     await nameInput.fill("А");
     await nameInput.blur();
-    const errorMsg = page.locator("div").filter({ hasText: /Минимум 2/i }).first();
+    const errorMsg = page.locator("div").filter({ hasText: /Minimum 2/i }).first();
     await expect(errorMsg).toBeVisible({ timeout: 3000 });
     await expect(nameInput).toHaveCSS("border-top-color", "rgb(192, 57, 43)");
 
@@ -44,7 +44,7 @@ test.describe("FI field validation — 4 states", () => {
     const buildingInput = page.getByPlaceholder(/Building A/i).first();
     await buildingInput.fill("");
     await buildingInput.blur();
-    const buildingError = page.locator("div").filter({ hasText: /корпуса/i }).first();
+    const buildingError = page.locator("div").filter({ hasText: /building name/i }).first();
     await expect(buildingError).toBeVisible({ timeout: 3000 });
     await expect(buildingInput).toHaveCSS("border-top-color", "rgb(192, 57, 43)");
 
@@ -52,7 +52,7 @@ test.describe("FI field validation — 4 states", () => {
     const capacityInput = page.getByPlaceholder("2").first();
     await capacityInput.fill("");
     await capacityInput.blur();
-    const capError = page.locator("div").filter({ hasText: /1.{1,5}50/i }).first();
+    const capError = page.locator("div").filter({ hasText: /Number from/i }).first();
     await expect(capError).toBeVisible({ timeout: 3000 });
     await expect(capacityInput).toHaveCSS("border-top-color", "rgb(192, 57, 43)");
   });
@@ -71,7 +71,7 @@ test.describe("FI field validation — 4 states", () => {
     await nameInput.waitFor({ state: "visible", timeout: 5000 });
     await nameInput.focus();
     await nameInput.blur();
-    const nameError = page.locator("div").filter({ hasText: /препарата/i }).first();
+    const nameError = page.locator("div").filter({ hasText: /medication name/i }).first();
     await expect(nameError).toBeVisible({ timeout: 3000 });
     await expect(nameInput).toHaveCSS("border-top-color", "rgb(192, 57, 43)");
   });
@@ -86,7 +86,7 @@ test.describe("FI field validation — 4 states", () => {
     const usernameInput = page.getByPlaceholder(/user123/i).first();
     await expect(usernameInput).toBeVisible({ timeout: 3000 });
     await usernameInput.focus();
-    const hint = page.locator("div").filter({ hasText: /подчёркивание/i }).first();
+    const hint = page.locator("div").filter({ hasText: /underscore/i }).first();
     await expect(hint).toBeVisible({ timeout: 3000 });
   });
 });
