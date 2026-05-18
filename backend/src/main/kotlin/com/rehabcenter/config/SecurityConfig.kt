@@ -4,8 +4,6 @@ import com.rehabcenter.security.JwtAuthenticationFilter
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.env.Environment
-import org.springframework.core.env.Profiles
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -20,7 +18,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 @EnableConfigurationProperties(JwtProperties::class)
 class SecurityConfig(
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
-    private val environment: Environment,
 ) {
 
     @Bean
@@ -53,9 +50,7 @@ class SecurityConfig(
                     "/actuator/health/**",
                     "/actuator/info",
                 ).permitAll()
-                if (environment.acceptsProfiles(Profiles.of("docker"))) {
-                    it.requestMatchers("/actuator/prometheus").permitAll()
-                }
+                it.requestMatchers("/actuator/prometheus").permitAll()
                 it.anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)

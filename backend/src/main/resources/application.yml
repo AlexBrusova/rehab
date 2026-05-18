@@ -52,7 +52,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,prometheus
   endpoint:
     health:
       probes:
@@ -61,11 +61,21 @@ management:
       group:
         readiness:
           include: readinessState, db
+    prometheus:
+      enabled: true
   health:
     liveness-state:
       enabled: true
     readiness-state:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+      percentiles:
+        http.server.requests: 0.5,0.95,0.99
 
 jwt:
   secret: ${JWT_SECRET:dev-secret-change-me-min-32-chars-long!!}
