@@ -3,6 +3,7 @@ package com.rehabcenter.web
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.rehabcenter.domain.Consequence
 import com.rehabcenter.repo.ConsequenceRepository
+import com.rehabcenter.service.PushSender
 import com.rehabcenter.validation.UiValidation
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
@@ -27,6 +28,7 @@ import java.util.UUID
 @RequestMapping("/api/consequences")
 class ConsequenceController(
     private val consequences: ConsequenceRepository,
+    private val push: PushSender,
 ) {
     @GetMapping
     fun list(
@@ -67,7 +69,14 @@ class ConsequenceController(
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             )
-        return ResponseEntity.status(201).body(consequences.save(c))
+        val saved = consequences.save(c)
+        push.sendToHouseManagers(
+            houseId = body.houseId!!,
+            title = "⚠️ New Consequence Pending",
+            body = "${body.type} — awaiting approval",
+            url = "/consequences",
+        )
+        return ResponseEntity.status(201).body(saved)
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

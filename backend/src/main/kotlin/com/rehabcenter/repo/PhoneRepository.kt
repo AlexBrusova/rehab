@@ -15,4 +15,8 @@ interface PhoneRepository : JpaRepository<Phone, String> {
     @EntityGraph(attributePaths = ["patient"])
     @Query("select p from Phone p order by p.createdAt desc")
     fun findAllForPhones(): List<Phone>
+
+    @EntityGraph(attributePaths = ["patient"])
+    @Query("select p from Phone p where p.status = 'active'")
+    fun findAllActiveWithPatient(): List<Phone>
 }
