@@ -37,9 +37,9 @@ class PushController(
     @JsonIgnoreProperties(ignoreUnknown = true)
     data class SubscribeBody(
         @field:NotBlank @field:Size(max = 2048) val endpoint: String? = null,
-        @field:NotBlank @field:Size(max = 512)  val p256dh: String? = null,
-        @field:NotBlank @field:Size(max = 128)  val auth: String? = null,
-        @field:Size(max = 36)                   val houseId: String? = null,
+        @field:NotBlank @field:Size(max = 512) val p256dh: String? = null,
+        @field:NotBlank @field:Size(max = 128) val auth: String? = null,
+        @field:Size(max = 36) val houseId: String? = null,
     )
 
     @Transactional
