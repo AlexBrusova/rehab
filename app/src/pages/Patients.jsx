@@ -66,7 +66,7 @@ export default function Patients({
     const admitDate =
       admitRaw || new Date().toLocaleDateString("en-GB");
     if (admitRaw && !isValidDateDdMmYyyy(admitRaw)) {
-      toast(t('patients.toastAdmitInvalid'));
+      toast(t('patients.toastAdmitDateInvalid'));
       return;
     }
     try {
@@ -81,9 +81,9 @@ export default function Patients({
         roomId: rooms[0]?.id || "",
       });
       setShowAdd(false);
-      toast(t('patients.toastPatientAdded'));
+      toast(t('patients.toastAddSuccess'));
     } catch {
-      toast(t('patients.toastPatientAddFailed'));
+      toast(t('patients.toastAddFailed'));
     }
   };
   const discharge = async () => {
@@ -95,7 +95,7 @@ export default function Patients({
       await onArchivePatient(showDischarge, dischargeType);
       setShowDischarge(null);
       setDischargeType("");
-      toast(t('patients.toastTreatmentCompleted'));
+      toast(t('patients.toastDischargeSuccess'));
     } catch {
       toast(t('patients.toastDischargeFailed'));
     }

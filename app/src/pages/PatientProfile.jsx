@@ -54,15 +54,15 @@ export default function PatientProfile({
     try {
       await onSaveMed(id, upd);
       setEditMed(null);
-      toast(t('patientProfile.toastMedUpdated'));
-    } catch { toast(t('patientProfile.toastMedUpdateFail')); }
+      toast(t('patientProfile.toastUpdateSuccess'));
+    } catch { toast(t('patientProfile.toastUpdateFailed')); }
   };
 
   const removeMed = async (id) => {
     try {
       await onRemoveMed(id);
-      toast(t('patientProfile.toastMedRemoved'));
-    } catch { toast(t('patientProfile.toastMedRemoveFail')); }
+      toast(t('patientProfile.toastRemoveSuccess'));
+    } catch { toast(t('patientProfile.toastRemoveFailed')); }
   };
 
   const addMed = async () => {
@@ -71,12 +71,12 @@ export default function PatientProfile({
       await onAddMed(pid, newMed);
       setNewMed({ name: "", dose: "", unit: "mg", morning: false, noon: false, evening: false, night: false });
       setShowAddMed(false);
-      toast(t('patientProfile.toastMedAdded'));
-    } catch { toast(t('patientProfile.toastMedAddFail')); }
+      toast(t('patientProfile.toastAddSuccess'));
+    } catch { toast(t('patientProfile.toastAddFailed')); }
   };
 
   const openAbsence = async () => {
-    if (!absData.returnDate) { toast(t('patientProfile.toastEnterReturnDate')); return; }
+    if (!absData.returnDate) { toast(t('patientProfile.toastReturnDateRequired')); return; }
     if (!isValidDateDdMmYyyy(absData.returnDate)) {
       toast(t('patientProfile.toastInvalidReturnDate'));
       return;
@@ -85,14 +85,14 @@ export default function PatientProfile({
       await onUpdatePatient(pid, { awayType: absData.type });
       setShowAbsence(false);
       toast(`✅ ${p.name} left for ${absData.type} – back on ${absData.returnDate}`);
-    } catch { toast(t('patientProfile.toastUpdatePatientFail')); }
+    } catch { toast(t('patientProfile.toastAbsenceFailed')); }
   };
 
   const returnPatient = async () => {
     try {
       await onUpdatePatient(pid, { awayType: null });
       toast(`✅ ${p.name} returned to center`);
-    } catch { toast(t('patientProfile.toastUpdatePatientFail')); }
+    } catch { toast(t('patientProfile.toastReturnFailed')); }
   };
 
   return (
