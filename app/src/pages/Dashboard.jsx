@@ -21,6 +21,7 @@ export default function Dashboard({
   rooms,
   user,
   t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [profilePid, setProfilePid] = useState(null);
@@ -67,6 +68,8 @@ export default function Dashboard({
           onAddMed={() => {}}
           onSaveMed={() => {}}
           onRemoveMed={() => {}}
+          t={t}
+          dir={dir}
         />
       )}{" "}
       <div
