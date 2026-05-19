@@ -35,7 +35,7 @@ export default function Rooms({
   const unassigned = patients.filter((p) => p.status === "active" && !p.roomId);
   const addRoom = async () => {
     if (!newR.number || !newR.building) {
-      toast(t("rooms.toastFillBuildingAndNumber"));
+      toast(t("rooms.toastFillBuilding"));
       return;
     }
     const cap = parseInt(String(newR.capacity || "1"), 10);
@@ -56,9 +56,9 @@ export default function Rooms({
       });
       setNewR({ number: "", building: "Building A", capacity: "1" });
       setShowAdd(false);
-      toast(t("rooms.toastRoomAdded"));
+      toast(t("rooms.toastAddSuccess"));
     } catch {
-      toast(t("rooms.toastFailedAddRoom"));
+      toast(t("rooms.toastAddFailed"));
     }
   };
   const saveEdit = async () => {
@@ -78,30 +78,30 @@ export default function Rooms({
     try {
       await onUpdateRoom(openRoom, payload);
       setEditingRoom(false);
-      toast(t("rooms.toastRoomUpdated"));
+      toast(t("rooms.toastUpdateSuccess"));
     } catch {
-      toast(t("rooms.toastFailedUpdateRoom"));
+      toast(t("rooms.toastUpdateFailed"));
     }
   };
   const deleteRoom = async () => {
     if (occ.length > 0) {
-      toast(t("rooms.toastRemovePatientsFirst"));
+      toast(t("rooms.toastRemovePatientFirst"));
       return;
     }
     try {
       await onDeleteRoom(openRoom);
       setOpenRoom(null);
-      toast(t("rooms.toastRoomDeleted"));
+      toast(t("rooms.toastDeleteSuccess"));
     } catch {
-      toast(t("rooms.toastFailedDeleteRoom"));
+      toast(t("rooms.toastDeleteFailed"));
     }
   };
   const vacatePatient = async (patId) => {
     try {
       await onUpdatePatient(patId, { roomId: null });
-      toast(t("rooms.toastPatientRemovedFromRoom"));
+      toast(t("rooms.toastRemovePatientSuccess"));
     } catch {
-      toast(t("rooms.toastFailedUpdatePatient"));
+      toast(t("rooms.toastRemovePatientFailed"));
     }
   };
   const movePatient = async () => {
@@ -119,9 +119,9 @@ export default function Rooms({
       await onUpdatePatient(movePatId, { roomId: moveToRoomId });
       setMovePatId("");
       setMoveToRoomId("");
-      toast(t("rooms.toastPatientMoved"));
+      toast(t("rooms.toastAssignSuccess"));
     } catch {
-      toast(t("rooms.toastFailedMovePatient"));
+      toast(t("rooms.toastAssignFailed"));
     }
   };
   const assignToRoom = async (patId) => {
@@ -133,9 +133,9 @@ export default function Rooms({
     }
     try {
       await onUpdatePatient(patId, { roomId: openRoom });
-      toast(t("rooms.toastPatientAssigned"));
+      toast(t("rooms.toastAssignSuccess"));
     } catch {
-      toast(t("rooms.toastFailedAssignPatient"));
+      toast(t("rooms.toastAssignFailed"));
     }
   }; /* ── Inner screen – Open Room ── */
   if (openRoom && room) {

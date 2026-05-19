@@ -81,7 +81,7 @@ export default function ScheduleTab({
     a.href = url;
     a.download = `Shift_Schedule_${selMonth}.csv`;
     a.click();
-    toast("📥 Excel file downloaded");
+    toast(t("manage.scheduleExportSuccess"));
   };
   return (
     <div>
