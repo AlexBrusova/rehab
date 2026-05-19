@@ -504,15 +504,6 @@ export default function App() {
   const houseTherapy = therapy.filter((t) => housePatientIds.has(t.patientId));
   const houseFinance = finance.filter((f) => housePatientIds.has(f.patientId));
   const nav = NAV_CFG[user.role] || NAV_CFG.counselor;
-  const shared = {
-    patients,
-    meds,
-    setMeds,
-    users,
-    therapy,
-    user,
-    toast: showToast,
-  };
   const screenEl = {
     dashboard: (
       <ErrorBoundary key="dashboard" name="Дашборд" onRetry={() => setScreen("dashboard")}>

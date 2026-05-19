@@ -9,9 +9,7 @@ export default function Groups({
   dir = "ltr",
   patients,
   groups,
-  setGroups,
   attendance,
-  setAttendance,
   toast,
   onCreateGroup,
   onUpdateGroup,
@@ -29,7 +27,6 @@ export default function Groups({
     new Date().toTimeString().slice(0, 5),
   );
   const [quickType, setQuickType] = useState("therapeutic");
-  const topicRef = { current: null };
   const activePats = patients.filter(
     (p) => p.status === "active" && !p.awayType,
   );

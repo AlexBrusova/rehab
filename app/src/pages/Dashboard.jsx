@@ -21,7 +21,6 @@ export default function Dashboard({
   rooms,
   user,
   t = (k) => k,
-  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [profilePid, setProfilePid] = useState(null);

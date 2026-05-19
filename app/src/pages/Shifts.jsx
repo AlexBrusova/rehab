@@ -6,7 +6,6 @@ import { Badge, Card, CT, Btn, Th, Td, Modal, FL, FS, FTA, VoiceBtn } from "../c
 
 export default function Shifts({
   shifts,
-  setShifts,
   users,
   user,
   toast,

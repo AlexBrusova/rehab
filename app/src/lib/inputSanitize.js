@@ -6,6 +6,7 @@ import { V, TIME_HHMM_RE } from "../data/validationLimits";
 
 export function stripControlChars(s) {
   if (s == null || typeof s !== "string") return "";
+  // eslint-disable-next-line no-control-regex
   return s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "");
 }
 
@@ -16,7 +17,7 @@ export function clampLen(s, max) {
 
 /** Имя / тема: без угловых скобок и слэшей, длина по лимиту. */
 export function sanitizePersonName(s) {
-  return clampLen(String(s ?? "").replace(/[<>\"\\/]/g, ""), V.NAME_MAX);
+  return clampLen(String(s ?? "").replace(/[<>"\\]/g, ""), V.NAME_MAX);
 }
 
 /** Текстовые поля (описание и т.д.). */
@@ -81,7 +82,7 @@ export function sanitizeMedName(s) {
 /** Доза: буквы/цифры/пробелы/тире/точка/слэш (дроби), без управляющих. */
 export function sanitizeMedDose(s) {
   let t = stripControlChars(String(s ?? "")).replace(/[<>]/g, "");
-  t = t.replace(/[^\p{L}\p{N}\s./\-]/gu, "");
+  t = t.replace(/[^\p{L}\p{N}\s./-]/gu, "");
   return t.slice(0, V.MED_DOSE_MAX);
 }
 

@@ -21,7 +21,6 @@ export default function Manage({
   onAssignTherapist,
   onMarkAway,
   onReturn,
-  shifts,
   activeHouseId,
   houses,
   onAddUser,

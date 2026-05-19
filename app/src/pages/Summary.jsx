@@ -8,7 +8,6 @@ export default function Summary({
   patients,
   groups,
   dailySummary,
-  user,
   toast,
   onSave,
   t = (k) => k,

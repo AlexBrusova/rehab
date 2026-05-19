@@ -7,7 +7,6 @@ import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Consequences({
   consequences,
-  setConsequences,
   patients,
   users,
   user,

@@ -8,9 +8,7 @@ import { sanitizeRoomBuilding, sanitizeRoomNumber, sanitizeRoomCapacity } from "
 
 export default function Rooms({
   rooms,
-  setRooms,
   patients,
-  setPatients,
   toast,
   onAddRoom,
   onUpdateRoom,
