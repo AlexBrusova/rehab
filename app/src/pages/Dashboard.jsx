@@ -20,6 +20,8 @@ export default function Dashboard({
 
   rooms,
   user,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [profilePid, setProfilePid] = useState(null);
@@ -66,6 +68,8 @@ export default function Dashboard({
           onAddMed={() => {}}
           onSaveMed={() => {}}
           onRemoveMed={() => {}}
+          t={t}
+          dir={dir}
         />
       )}{" "}
       <div
@@ -78,23 +82,23 @@ export default function Dashboard({
       >
         {" "}
         <Stat
-          label="Active Patients"
+          label={t('dashboard.activePatients')}
           value={patients.filter((p) => p.status === "active").length}
-          sub={`${patients.filter((p) => p.status === "away").length} outside right now`}
+          sub={`${patients.filter((p) => p.status === "away").length} ${t('dashboard.activePatientsSub')}`}
           icon="👥"
           accent={C.blue}
         />{" "}
         <Stat
-          label="Changed Medications"
+          label={t('dashboard.changedMedications')}
           value={changed}
-          sub="Require confirmation"
+          sub={t('dashboard.changedMedicationsSub')}
           icon="💊"
           accent={C.orange}
         />{" "}
         <Stat
-          label="Alerts active"
+          label={t('dashboard.alertsActive')}
           value={pending + lowMood + urgentTherapy + overduePhones.length}
-          sub="Require attention"
+          sub={t('dashboard.alertsActiveSub')}
           icon="🔔"
           accent={C.red}
         />{" "}
@@ -111,22 +115,22 @@ export default function Dashboard({
         <Card>
           {" "}
           <CT icon="⚠️" bg="#fef3e8">
-            Alerts
+            {t('dashboard.alertsTitle')}
           </CT>{" "}
           {overduePhones.length > 0 && (
             <Alrt type="red" icon="📱">
-              <strong>Phone No Returned!</strong> – {overdueNames.join(", ")}{" "}
+              <strong>{t('dashboard.phoneNoReturned')}</strong> – {overdueNames.join(", ")}{" "}
               <span
                 onClick={() => onNav("phones")}
                 style={{ textDecoration: "underline", cursor: "pointer" }}
               >
-                to Manage Phones ←
+                {t('dashboard.toManagePhones')}
               </span>
             </Alrt>
           )}{" "}
           {lowMood > 0 && (
             <Alrt type="red" icon="😔">
-              <strong>Low Emotional Status</strong> –{" "}
+              <strong>{t('dashboard.lowEmotionalStatus')}</strong> –{" "}
               {patients
                 .filter((p) => p.mood <= 3 && p.status === "active")
                 .map((p) => p.name)
@@ -135,19 +139,18 @@ export default function Dashboard({
           )}{" "}
           {changed > 0 && (
             <Alrt type="orange" icon="💊">
-              <strong>{changed} Changed Medications</strong> – Not approved by
-              Counselornselor{" "}
+              <strong>{changed} {t('dashboard.changedMedicationsAlert')}</strong> – {t('dashboard.notApprovedByCounselor')}{" "}
               <span
                 onClick={() => onNav("medications")}
                 style={{ textDecoration: "underline", cursor: "pointer" }}
               >
-                Click for Medication Distribution ←
+                {t('dashboard.clickMedicationDistribution')}
               </span>
             </Alrt>
           )}{" "}
           {urgentTherapy > 0 && (
             <Alrt type="purple" icon="🧠">
-              <strong>Urgent from Emotional Therapist</strong> –{" "}
+              <strong>{t('dashboard.urgentFromTherapist')}</strong> –{" "}
               {therapy
                 .filter((t) => t.urgency === "URGENT")
                 .map((t) => t.counselorNote || "No note provided")
@@ -156,7 +159,7 @@ export default function Dashboard({
           )}{" "}
           {pending > 0 && (
             <Alrt type="orange" icon="⚠️">
-              <strong>{pending} consequences pending approval</strong>{" "}
+              <strong>{pending} {t('dashboard.consequencesPending')}</strong>{" "}
               <span
                 onClick={() => onNav("consequences")}
                 style={{ textDecoration: "underline", cursor: "pointer" }}
@@ -174,7 +177,7 @@ export default function Dashboard({
                 fontSize: 13,
               }}
             >
-              ✅ No active alerts
+              ✅ {t('dashboard.noActiveAlerts')}
             </div>
           )}{" "}
         </Card>{" "}
@@ -182,7 +185,7 @@ export default function Dashboard({
           {" "}
           <CT icon="🔄" bg="#e3f7f8">
             {" "}
-            Active shift{" "}
+            {t('dashboard.activeShift')}{" "}
             {activeHouse && (
               <span
                 style={{
@@ -208,13 +211,13 @@ export default function Dashboard({
             >
               {" "}
               <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 3 }}>
-                On-duty Counselor
+                {t('dashboard.onDutyCounselor')}
               </div>{" "}
               <div style={{ fontSize: 18, fontWeight: 900 }}>
                 {shiftCounselor.name}
               </div>{" "}
               <div style={{ fontSize: 12, opacity: 0.7 }}>
-                {activeShift.start} | Received from: {activeShift.receivedFrom}
+                {activeShift.start} | {t('dashboard.receivedFrom')} {activeShift.receivedFrom}
               </div>{" "}
             </div>
           ) : (
@@ -230,11 +233,11 @@ export default function Dashboard({
               }}
             >
               {" "}
-              No active shift in {activeHouse?.name || "this House"}{" "}
+              {t('dashboard.noActiveShift')} {activeHouse?.name || "this House"}{" "}
             </div>
           )}{" "}
           <CT icon="🗓️" bg="#e3f7f8">
-            Groups Today
+            {t('dashboard.groupsToday')}
           </CT>{" "}
           <table
             style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
@@ -271,21 +274,21 @@ export default function Dashboard({
                           }
                         >
                           {g.status === "done"
-                            ? "Closed"
+                            ? t('dashboard.groupClosed')
                             : g.status === "active"
-                              ? "Active"
-                              : "planned"}
+                              ? t('dashboard.groupActive')
+                              : t('dashboard.groupPlanned')}
                         </Badge>
                       </td>
                     </tr>
                   ))
                 : [
-                    ["09:30", "Morning Reception", "gray", "Closed"],
-                    ["14:00", "Skills workshop", "teal", "Active"],
-                    ["17:30", "Evening group", "blue", "planned"],
-                  ].map(([t, n, c, s]) => (
+                    ["09:30", "Morning Reception", "gray", t('dashboard.groupClosed')],
+                    ["14:00", "Skills workshop", "teal", t('dashboard.groupActive')],
+                    ["17:30", "Evening group", "blue", t('dashboard.groupPlanned')],
+                  ].map(([tm, n, c, s]) => (
                     <tr
-                      key={t}
+                      key={tm}
                       style={{ borderBottom: `1px solid ${C.border}` }}
                     >
                       {" "}
@@ -296,7 +299,7 @@ export default function Dashboard({
                           fontSize: 12,
                         }}
                       >
-                        {t}
+                        {tm}
                       </td>
                       <td style={{ padding: "7px 10px", fontWeight: 600 }}>
                         {n}
@@ -313,18 +316,18 @@ export default function Dashboard({
       <Card>
         {" "}
         <CT icon="👥" bg="#e8f0fb">
-          Status Patients
+          {t('dashboard.statusPatients')}
         </CT>{" "}
         <table
           style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
         >
           <thead>
             <tr>
-              <Th>Name</Th>
-              <Th>Days in Center</Th>
-              <Th>Emotional Status</Th>
-              <Th>Status</Th>
-              <Th>Medications</Th>
+              <Th>{t('dashboard.tableHeaderName')}</Th>
+              <Th>{t('dashboard.tableHeaderDaysInCenter')}</Th>
+              <Th>{t('dashboard.tableHeaderEmotionalStatus')}</Th>
+              <Th>{t('dashboard.tableHeaderStatus')}</Th>
+              <Th>{t('dashboard.tableHeaderMedications')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -412,7 +415,7 @@ export default function Dashboard({
                       </Badge>
                       {meds.some((m) => m.patientId === p.id && m.changed) && (
                         <Badge type="orange" style={{ marginRight: 4 }}>
-                          Changed
+                          {t('dashboard.patientChanged')}
                         </Badge>
                       )}
                     </Td>{" "}

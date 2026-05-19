@@ -2,7 +2,6 @@ package com.rehabcenter.service
 
 import com.rehabcenter.repo.PhoneRepository
 import org.slf4j.LoggerFactory
-import org.springframework.data.jpa.repository.Query
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.LocalTime

@@ -8,9 +8,10 @@ export default function Summary({
   patients,
   groups,
   dailySummary,
-  user,
   toast,
   onSave,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const [texts, setTexts] = useState({
     general: "",
@@ -23,17 +24,13 @@ export default function Summary({
       const patientSummaries = Object.fromEntries(patients.map((p) => [p.id, texts[p.id] || ""]));
       await onSave(texts.general, patientSummaries);
       setTexts({ general: "", ...Object.fromEntries(patients.map((p) => [p.id, ""])), ...Object.fromEntries(groups.map((g) => [g.id, ""])) });
-      toast("✅ Summary saved – all Staff notified 🔔");
-    } catch { toast("❌ Failed to save summary"); }
+      toast(t('summary.toastSaveSuccess'));
+    } catch { toast(t('summary.toastSaveFailed')); }
   };
   return (
     <div>
       {" "}
-      <Alrt type="teal" icon="🔔">
-        When you Save the Summary –{" "}
-        <strong>all Counselors and managers will be notified</strong> witwithin
-        the app.
-      </Alrt>{" "}
+      <Alrt type="teal" icon="🔔">{t('summary.notificationWarning')}</Alrt>{" "}
       <div
         style={{
           display: "grid",
@@ -46,7 +43,7 @@ export default function Summary({
         <Card>
           {" "}
           <CT icon="📊" bg="#e3f7f8">
-            Summary Groups Today
+            {t('summary.summaryGroupsTitle')}
           </CT>{" "}
           {groups.map((g) => (
             <div
@@ -83,7 +80,7 @@ export default function Summary({
                   }
                   style={{ marginRight: "auto" }}
                 >
-                  {g.status === "done" ? "Closed" : "Active"}
+                  {g.status === "done" ? t('summary.statusClosed') : t('summary.statusActive')}
                 </Badge>{" "}
               </div>{" "}
               <div style={{ padding: 12 }}>
@@ -94,10 +91,11 @@ export default function Summary({
                 <FTA
                   value={texts[g.id] || ""}
                   onChange={(v) => setT(g.id, v)}
-                  placeholder="Add Note about the group..."
+                  placeholder={t('summary.groupNotePlaceholder')}
                   rows={2}
                   sanitize={sanitizeFreeText}
                   maxLength={V.NOTE_MAX}
+                  dir={dir}
                 />{" "}
               </div>{" "}
             </div>
@@ -106,7 +104,7 @@ export default function Summary({
         <Card>
           {" "}
           <CT icon="📝" bg="#fef3e8">
-            General Summary
+            {t('summary.generalSummaryTitle')}
           </CT>{" "}
           <div style={{ marginBottom: 8 }}>
             <VoiceBtn onTranscript={(v) => setT("general", v)} />
@@ -114,10 +112,11 @@ export default function Summary({
           <FTA
             value={texts.general}
             onChange={(v) => setT("general", v)}
-            placeholder="Summarize today: Events unusual, general atmosphere..."
+            placeholder={t('summary.generalSummaryPlaceholder')}
             rows={6}
             sanitize={sanitizeFreeText}
             maxLength={V.NOTE_MAX}
+            dir={dir}
           />{" "}
         </Card>{" "}
       </div>{" "}
@@ -128,11 +127,11 @@ export default function Summary({
           bg="#e8f0fb"
           right={
             <Btn color="teal" onClick={save}>
-              💾 Save and Send Alert
+              {t('summary.saveAndSendAlert')}
             </Btn>
           }
         >
-          Individual Summary
+          {t('summary.individualSummaryTitle')}
         </CT>{" "}
         {patients.map((p) => (
           <div
@@ -186,7 +185,7 @@ export default function Summary({
               {p.status === "away" && (
                 <Badge type="yellow">🏠 {p.awayType}</Badge>
               )}{" "}
-              {p.alert && <Badge type="red">⚠ Requires attention</Badge>}{" "}
+              {p.alert && <Badge type="red">{t('summary.requiresAttention')}</Badge>}{" "}
             </div>{" "}
             <div
               style={{
@@ -206,6 +205,7 @@ export default function Summary({
                 rows={2}
                 sanitize={sanitizeFreeText}
                 maxLength={V.NOTE_MAX}
+                dir={dir}
               />{" "}
             </div>{" "}
           </div>
@@ -215,7 +215,7 @@ export default function Summary({
         <Card style={{ marginTop: 16 }}>
           {" "}
           <CT icon="📁" bg="#f0f2f5">
-            Previous Summaries
+            {t('summary.previousSummariesTitle')}
           </CT>{" "}
           {dailySummary.map((s) => (
             <div
@@ -229,10 +229,10 @@ export default function Summary({
             >
               {" "}
               <div style={{ fontSize: 12, color: C.soft, marginBottom: 4 }}>
-                {s.date} | {s.notifiedAt} | Staff notified 🔔
+                {s.date} | {s.notifiedAt} | {t('summary.staffNotified')}
               </div>{" "}
               <div style={{ fontSize: 13 }}>
-                {s.generalText || "(No general text)"}
+                {s.generalText || t('summary.noGeneralText')}
               </div>{" "}
             </div>
           ))}{" "}

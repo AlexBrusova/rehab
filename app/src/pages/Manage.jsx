@@ -21,11 +21,12 @@ export default function Manage({
   onAssignTherapist,
   onMarkAway,
   onReturn,
-  shifts,
   activeHouseId,
   houses,
   onAddUser,
   onUpdateUser,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [tab, setTab] = useState("staff");
@@ -43,31 +44,31 @@ export default function Manage({
   const [editData, setEditData] = useState({});
   const saveEdit = async () => {
     if (!editData.name) {
-      toast("⚠️ Name cannot be empty");
+      toast(t('manage.toastNameRequired'));
       return;
     }
     try {
       await onUpdateUser(editUser, editData);
       setEditUser(null);
-      toast("✅ Details updated");
+      toast(t('manage.toastDetailsUpdated'));
     } catch {
-      toast("❌ Failed to update user");
+      toast(t('manage.toastUpdateFailed'));
     }
   };
   const isOrgManager = currentUser.role === "org_manager";
   const canEditSchedule = currentUser.role === "org_manager" || currentUser.role === "manager";
   const addUser = async () => {
     if (!newU.name || !newU.username) {
-      toast("⚠️ Please fill Name and Username");
+      toast(t('manage.toastNameUsernameRequired'));
       return;
     }
     try {
       await onAddUser({ ...newU, color: C.teal });
       setNewU({ name: "", username: "", role: "counselor", phone: "", allowedHouses: [], allHousesAccess: false });
       setShowAdd(false);
-      toast("✅ User added – Default password: 1234");
+      toast(t('manage.toastAddSuccess'));
     } catch {
-      toast("❌ Failed to add user (username may already exist)");
+      toast(t('manage.toastAddFailed'));
     }
   };
   const toggleUser = (id) => {
@@ -113,52 +114,56 @@ export default function Manage({
     <div>
       {" "}
       {showAdd && (
-        <Modal onClose={() => setShowAdd(false)} title="➕ Add Staff Member">
+        <Modal onClose={() => setShowAdd(false)} title={t('manage.addStaffTitle')}>
           {" "}
-          <FL label="Name Full">
+          <FL label={t('manage.nameLabel')}>
             <FI
               value={newU.name}
               onChange={(v) => setNewU((u) => ({ ...u, name: v }))}
-              placeholder="John Doe"
+              placeholder={t('manage.namePlaceholder')}
               {...userFullNameRules}
               maxLength={V.NAME_MAX}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Username">
+          <FL label={t('manage.usernameLabel')}>
             <FI
               value={newU.username}
               onChange={(v) => setNewU((u) => ({ ...u, username: v }))}
-              placeholder="user123"
+              placeholder={t('manage.usernamePlaceholder')}
               {...usernameRules}
               maxLength={V.USERNAME_MAX}
               autoCapitalize="none"
               spellCheck={false}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Phone">
+          <FL label={t('manage.phoneLabel')}>
             <FI
               value={newU.phone}
               onChange={(v) => setNewU((u) => ({ ...u, phone: v }))}
-              placeholder="050-0000000"
+              placeholder={t('manage.phonePlaceholder')}
               sanitize={sanitizePhoneInput}
               maxLength={V.SHORT_LABEL}
               inputMode="tel"
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Role">
+          <FL label={t('manage.roleLabel')}>
             <FS
               value={newU.role}
               onChange={(v) => setNewU((u) => ({ ...u, role: v }))}
               options={[
-                { v: "counselor", l: "Counselor" },
-                { v: "doctor", l: "Doctor" },
-                { v: "therapist", l: "Emotional Therapist" },
-                { v: "manager", l: "House Manager" },
-                { v: "org_manager", l: "Org Manager" },
+                { v: "counselor", l: t('manage.roleCounselor') },
+                { v: "doctor", l: t('manage.roleDoctor') },
+                { v: "therapist", l: t('manage.roleTherapist') },
+                { v: "manager", l: t('manage.roleManager') },
+                { v: "org_manager", l: t('manage.roleOrgManager') },
               ]}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Access to Houses">
+          <FL label={t('manage.accessHousesLabel')}>
             {" "}
             <div
               style={{
@@ -223,7 +228,7 @@ export default function Manage({
                 }
               />{" "}
               <span style={{ fontWeight: 700, color: C.teal }}>
-                Access to Houses
+                {t('manage.accessHousesLabel')}
               </span>{" "}
             </label>{" "}
           </FL>{" "}
@@ -238,14 +243,14 @@ export default function Manage({
               marginBottom: 14,
             }}
           >
-            🔑 Initial Password: 1234
+            {t('manage.initialPassword')}
           </div>{" "}
           <div style={{ display: "flex", gap: 10 }}>
             <Btn color="teal" onClick={addUser}>
-              ✓ Add
+              {t('manage.addButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowAdd(false)}>
-              Cancel
+              {t('manage.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -258,7 +263,7 @@ export default function Manage({
           return (
             <Modal
               onClose={() => setEditPerms(null)}
-              title={`🔑 Permissions – ${eu.name}`}
+              title={`${t('manage.permissionsTitle')} ${eu.name}`}
               width={380}
             >
               {" "}
@@ -272,7 +277,7 @@ export default function Manage({
                     marginBottom: 8,
                   }}
                 >
-                  Access to Houses:
+                  {t('manage.accessHousesSubtitle')}
                 </div>{" "}
                 {houses.map((h) => {
                   const has = (eu.allowedHouses || []).includes(h.id);
@@ -362,7 +367,7 @@ export default function Manage({
                   <span
                     style={{ fontWeight: 700, fontSize: 13, color: C.purple }}
                   >
-                    🔓 Access to Houses
+                    {t('manage.allHousesAccess')}
                   </span>{" "}
                 </label>{" "}
               </div>{" "}
@@ -371,10 +376,10 @@ export default function Manage({
                   color="teal"
                   onClick={() => {
                     setEditPerms(null);
-                    toast("✅ Permissions updated");
+                    toast(t('manage.toastPermissionsUpdated'));
                   }}
                 >
-                  ✓ Save
+                  {t('manage.saveButton')}
                 </Btn>
               </div>{" "}
             </Modal>
@@ -384,29 +389,31 @@ export default function Manage({
       {editUser && (
         <Modal
           onClose={() => setEditUser(null)}
-          title="✏️ Edit User Details"
+          title={t('manage.editUserTitle')}
           width={380}
         >
           {" "}
-          <FL label="Name Full">
+          <FL label={t('manage.nameLabel')}>
             <FI
               value={editData.name || ""}
               onChange={(v) => setEditData((d) => ({ ...d, name: v }))}
               sanitize={sanitizePersonName}
               maxLength={V.NAME_MAX}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Phone">
+          <FL label={t('manage.phoneLabel')}>
             <FI
               value={editData.phone || ""}
               onChange={(v) => setEditData((d) => ({ ...d, phone: v }))}
-              placeholder="050-0000000"
+              placeholder={t('manage.phonePlaceholder')}
               sanitize={sanitizePhoneInput}
               maxLength={V.SHORT_LABEL}
               inputMode="tel"
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Role">
+          <FL label={t('manage.roleLabel')}>
             <FS
               value={editData.role || "counselor"}
               onChange={(v) =>
@@ -414,21 +421,22 @@ export default function Manage({
                   ...d,
                   role: v,
                   roleLabel: {
-                    counselor: "Counselor",
-                    doctor: "Doctor",
-                    therapist: "Emotional Therapist",
-                    manager: "House Manager",
-                    org_manager: "Org Manager",
+                    counselor: t('manage.roleCounselor'),
+                    doctor: t('manage.roleDoctor'),
+                    therapist: t('manage.roleTherapist'),
+                    manager: t('manage.roleManager'),
+                    org_manager: t('manage.roleOrgManager'),
                   }[v],
                 }))
               }
               options={[
-                { v: "counselor", l: "Counselor" },
-                { v: "doctor", l: "Doctor" },
-                { v: "therapist", l: "Emotional Therapist" },
-                { v: "manager", l: "House Manager" },
-                { v: "org_manager", l: "Org Manager" },
+                { v: "counselor", l: t('manage.roleCounselor') },
+                { v: "doctor", l: t('manage.roleDoctor') },
+                { v: "therapist", l: t('manage.roleTherapist') },
+                { v: "manager", l: t('manage.roleManager') },
+                { v: "org_manager", l: t('manage.roleOrgManager') },
               ]}
+              dir={dir}
             />
           </FL>{" "}
           <div
@@ -442,15 +450,14 @@ export default function Manage({
               marginBottom: 14,
             }}
           >
-            💡 Username stays unchanged. The Staff member will can change their
-            Password in Account Settingsount.
+            {t('manage.usernameLocked')}
           </div>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="teal" onClick={saveEdit}>
-              ✓ Save
+              {t('manage.saveButton')}
             </Btn>
             <Btn color="outline" onClick={() => setEditUser(null)}>
-              Cancel
+              {t('manage.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -468,10 +475,10 @@ export default function Manage({
       >
         {" "}
         {[
-          ["staff", "👥 Staff"],
-          ["schedule", "📅 Shift Schedule"],
-          ["therapist", "🧠 Assignment Therapist"],
-          ["absences", "🏠 Absences"],
+          ["staff", t('manage.staffTab')],
+          ["schedule", t('manage.scheduleTab')],
+          ["therapist", t('manage.therapistTab')],
+          ["absences", t('manage.absencesTab')],
         ].map(([v, l]) => (
           <button
             key={v}
@@ -504,7 +511,7 @@ export default function Manage({
             }}
           >
             <Btn color="teal" size="sm" onClick={() => setShowAdd(true)}>
-              + Add Staff Member
+              {t('manage.addStaffButton')}
             </Btn>
           </div>{" "}
           <div
@@ -578,7 +585,7 @@ export default function Manage({
                           {u.roleLabel}
                         </span>{" "}
                         {u.active === false && (
-                          <Badge type="red">No Active</Badge>
+                          <Badge type="red">{t('manage.noActiveStatus')}</Badge>
                         )}{" "}
                       </div>{" "}
                     </div>{" "}
@@ -604,7 +611,7 @@ export default function Manage({
                           fontWeight: 700,
                         }}
                       >
-                        🔓 All Houses
+                        {t('manage.allHousesAccess')}
                       </span>
                     ) : (
                       (u.allowedHouses || []).map((hid) => {
@@ -628,7 +635,7 @@ export default function Manage({
                     )}{" "}
                     {!(u.allowedHouses || []).length && !u.allHousesAccess && (
                       <span style={{ fontSize: 10, color: C.soft }}>
-                        No access to Houses
+                        {t('manage.noAccessHouses')}
                       </span>
                     )}{" "}
                   </div>{" "}
@@ -663,7 +670,7 @@ export default function Manage({
                           fontFamily: "inherit",
                         }}
                       >
-                        ✏️ Edit
+                        {t('manage.editButton')}
                       </button>
                     )}{" "}
                     {isOrgManager && (
@@ -681,7 +688,7 @@ export default function Manage({
                           fontFamily: "inherit",
                         }}
                       >
-                        🔑 Permissions
+                        {t('manage.permissionsButton')}
                       </button>
                     )}{" "}
                     {isOrgManager && (
@@ -699,12 +706,12 @@ export default function Manage({
                           fontFamily: "inherit",
                         }}
                       >
-                        {u.active === false ? "🟢 Activate" : "🔴 Issued"}
+                        {u.active === false ? t('manage.activateButton') : t('manage.issueButton')}
                       </button>
                     )}{" "}
                     {isOrgManager && (
                       <button
-                        onClick={() => toast("🔑 Password reset")}
+                        onClick={() => toast(t('manage.toastPasswordReset'))}
                         style={{
                           padding: "4px 10px",
                           borderRadius: 8,
@@ -717,7 +724,7 @@ export default function Manage({
                           fontFamily: "inherit",
                         }}
                       >
-                        Reset Password
+                        {t('manage.resetPasswordButton')}
                       </button>
                     )}{" "}
                   </div>{" "}
@@ -735,6 +742,8 @@ export default function Manage({
           isOrgManager={canEditSchedule}
           activeHouseId={activeHouseId}
           toast={toast}
+          t={t}
+          dir={dir}
         />
       )}{" "}
       {tab === "therapist" && (
@@ -743,6 +752,8 @@ export default function Manage({
           patients={patients}
           therapistAssignments={therapistAssignments}
           onAssignTherapist={onAssignTherapist}
+          t={t}
+          dir={dir}
         />
       )}{" "}
       {tab === "absences" && (
@@ -752,7 +763,7 @@ export default function Manage({
           <Card style={{ marginBottom: 16 }}>
             {" "}
             <CT icon="🏠" bg="#fef9e7">
-              Patients Outside Right Now
+              {t('manage.patientsOutsideTitle')}
             </CT>{" "}
             {patients.filter((p) => p.status === "away").length === 0 && (
               <div
@@ -763,7 +774,7 @@ export default function Manage({
                   fontSize: 13,
                 }}
               >
-                No patients away from center right now ✅
+                {t('manage.noPatientAway')}
               </div>
             )}{" "}
             {patients
@@ -805,7 +816,7 @@ export default function Manage({
                       {p.awayType}
                     </div>{" "}
                   </div>{" "}
-                  <Badge type="yellow">outside</Badge>{" "}
+                  <Badge type="yellow">{t('manage.outsideStatus')}</Badge>{" "}
                   <Btn
                     color="teal"
                     size="sm"
@@ -813,10 +824,10 @@ export default function Manage({
                       try {
                         await onReturn(p.id);
                         toast(`✅ ${p.name} returned to center`);
-                      } catch { toast("❌ Failed to update"); }
+                      } catch { toast(t('manage.toastReturnFailed')); }
                     }}
                   >
-                    ✓ Confirm Return
+                    {t('manage.confirmReturnButton')}
                   </Btn>{" "}
                 </div>
               ))}{" "}
@@ -824,12 +835,14 @@ export default function Manage({
           <Card>
             {" "}
             <CT icon="📤" bg="#e8f0fb">
-              Confirm New Absence
+              {t('manage.confirmNewAbsenceTitle')}
             </CT>{" "}
             <AbsenceForm
               patients={patients.filter((p) => p.status === "active")}
               onMarkAway={onMarkAway}
               toast={toast}
+              t={t}
+              dir={dir}
             />{" "}
           </Card>{" "}
         </div>

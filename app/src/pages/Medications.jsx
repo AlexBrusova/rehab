@@ -9,7 +9,7 @@ import {
 import { Badge, Card, CT, Alrt, Btn, Th, Td, Modal, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
-export default function Medications({ patients, meds, dist, user, toast, onSetStatus }) {
+export default function Medications({ t = (k) => k, dir = "ltr", patients, meds, dist, user, toast, onSetStatus }) {
   const today = new Date().toLocaleDateString("en-GB");
   const { isMobile } = useBreakpoint();
   const [shift, setShift] = useState("morning");
@@ -39,10 +39,10 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
     },
   ]);
   const shiftLabel = {
-    morning: "☀️ Morning 09:00",
-    noon: "🌤️ Noon 13:00",
-    evening: "🌙 Evening 20:00",
-    night: "🌑 Night 23:00",
+    morning: t('medications.shiftMorning'),
+    noon: t('medications.shiftNoon'),
+    evening: t('medications.shiftEvening'),
+    night: t('medications.shiftNight'),
   };
   const shiftKey = {
     morning: "morning",
@@ -62,7 +62,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
   };
   const addExtraMed = () => {
     if (!extraName.trim()) {
-      toast("⚠️ Please enter Medication Name");
+      toast(t('medications.toastMedicationNameRequired'));
       return;
     }
     const timeNow = new Date().toTimeString().slice(0, 5);
@@ -96,7 +96,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
   };
   const submitSOS = () => {
     if (!sosData.medName || !sosData.approvedBy) {
-      toast("⚠️ Please fill Medication Name and who approved");
+      toast(t('medications.toastApprovedByRequired'));
       return;
     }
     toast(
@@ -139,60 +139,71 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
       {" "}
       {/* SOS MODAL */}{" "}
       {showSOS && (
-        <Modal onClose={() => setShowSOS(false)} title="🚨 SOS Medication">
+        <Modal onClose={() => setShowSOS(false)} title={t('medications.sosTitle')}>
           {" "}
           <Alrt type="purple" icon="🔐">
-            Must mark who approved before saving
+            {t('medications.mustMarkApprovalWarning')}
           </Alrt>{" "}
-          <FL label="Patient">
+          <FL label={t('medications.patientLabel')}>
             <FS
               value={sosData.patientId}
               onChange={(v) => setSosData((s) => ({ ...s, patientId: v }))}
               options={patients
                 .filter((p) => p.status === "active")
                 .map((p) => ({ v: p.id, l: p.name }))}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Medication Name">
+          <FL label={t('medications.medicationNameLabel')}>
             <FI
               value={sosData.medName}
               onChange={(v) => setSosData((s) => ({ ...s, medName: v }))}
-              placeholder="e.g.: Diphenhydramine"
+              placeholder={t('medications.medicationNamePlaceholder')}
               sanitize={sanitizeMedName}
               maxLength={V.MED_NAME_MAX}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Dose">
+          <FL label={t('medications.doseLabel')}>
             <FI
               value={sosData.dose}
               onChange={(v) => setSosData((s) => ({ ...s, dose: v }))}
-              placeholder="25mg"
+              placeholder={t('medications.dosePlaceholder')}
               sanitize={sanitizeMedDose}
               maxLength={V.MED_DOSE_MAX}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Reason">
+          <FL label={t('medications.reasonLabel')}>
             <FS
               value={sosData.reason}
               onChange={(v) => setSosData((s) => ({ ...s, reason: v }))}
-              options={["Headache", "Sedation", "Sleep", "SOS", "Other"]}
+              options={[
+                { v: "Headache", l: t('medications.reasonHeadache') },
+                { v: "Sedation", l: t('medications.reasonSedation') },
+                { v: "Sleep", l: t('medications.reasonSleep') },
+                { v: "SOS", l: t('medications.reasonSOS') },
+                { v: "Other", l: t('medications.reasonOther') },
+              ]}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Who approved? (required) ⭐">
+          <FL label={t('medications.approvedByLabel')}>
             <FI
               value={sosData.approvedBy}
               onChange={(v) => setSosData((s) => ({ ...s, approvedBy: v }))}
-              placeholder="Manager / Doctor name who approved"
+              placeholder={t('medications.approvedByPlaceholder')}
               sanitize={sanitizePersonName}
               maxLength={V.MED_PRESCRIBED_BY_MAX}
+              dir={dir}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="red" onClick={submitSOS}>
-              ✓ Save SOS
+              {t('medications.saveSosButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowSOS(false)}>
-              Cancel
+              {t('medications.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -204,30 +215,30 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
             setShowExtra(null);
             setExtraName("");
           }}
-          title={`💊 Extra Medication – ${patients.find((p) => p.id === showExtra)?.name}`}
+          title={`${t('medications.extraMedicationTitle')} ${patients.find((p) => p.id === showExtra)?.name}`}
           width={360}
         >
           {" "}
           <Alrt type="orange" icon="🔔">
-            Proposed by Counselor – <strong>managers will be notified</strong>{" "}
-            immediately
+            {t('medications.extraMedicationWarning')}
           </Alrt>{" "}
-          <FL label="Name of medication given">
+          <FL label={t('medications.medicationGivenLabel')}>
             {" "}
             <FI
               value={extraName}
               onChange={setExtraName}
-              placeholder="e.g.: Diphenhydramine"
+              placeholder={t('medications.medicationGivenPlaceholder')}
               sanitize={sanitizeMedName}
               maxLength={V.MED_NAME_MAX}
+              dir={dir}
             />{" "}
           </FL>{" "}
           <div style={{ fontSize: 12, color: C.soft, marginBottom: 16 }}>
-            Dose – not required. Time recorded automatically.
+            {t('medications.doseNotRequired')}
           </div>{" "}
           <div style={{ display: "flex", gap: 10 }}>
             <Btn color="orange" onClick={addExtraMed}>
-              ✓ Record and Send Alert
+              {t('medications.recordAndSendAlert')}
             </Btn>
             <Btn
               color="outline"
@@ -236,7 +247,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
                 setExtraName("");
               }}
             >
-              Cancel
+              {t('medications.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -246,7 +257,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
         <Card style={{ marginBottom: 16, border: `2px solid ${C.orange}` }}>
           {" "}
           <CT icon="🔔" bg="#fef3e8">
-            Alerts – Extra Medications given by Counselor
+            {t('medications.alertsTitle')}
           </CT>{" "}
           {extraAlerts.map((a) => (
             <div
@@ -264,7 +275,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
               <div style={{ flex: 1 }}>
                 {" "}
                 <span style={{ fontWeight: 700 }}>{a.patientName}</span>{" "}
-                <span style={{ color: C.mid }}> received </span>{" "}
+                <span style={{ color: C.mid }}>{t('medications.receivedColumn')}</span>{" "}
                 <span style={{ fontWeight: 700, color: C.orange }}>
                   {a.medName}
                 </span>{" "}
@@ -292,7 +303,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
       )}{" "}
       {changedMeds.length > 0 && (
         <Alrt type="orange" icon="⚠️">
-          <strong>{changedMeds.length} New Changed Medications</strong> –{" "}
+          <strong>{changedMeds.length} {t('medications.changedMedicationsWarning')}</strong> –{" "}
           {[
             ...new Set(
               changedMeds.map(
@@ -314,7 +325,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
         <Card>
           {" "}
           <CT icon="💊" bg="#e8f0fb">
-            Select Distribution Time
+            {t('medications.selectDistributionTime')}
           </CT>{" "}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             {" "}
@@ -334,10 +345,10 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
           {" "}
           <div>
             <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 3 }}>
-              SOS Medication
+              {t('medications.sosWarning')}
             </div>
             <div style={{ fontSize: 12, color: C.soft }}>
-              Requires Manager / Doctor approval
+              {t('medications.sosDescription')}
             </div>
           </div>{" "}
           <Btn
@@ -346,7 +357,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
             style={{ marginRight: "auto" }}
             onClick={() => setShowSOS(true)}
           >
-            🚨 SOS
+            {t('medications.sosButton')}
           </Btn>{" "}
         </Card>{" "}
       </div>{" "}
@@ -359,16 +370,16 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
             <Btn
               color="teal"
               size="sm"
-              onClick={() => toast("✅ Distribution saved")}
+              onClick={() => toast(t('medications.toastSaveSuccess'))}
             >
-              ✓ Finish Distribution
+              {t('medications.finishDistribution')}
             </Btn>
           }
         >
           {" "}
-          Distribution – {shiftLabel[shift]}{" "}
+          {t('medications.distributionTitle')} {shiftLabel[shift]}{" "}
           <Badge type="blue" style={{ marginRight: 8 }}>
-            {shiftPats.length} Patients
+            {shiftPats.length} {t('medications.patientCountLabel')}
           </Badge>{" "}
         </CT>{" "}
         <div style={{ overflowX: "auto" }}>
@@ -384,9 +395,9 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
             <thead>
               <tr>
                 {" "}
-                <Th>Patient</Th> <Th>Regular Medications</Th> <Th>received</Th>{" "}
-                <Th>Partial</Th> <Th>Did Not Take</Th>{" "}
-                <Th>Extra Medications Today</Th>{" "}
+                <Th>{t('medications.patientColumn')}</Th> <Th>{t('medications.regularMedicationsColumn')}</Th> <Th>{t('medications.receivedColumn')}</Th>{" "}
+                <Th>{t('medications.partialColumn')}</Th> <Th>{t('medications.didNotTakeColumn')}</Th>{" "}
+                <Th>{t('medications.extraMedicationsColumn')}</Th>{" "}
               </tr>
             </thead>
             <tbody>
@@ -431,7 +442,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
                             marginRight: 4,
                           }}
                         >
-                          Changed
+                          {t('medications.changedBadge')}
                         </span>
                       )}{" "}
                     </Td>{" "}
@@ -534,7 +545,7 @@ export default function Medications({ patients, meds, dist, user, toast, onSetSt
                             whiteSpace: "nowrap",
                           }}
                         >
-                          + Add
+                          {t('medications.extraAddButton')}
                         </button>{" "}
                       </div>{" "}
                     </Td>{" "}

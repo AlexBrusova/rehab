@@ -13,6 +13,8 @@ export default function ScheduleTab({
   isOrgManager,
   activeHouseId,
   toast,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const nowMonth = new Date().toISOString().slice(0, 7);
   const [selMonth, setSelMonth] = useState(nowMonth);
@@ -79,7 +81,7 @@ export default function ScheduleTab({
     a.href = url;
     a.download = `Shift_Schedule_${selMonth}.csv`;
     a.click();
-    toast("📥 Excel file downloaded");
+    toast(t("manage.scheduleExportSuccess"));
   };
   return (
     <div>
@@ -88,7 +90,7 @@ export default function ScheduleTab({
       <Card style={{ marginBottom: 14 }}>
         {" "}
         <CT icon="📊" bg="#e3f7f8">
-          Number of Shifts – {selMonth}
+          {t('manage.scheduleNumberOfShifts')} {selMonth}
         </CT>{" "}
         {counselors.map((u) => (
           <div
@@ -123,7 +125,7 @@ export default function ScheduleTab({
               {" "}
               <div style={{ fontWeight: 700, fontSize: 13 }}>{u.name}</div>{" "}
               <div style={{ fontSize: 11, color: C.soft }}>
-                Total this month: {shiftCount(u.id)} Shifts
+                {t('manage.scheduleTotalThisMonth')} {shiftCount(u.id)} {t('manage.scheduleShiftsLabel')}
               </div>{" "}
             </div>{" "}
             <div
@@ -145,11 +147,11 @@ export default function ScheduleTab({
       {selDay && (
         <Modal
           onClose={() => setSelDay(null)}
-          title={`📅 ${selDay} – Counselor Assignment`}
+          title={`📅 ${selDay} – ${t('manage.scheduleCounselorAssignment')}`}
           width={340}
         >
           {" "}
-          <FL label="Select Counselor">
+          <FL label={t('manage.scheduleSelectCounselor')}>
             {" "}
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {" "}
@@ -211,7 +213,7 @@ export default function ScheduleTab({
                           fontWeight: 700,
                         }}
                       >
-                        ✓ Defined
+                        {t('manage.scheduleDefinedLabel')}
                       </span>
                     )}{" "}
                   </button>
@@ -232,18 +234,19 @@ export default function ScheduleTab({
                 }}
               >
                 {" "}
-                🗑️ Clear This Day{" "}
+                {t('manage.scheduleClearDay')}{" "}
               </button>{" "}
             </div>{" "}
           </FL>{" "}
-          <FL label="Note (partial shift)">
+          <FL label={t('manage.scheduleNoteFull')}>
             {" "}
             <FI
               value={slotData.note}
               onChange={(v) => setSlotData((d) => ({ ...d, note: v }))}
-              placeholder="e.g.: until 15:00 only"
+              placeholder={t('manage.scheduleNotePlaceholder')}
               sanitize={(s) => sanitizeFreeText(s, V.SHIFT_LABEL_MAX)}
               maxLength={V.SHIFT_LABEL_MAX}
+              dir={dir}
             />{" "}
           </FL>{" "}
         </Modal>
@@ -252,7 +255,7 @@ export default function ScheduleTab({
       <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
         {" "}
         <Btn color="outline" onClick={exportExcel}>
-          📥 Export Excel
+          {t('manage.scheduleExportButton')}
         </Btn>{" "}
       </div>{" "}
       {/* Monthly Schedule */}{" "}
@@ -446,7 +449,7 @@ export default function ScheduleTab({
           ))}{" "}
         </div>{" "}
         <div style={{ marginTop: 6, fontSize: 10, color: C.soft }}>
-          * = partial shift / replacement
+          {t('manage.schedulePartialNote')}
         </div>{" "}
       </Card>{" "}
     </div>

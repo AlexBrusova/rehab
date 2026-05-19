@@ -27,6 +27,8 @@ export default function PatientProfile({
   onAddMed,
   onSaveMed,
   onRemoveMed,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const p = patients.find((pt) => pt.id === pid);
@@ -38,98 +40,99 @@ export default function PatientProfile({
     morning: false, noon: false, evening: false, night: false,
   });
   const [showAbsence, setShowAbsence] = useState(false);
-  const [absData, setAbsData] = useState({ type: "Home Visit", returnDate: "" });
+  const [absData, setAbsData] = useState({ type: t('patientProfile.homeVisit'), returnDate: "" });
 
   const canManageAbsence = user.role === "manager" || user.role === "counselor";
   const canRequestAbsence = user.role === "counselor" || user.role === "manager";
 
   const room = rooms.find((r) => r.id === p?.roomId);
   const pMeds = meds.filter((m) => m.patientId === pid);
-  const pTherapy = therapy.filter((t) => t.patientId === pid);
+  const pTherapy = therapy.filter((th) => th.patientId === pid);
   if (!p) return null;
 
   const saveMed = async (id, upd) => {
     try {
       await onSaveMed(id, upd);
       setEditMed(null);
-      toast("✅ Medication updated");
-    } catch { toast("❌ Failed to update medication"); }
+      toast(t('patientProfile.toastUpdateSuccess'));
+    } catch { toast(t('patientProfile.toastUpdateFailed')); }
   };
 
   const removeMed = async (id) => {
     try {
       await onRemoveMed(id);
-      toast("Medication removed");
-    } catch { toast("❌ Failed to remove medication"); }
+      toast(t('patientProfile.toastRemoveSuccess'));
+    } catch { toast(t('patientProfile.toastRemoveFailed')); }
   };
 
   const addMed = async () => {
-    if (!newMed.name || !newMed.dose) { toast("⚠️ Please fill Name and Dose"); return; }
+    if (!newMed.name || !newMed.dose) { toast(t('patientProfile.toastFillNameDose')); return; }
     try {
       await onAddMed(pid, newMed);
       setNewMed({ name: "", dose: "", unit: "mg", morning: false, noon: false, evening: false, night: false });
       setShowAddMed(false);
-      toast("✅ Medication added");
-    } catch { toast("❌ Failed to add medication"); }
+      toast(t('patientProfile.toastAddSuccess'));
+    } catch { toast(t('patientProfile.toastAddFailed')); }
   };
 
   const openAbsence = async () => {
-    if (!absData.returnDate) { toast("⚠️ Please enter expected return date"); return; }
+    if (!absData.returnDate) { toast(t('patientProfile.toastReturnDateRequired')); return; }
     if (!isValidDateDdMmYyyy(absData.returnDate)) {
-      toast("⚠️ Invalid return date (use DD/MM/YYYY)");
+      toast(t('patientProfile.toastInvalidReturnDate'));
       return;
     }
     try {
       await onUpdatePatient(pid, { awayType: absData.type });
       setShowAbsence(false);
       toast(`✅ ${p.name} left for ${absData.type} – back on ${absData.returnDate}`);
-    } catch { toast("❌ Failed to update patient"); }
+    } catch { toast(t('patientProfile.toastAbsenceFailed')); }
   };
 
   const returnPatient = async () => {
     try {
       await onUpdatePatient(pid, { awayType: null });
       toast(`✅ ${p.name} returned to center`);
-    } catch { toast("❌ Failed to update patient"); }
+    } catch { toast(t('patientProfile.toastReturnFailed')); }
   };
 
   return (
     <Modal onClose={onClose} title="" width={600}>
       {showAbsence && (
-        <Modal onClose={() => setShowAbsence(false)} title="🏠 Confirm Logout" width={380}>
+        <Modal onClose={() => setShowAbsence(false)} title={t('patientProfile.confirmLogoutTitle')} width={380}>
           {!canManageAbsence && (
-            <Alrt type="teal" icon="ℹ️">Absence will be recorded and visible to manager</Alrt>
+            <Alrt type="teal" icon="ℹ️">{t('patientProfile.absenceNote')}</Alrt>
           )}
-          <FL label="Type Logout">
+          <FL label={t('patientProfile.typeLogoutLabel')}>
             <div style={{ display: "flex", gap: 10 }}>
-              {["Home Visit", "Errands", "Therapy Medical", "Other"].map((t) => (
-                <div key={t} onClick={() => setAbsData((d) => ({ ...d, type: t }))} style={{
+              {[t('patientProfile.homeVisit'), t('patientProfile.errands'), t('patientProfile.therapyMedical'), t('patientProfile.other')].map((absType) => (
+                <div key={absType} onClick={() => setAbsData((d) => ({ ...d, type: absType }))} style={{
                   flex: 1, padding: "8px 6px", borderRadius: 10,
-                  border: `2px solid ${absData.type === t ? C.teal : C.border}`,
-                  background: absData.type === t ? "#e3f7f8" : "#fff",
+                  border: `2px solid ${absData.type === absType ? C.teal : C.border}`,
+                  background: absData.type === absType ? "#e3f7f8" : "#fff",
                   textAlign: "center", cursor: "pointer", fontSize: 12, fontWeight: 700,
-                  color: absData.type === t ? C.teal : C.mid,
-                }}>{t}</div>
+                  color: absData.type === absType ? C.teal : C.mid,
+                }}>{absType}</div>
               ))}
             </div>
           </FL>
-          <FL label="Date Return Expected">
+          <FL label={t('patientProfile.dateReturnLabel')}>
             <FI
               value={absData.returnDate}
               onChange={(v) => setAbsData((d) => ({ ...d, returnDate: v }))}
-              placeholder="DD/MM/YYYY"
+              placeholder={t('patientProfile.dateReturnPlaceholder')}
               sanitize={sanitizeDateDdMm}
               maxLength={V.DATE_UI_MAX}
               inputMode="numeric"
               title="DD/MM/YYYY"
+              dir={dir}
             />
           </FL>
           <div style={{ background: "#fff8f0", border: "1px solid #f5c07a", borderRadius: 8, padding: "9px 12px", fontSize: 12, color: "#8b4800", marginBottom: 14 }}>
-            ⚠️ During absence: Patient will NOT appear in Medication Distribution, Groups and Phones.
+            {t('patientProfile.absenceWarning')}
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <Btn color="teal" onClick={openAbsence}>✓ Mark Absence</Btn>
-            <Btn color="outline" onClick={() => setShowAbsence(false)}>Cancel</Btn>
+            <Btn color="teal" onClick={openAbsence}>{t('patientProfile.markAbsenceButton')}</Btn>
+            <Btn color="outline" onClick={() => setShowAbsence(false)}>{t('patientProfile.cancelButton')}</Btn>
           </div>
         </Modal>
       )}
@@ -145,25 +148,25 @@ export default function PatientProfile({
             {p.dob && `${p.dob} | `}{room ? `${room.number} – ${room.building}` : "—"}
           </div>
           <div style={{ display: "flex", gap: 6, marginTop: 6, flexWrap: "wrap" }}>
-            <Badge type="teal">💊 {pMeds.length} Medications</Badge>
+            <Badge type="teal">💊 {pMeds.length} {t('patientProfile.medications')}</Badge>
             <Badge type={p.status === "away" ? "yellow" : "green"}>
-              {p.status === "away" ? `🏠 ${p.awayType}` : "✓ Active"}
+              {p.status === "away" ? `🏠 ${p.awayType}` : t('patientProfile.activeStatus')}
             </Badge>
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
           <div style={{ textAlign: "center", background: "rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 16px" }}>
             <div style={{ fontSize: 30, fontWeight: 900, color: "#5dffd5", lineHeight: 1 }}>{p.daysInRehab || "—"}</div>
-            <div style={{ fontSize: 11, opacity: 0.6 }}>Days in Center</div>
+            <div style={{ fontSize: 11, opacity: 0.6 }}>{t('patientProfile.daysInCenter')}</div>
           </div>
           {p.status === "active" && canRequestAbsence && (
             <button onClick={() => setShowAbsence(true)} style={{ background: "rgba(255,165,0,0.2)", border: "1px solid rgba(255,165,0,0.5)", color: "#ffd080", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-              🏠 Send on visit
+              {t('patientProfile.sendOnVisitButton')}
             </button>
           )}
           {p.status === "away" && canManageAbsence && (
             <button onClick={returnPatient} style={{ background: "rgba(39,174,96,0.2)", border: "1px solid rgba(39,174,96,0.5)", color: "#5dffd5", borderRadius: 8, padding: "5px 10px", fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "inherit", whiteSpace: "nowrap" }}>
-              ✓ Confirm Return
+              {t('patientProfile.confirmReturnButton')}
             </button>
           )}
         </div>
@@ -172,13 +175,13 @@ export default function PatientProfile({
       {/* Tabs */}
       <div style={{ display: "flex", gap: 3, marginBottom: 16, borderBottom: `2px solid ${C.border}`, overflowX: "auto" }}>
         {[
-          ["meds", "💊 Medications"],
-          ["absence", "🏠 Absences"],
-          ["cons", "⛔ Consequences"],
-          ["finance", "💰 General"],
-          ["moods", "😊 Indicators"],
-          ["therapy", "🧠 Emotional Therapy"],
-          ["notes", "📝 Notes"],
+          ["meds", t('patientProfile.medicationsTab')],
+          ["absence", t('patientProfile.absencesTab')],
+          ["cons", t('patientProfile.consequencesTab')],
+          ["finance", t('patientProfile.financeTab')],
+          ["moods", t('patientProfile.moodsTab')],
+          ["therapy", t('patientProfile.therapyTab')],
+          ["notes", t('patientProfile.notesTab')],
         ].map(([id, l]) => (
           <div key={id} onClick={() => setTab(id)} style={{ padding: "7px 12px", fontSize: 11, fontWeight: 700, cursor: "pointer", color: tab === id ? C.blue : C.soft, borderBottom: `2px solid ${tab === id ? C.blue : "transparent"}`, marginBottom: -2, whiteSpace: "nowrap" }}>
             {l}
@@ -191,7 +194,7 @@ export default function PatientProfile({
         <div>
           {canEditMeds && (
             <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
-              <Btn color="teal" size="sm" onClick={() => setShowAddMed(true)}>+ Add Medication</Btn>
+              <Btn color="teal" size="sm" onClick={() => setShowAddMed(true)}>{t('patientProfile.addMedicationButton')}</Btn>
             </div>
           )}
           {showAddMed && (
@@ -200,18 +203,20 @@ export default function PatientProfile({
                 <FI
                   value={newMed.name}
                   onChange={(v) => setNewMed((m) => ({ ...m, name: v }))}
-                  placeholder="Medication Name"
+                  placeholder={t('patientProfile.medicationNamePlaceholder')}
                   sanitize={sanitizeMedName}
                   maxLength={V.MED_NAME_MAX}
+                  dir={dir}
                 />
                 <FI
                   value={newMed.dose}
                   onChange={(v) => setNewMed((m) => ({ ...m, dose: v }))}
-                  placeholder="Dose"
+                  placeholder={t('patientProfile.dosePlaceholder')}
                   sanitize={sanitizeMedDose}
                   maxLength={V.MED_DOSE_MAX}
+                  dir={dir}
                 />
-                <FS value={newMed.unit} onChange={(v) => setNewMed((m) => ({ ...m, unit: v }))} options={["mg", "mcg", "ml", "IU", "g"]} />
+                <FS value={newMed.unit} onChange={(v) => setNewMed((m) => ({ ...m, unit: v }))} options={["mg", "mcg", "ml", "IU", "g"]} dir={dir} />
               </div>
               <div style={{ display: "flex", gap: 8, marginBottom: 10 }}>
                 {["morning", "noon", "evening", "night"].map((k, i) => (
@@ -221,18 +226,18 @@ export default function PatientProfile({
                 ))}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <Btn color="teal" size="sm" onClick={addMed}>✓ Add</Btn>
-                <Btn color="outline" size="sm" onClick={() => setShowAddMed(false)}>Cancel</Btn>
+                <Btn color="teal" size="sm" onClick={addMed}>{t('patientProfile.addButton')}</Btn>
+                <Btn color="outline" size="sm" onClick={() => setShowAddMed(false)}>{t('patientProfile.cancelButton')}</Btn>
               </div>
             </div>
           )}
           {pMeds.length === 0 && !showAddMed && (
-            <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>No medications prescribed</div>
+            <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>{t('patientProfile.noMedicationsPrescribed')}</div>
           )}
           {pMeds.map((m) => (
             <div key={m.id}>
               {editMed === m.id ? (
-                <EditMedRow med={m} onSave={(upd) => saveMed(m.id, upd)} onCancel={() => setEditMed(null)} />
+                <EditMedRow med={m} onSave={(upd) => saveMed(m.id, upd)} onCancel={() => setEditMed(null)} t={t} dir={dir} />
               ) : (
                 <div style={{ display: "flex", alignItems: "center", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${C.border}`, background: "#fff", marginBottom: 8, gap: 10 }}>
                   <span style={{ fontSize: 18 }}>💊</span>
@@ -241,10 +246,10 @@ export default function PatientProfile({
                     <div style={{ fontSize: 12, color: C.mid }}>{m.dose}{m.unit}</div>
                   </div>
                   <div style={{ display: "flex", gap: 5 }}>
-                    {["Morning", "Noon", "Evening", "Night"].map((t, i) => {
+                    {["Morning", "Noon", "Evening", "Night"].map((label, i) => {
                       const k = ["morning", "noon", "evening", "night"][i];
                       return (
-                        <span key={t} style={{ padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: m[k] ? C.teal : "#f0f2f5", color: m[k] ? "#fff" : "#aaa" }}>{t}</span>
+                        <span key={label} style={{ padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: m[k] ? C.teal : "#f0f2f5", color: m[k] ? "#fff" : "#aaa" }}>{label}</span>
                       );
                     })}
                   </div>
@@ -269,21 +274,21 @@ export default function PatientProfile({
               <div style={{ fontSize: 36 }}>🏠</div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 16, fontWeight: 900, marginBottom: 3 }}>{p.awayType}</div>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>Patient is outside center right now</div>
-                <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>Not shown in Medications / Groups / Phones</div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>{t('patientProfile.patientOutsideWarning')}</div>
+                <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>{t('patientProfile.notShownInServices')}</div>
               </div>
               {canManageAbsence && (
                 <button onClick={returnPatient} style={{ background: "rgba(255,255,255,0.2)", border: "1px solid rgba(255,255,255,0.4)", color: "#fff", borderRadius: 10, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: "inherit" }}>
-                  ✓ Confirm Return
+                  {t('patientProfile.confirmReturnButton')}
                 </button>
               )}
             </div>
           ) : (
             <div style={{ background: "#e8f8ef", borderRadius: 12, padding: 14, marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
               <span style={{ fontSize: 22 }}>✅</span>
-              <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: C.green }}>Patient is in Center</div>
+              <div style={{ flex: 1, fontSize: 13, fontWeight: 700, color: C.green }}>{t('patientProfile.patientInCenter')}</div>
               {canRequestAbsence && (
-                <Btn color="orange" size="sm" onClick={() => setShowAbsence(true)}>🏠 Send on visit</Btn>
+                <Btn color="orange" size="sm" onClick={() => setShowAbsence(true)}>{t('patientProfile.sendOnVisitButton')}</Btn>
               )}
             </div>
           )}
@@ -296,13 +301,13 @@ export default function PatientProfile({
           {(() => {
             const pCons = (consequences || []).filter((c) => c.patientId === pid);
             const typeLabels = { phone: "📵 Phone Restriction", visit: "🏠 Cancel Home Visit", cigarettes: "🚬 Cigarette Restriction", other: "📝 Other" };
-            if (pCons.length === 0) return <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>No records found</div>;
+            if (pCons.length === 0) return <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>{t('patientProfile.noConsequenceRecords')}</div>;
             return pCons.map((c) => (
               <div key={c.id} style={{ borderRadius: 10, border: `1.5px solid ${c.status === "approved" ? C.orange : c.status === "pending" ? "#f5c07a" : C.border}`, padding: 14, marginBottom: 10, background: c.status === "approved" ? "#fff8f0" : c.status === "pending" ? "#fffbf0" : "#f9f9f9" }}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 5, alignItems: "center" }}>
                   <span style={{ fontWeight: 800, fontSize: 13 }}>{typeLabels[c.type] || c.type}</span>
                   <Badge type={c.status === "approved" ? "orange" : c.status === "pending" ? "yellow" : "gray"}>
-                    {c.status === "approved" ? "⛔ Active" : c.status === "pending" ? "⏳ Pending" : "Cancelled"}
+                    {c.status === "approved" ? "⛔ Active" : c.status === "pending" ? "⏳ Pending" : t('patientProfile.recordCancelled')}
                   </Badge>
                 </div>
                 <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 3 }}>{c.description || c.desc}</div>
@@ -322,11 +327,11 @@ export default function PatientProfile({
             return (
               <>
                 <div style={{ background: `linear-gradient(135deg,${C.teal},${C.tealLt})`, borderRadius: 12, padding: 16, color: "#fff", marginBottom: 14, textAlign: "center" }}>
-                  <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 4 }}>Account Balance</div>
+                  <div style={{ fontSize: 12, opacity: 0.75, marginBottom: 4 }}>{t('patientProfile.accountBalance')}</div>
                   <div style={{ fontSize: 32, fontWeight: 900 }}>₪{Number(balance).toLocaleString()}</div>
                 </div>
                 {pFin.length === 0 ? (
-                  <div style={{ textAlign: "center", padding: 16, color: C.soft, fontSize: 13 }}>No financial transactions</div>
+                  <div style={{ textAlign: "center", padding: 16, color: C.soft, fontSize: 13 }}>{t('patientProfile.noFinancialTransactions')}</div>
                 ) : (
                   pFin.map((f) => (
                     <div key={f.id} style={{ display: "flex", alignItems: "center", padding: "9px 0", borderBottom: `1px solid ${C.border}`, gap: 10 }}>
@@ -359,8 +364,8 @@ export default function PatientProfile({
                 {p.mood ?? "—"}
               </div>
               <div style={{ fontSize: 13, color: C.soft }}>
-                <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>Mood Score / 10</div>
-                {p.mood >= 7 ? "😊 Good" : p.mood >= 4 ? "😐 Moderate" : p.mood ? "😟 Low — attention needed" : "Not recorded"}
+                <div style={{ fontWeight: 700, color: C.text, marginBottom: 4 }}>{t('patientProfile.moodScore')}</div>
+                {p.mood >= 7 ? t('patientProfile.moodGood') : p.mood >= 4 ? t('patientProfile.moodModerate') : p.mood ? t('patientProfile.moodLow') : "Not recorded"}
               </div>
             </div>
           </Card>
@@ -371,28 +376,28 @@ export default function PatientProfile({
       {tab === "therapy" && (
         <div>
           {pTherapy.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>No scheduled sessions</div>
+            <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>{t('patientProfile.noScheduledSessions')}</div>
           ) : (
-            pTherapy.map((t) => (
-              <div key={t.id} style={{ borderRadius: 10, border: `1px solid ${C.border}`, padding: 14, marginBottom: 10 }}>
+            pTherapy.map((session) => (
+              <div key={session.id} style={{ borderRadius: 10, border: `1px solid ${C.border}`, padding: 14, marginBottom: 10 }}>
                 <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
                   <span style={{ fontSize: 14 }}>🧠</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 13 }}>{t.topic}</div>
-                    <div style={{ fontSize: 12, color: C.soft }}>{t.date}</div>
+                    <div style={{ fontWeight: 700, fontSize: 13 }}>{session.topic}</div>
+                    <div style={{ fontSize: 12, color: C.soft }}>{session.date}</div>
                   </div>
-                  <Badge type={{ NORMAL: "teal", ATTENTION: "orange", URGENT: "red" }[t.urgency]}>
-                    {{ NORMAL: "Normal", ATTENTION: "Attention", URGENT: "Urgent" }[t.urgency]}
+                  <Badge type={{ NORMAL: "teal", ATTENTION: "orange", URGENT: "red" }[session.urgency]}>
+                    {{ NORMAL: "Normal", ATTENTION: "Attention", URGENT: "Urgent" }[session.urgency]}
                   </Badge>
                 </div>
-                {t.counselorNote && (
+                {session.counselorNote && (
                   <div style={{ background: "#e3f7f8", border: "1px solid #7dd4d7", borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#054548" }}>
-                    💬 Note for Counselors: {t.counselorNote}
+                    {t('patientProfile.noteForCounselors')} {session.counselorNote}
                   </div>
                 )}
-                {(user.role === "manager" || user.role === "therapist") && t.notes && (
+                {(user.role === "manager" || user.role === "therapist") && session.notes && (
                   <div style={{ background: "#f0e8fb", border: `1px solid #c9a8f0`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: "#3d1a6b", marginTop: 6 }}>
-                    🔒 {t.notes}
+                    🔒 {session.notes}
                   </div>
                 )}
               </div>
@@ -405,13 +410,13 @@ export default function PatientProfile({
       {tab === "notes" && (
         <div>
           <Card style={{ marginBottom: 12 }}>
-            <CT icon="📋" bg="#e8f0fb">Patient Details</CT>
+            <CT icon="📋" bg="#e8f0fb">{t('patientProfile.patientDetailsTitle')}</CT>
             {[
-              ["👤 Full Name", p.name],
-              ["🎂 Date of Birth", p.dob || "—"],
-              ["📅 Admission Date", p.admitDate || "—"],
-              ["🏠 Room", room ? `${room.number} – ${room.building}` : "—"],
-              ["📊 Days in Center", p.daysInRehab ?? "—"],
+              [t('patientProfile.fullNameLabel'), p.name],
+              [t('patientProfile.dateOfBirthLabel'), p.dob || "—"],
+              [t('patientProfile.admissionDateLabel'), p.admitDate || "—"],
+              [t('patientProfile.roomLabel'), room ? `${room.number} – ${room.building}` : "—"],
+              [t('patientProfile.daysLabel'), p.daysInRehab ?? "—"],
             ].map(([l, v]) => (
               <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}`, fontSize: 13 }}>
                 <span style={{ color: C.soft }}>{l}</span>
@@ -420,7 +425,7 @@ export default function PatientProfile({
             ))}
             {p.notes && (
               <div style={{ marginTop: 10, background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
-                <div style={{ fontWeight: 700, fontSize: 11, color: C.soft, marginBottom: 4 }}>📝 Notes</div>
+                <div style={{ fontWeight: 700, fontSize: 11, color: C.soft, marginBottom: 4 }}>{t('patientProfile.notesLabel')}</div>
                 {p.notes}
               </div>
             )}
