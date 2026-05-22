@@ -327,7 +327,6 @@ export default function Dashboard({
               <Th>{t('dashboard.tableHeaderDaysInCenter')}</Th>
               <Th>{t('dashboard.tableHeaderEmotionalStatus')}</Th>
               <Th>{t('dashboard.tableHeaderStatus')}</Th>
-              <Th>{t('dashboard.tableHeaderMedications')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -407,16 +406,6 @@ export default function Dashboard({
                         <Badge type="yellow">🏠 {p.awayType}</Badge>
                       ) : (
                         <Badge type="green">✓ Active</Badge>
-                      )}
-                    </Td>{" "}
-                    <Td>
-                      <Badge type="blue">
-                        💊 {meds.filter((m) => m.patientId === p.id).length}
-                      </Badge>
-                      {meds.some((m) => m.patientId === p.id && m.changed) && (
-                        <Badge type="orange" style={{ marginRight: 4 }}>
-                          {t('dashboard.patientChanged')}
-                        </Badge>
                       )}
                     </Td>{" "}
                   </tr>
