@@ -128,15 +128,6 @@ export default function Dashboard({
               </span>
             </Alrt>
           )}{" "}
-          {lowMood > 0 && (
-            <Alrt type="red" icon="😔">
-              <strong>{t('dashboard.lowEmotionalStatus')}</strong> –{" "}
-              {patients
-                .filter((p) => p.mood <= 3 && p.status === "active")
-                .map((p) => p.name)
-                .join(", ")}
-            </Alrt>
-          )}{" "}
           {changed > 0 && (
             <Alrt type="orange" icon="💊">
               <strong>{changed} {t('dashboard.changedMedicationsAlert')}</strong> – {t('dashboard.notApprovedByCounselor')}{" "}
