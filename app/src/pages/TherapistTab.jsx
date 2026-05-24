@@ -6,17 +6,18 @@ export default function TherapistTab({
   patients,
   therapistAssignments,
   onAssignTherapist,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const therapists = users.filter((u) => u.role === "therapist");
   return (
     <Card>
       {" "}
       <CT icon="🧠" bg="#fef3e8">
-        Assign Emotional Therapist to Patients
+        {t('manage.therapistTabTitle')}
       </CT>{" "}
       <Alrt type="teal" icon="💡">
-        per Patient – can assign an Emotional Therapist. Cane be changed at any
-        time.
+        {t('manage.therapistTabInfo')}
       </Alrt>{" "}
       {patients.map((p) => {
         const assigned = therapistAssignments[p.id];
@@ -37,24 +38,24 @@ export default function TherapistTab({
               {" "}
               <div style={{ fontWeight: 700, fontSize: 13, color: C.text }}>{p.name}</div>{" "}
               <div style={{ fontSize: 11, color: therapist ? C.teal : C.soft }}>
-                {therapist ? `🧠 ${therapist.name}` : "Not assigned"}
+                {therapist ? `🧠 ${therapist.name}` : t('manage.therapistNotAssigned')}
               </div>{" "}
             </div>{" "}
             <select
               value={assigned || ""}
               onChange={(e) => onAssignTherapist(p.id, e.target.value || null)}
+              dir={dir}
               style={{
                 padding: "5px 10px",
                 borderRadius: 8,
                 border: `1.5px solid ${C.border}`,
                 fontSize: 12,
                 fontFamily: "inherit",
-                direction: "ltr",
                 cursor: "pointer",
               }}
             >
               {" "}
-              <option value="">-- Select Therapist --</option>{" "}
+              <option value="">{t('manage.selectTherapistPlaceholder')}</option>{" "}
               {therapists.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}

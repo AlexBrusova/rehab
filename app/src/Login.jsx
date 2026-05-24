@@ -1,10 +1,11 @@
 import { useState } from "react";
+import PropTypes from "prop-types";
 import { C } from "./data/constants";
 import { V } from "./data/validationLimits";
 import { sanitizeUsername, stripControlChars } from "./lib/inputSanitize";
 import { login } from "./lib/api";
 
-export default function Login({ onLogin }) {
+export default function Login({ onLogin, t = (k) => k, dir = "ltr" }) {
   const [un, setUn] = useState("");
   const [pw, setPw] = useState("");
   const [err, setErr] = useState("");
@@ -18,13 +19,14 @@ export default function Login({ onLogin }) {
       const { token, user } = await login(un, pw);
       onLogin(user, token);
     } catch {
-      setErr("Invalid username or password");
+      setErr(t('login.errorMessage'));
       setLoading(false);
     }
   };
 
   return (
     <div
+      dir={dir}
       style={{
         minHeight: "100vh",
         background: `linear-gradient(135deg,${C.navy} 0%,${C.navyMid} 60%,#0d4a6e 100%)`,
@@ -32,7 +34,6 @@ export default function Login({ onLogin }) {
         alignItems: "center",
         justifyContent: "center",
         fontFamily: "'Heebo','Segoe UI',sans-serif",
-        direction: "ltr",
       }}
     >
       <div style={{ width: 400, maxWidth: "90vw" }}>
@@ -54,10 +55,10 @@ export default function Login({ onLogin }) {
             🏥
           </div>
           <div style={{ fontSize: 24, fontWeight: 900, color: "#fff", marginBottom: 4 }}>
-            Rehab Center
+            {t('login.appTitle')}
           </div>
           <div style={{ fontSize: 12, color: "rgba(255,255,255,0.45)" }}>
-            Internal Management System
+            {t('login.appSubtitle')}
           </div>
         </div>
         <div
@@ -79,7 +80,7 @@ export default function Login({ onLogin }) {
                 marginBottom: 4,
               }}
             >
-              Username
+              {t('login.usernameLabel')}
             </label>
             <input
               data-testid="login-username"
@@ -91,6 +92,7 @@ export default function Login({ onLogin }) {
               autoCorrect="off"
               autoComplete="username"
               spellCheck="false"
+              dir={dir}
               style={{
                 width: "100%",
                 padding: "10px 12px",
@@ -100,7 +102,6 @@ export default function Login({ onLogin }) {
                 color: "#fff",
                 fontSize: 16,
                 fontFamily: "inherit",
-                direction: "ltr",
                 outline: "none",
                 boxSizing: "border-box",
               }}
@@ -116,7 +117,7 @@ export default function Login({ onLogin }) {
                 marginBottom: 4,
               }}
             >
-              Password
+              {t('login.passwordLabel')}
             </label>
             <input
               data-testid="login-password"
@@ -130,6 +131,7 @@ export default function Login({ onLogin }) {
               autoCapitalize="none"
               autoCorrect="off"
               autoComplete="current-password"
+              dir={dir}
               style={{
                 width: "100%",
                 padding: "10px 12px",
@@ -139,7 +141,6 @@ export default function Login({ onLogin }) {
                 color: "#fff",
                 fontSize: 16,
                 fontFamily: "inherit",
-                direction: "ltr",
                 outline: "none",
                 boxSizing: "border-box",
               }}
@@ -180,10 +181,16 @@ export default function Login({ onLogin }) {
               fontFamily: "inherit",
             }}
           >
-            {loading ? "Connecting..." : "Login to System"}
+            {loading ? t('login.connectingButton') : t('login.submitButton')}
           </button>
         </div>
       </div>
     </div>
   );
 }
+
+Login.propTypes = {
+  onLogin: PropTypes.func.isRequired,
+  t: PropTypes.func,
+  dir: PropTypes.string,
+};

@@ -7,13 +7,14 @@ import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function Consequences({
   consequences,
-  setConsequences,
   patients,
   users,
   user,
   toast,
   onAdd,
   onUpdate,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [showNew, setShowNew] = useState(false);
@@ -24,62 +25,63 @@ export default function Consequences({
     reason: "",
   });
   const typeLabels = {
-    phone: "📵 Phone Restriction",
-    visit: "🏠 Home Visit Cancellation",
-    cigarettes: "🚬 Cigarette Restriction",
-    other: "📝 Other",
+    phone: t('consequences.phoneRestriction'),
+    visit: t('consequences.homeVisitCancellation'),
+    cigarettes: t('consequences.cigaretteRestriction'),
+    other: t('consequences.other'),
   };
   const pending = consequences.filter((c) => c.status === "pending");
   const approved = consequences.filter((c) => c.status === "approved");
   const approve = async (id) => {
     try {
       await onUpdate(id, { status: "approved", approvedBy: user.name });
-      toast("✅ Consequence approved");
-    } catch { toast("❌ Failed"); }
+      toast(t('consequences.toastApproveSuccess'));
+    } catch { toast(t('consequences.toastApproveFailed')); }
   };
   const reject = async (id) => {
     try {
       await onUpdate(id, { status: "rejected" });
-      toast("Consequence rejected");
-    } catch { toast("❌ Failed"); }
+      toast(t('consequences.toastRejectSuccess'));
+    } catch { toast(t('consequences.toastRejectFailed')); }
   };
   const cancel = async (id) => {
     try {
       await onUpdate(id, { status: "rejected" });
-      toast("Consequence cancelled");
-    } catch { toast("❌ Failed"); }
+      toast(t('consequences.toastCancelSuccess'));
+    } catch { toast(t('consequences.toastCancelFailed')); }
   };
   const addConsequence = async () => {
     if (!newC.patientId || !newC.desc) {
-      toast("⚠️ Please select a patient and fill Description");
+      toast(t('consequences.toastSelectPatient'));
       return;
     }
     try {
       await onAdd({ patientId: newC.patientId, type: newC.type, description: newC.desc });
       setNewC({ patientId: "", type: "phone", desc: "", reason: "" });
       setShowNew(false);
-      toast("✅ Consequence proposed – awaiting manager approval");
-    } catch { toast("❌ Failed to add consequence"); }
+      toast(t('consequences.toastAddSuccess'));
+    } catch { toast(t('consequences.toastAddFailed')); }
   };
   return (
     <div>
       {" "}
       {showNew && (
-        <Modal onClose={() => setShowNew(false)} title="⚠️ Propose Consequence">
+        <Modal onClose={() => setShowNew(false)} title={t('consequences.proposeConsequenceTitle')}>
           {" "}
           <Alrt type="orange" icon="🔐">
-            Consequence only valid after manager approval
+            {t('consequences.approvalWarning')}
           </Alrt>{" "}
-          <FL label="Patient">
+          <FL label={t('consequences.patientLabel')}>
             <FS
               value={newC.patientId}
               onChange={(v) => setNewC((c) => ({ ...c, patientId: v }))}
               options={patients
                 .filter((p) => p.status === "active")
                 .map((p) => ({ v: p.id, l: p.name }))}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Consequence Type">
+          <FL label={t('consequences.consequenceTypeLabel')}>
             <FS
               value={newC.type}
               onChange={(v) => setNewC((c) => ({ ...c, type: v }))}
@@ -89,31 +91,33 @@ export default function Consequences({
               }))}
             />
           </FL>{" "}
-          <FL label="Description (duration, details)">
+          <FL label={t('consequences.descriptionLabel')}>
             <FI
               value={newC.desc}
               onChange={(v) => setNewC((c) => ({ ...c, desc: v }))}
-              placeholder="e.g.: Phone Restriction 3 days"
+              placeholder={t('consequences.descriptionPlaceholder')}
               sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
               maxLength={V.SHORT_LABEL}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Reason">
+          <FL label={t('consequences.reasonLabel')}>
             <FTA
               value={newC.reason}
               onChange={(v) => setNewC((c) => ({ ...c, reason: v }))}
-              placeholder="Description of what happened..."
+              placeholder={t('consequences.reasonPlaceholder')}
               rows={2}
               sanitize={sanitizeFreeText}
               maxLength={V.NOTE_MAX}
+              dir={dir}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="orange" onClick={addConsequence}>
-              ✓ Propose
+              {t('consequences.proposeButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowNew(false)}>
-              Cancel
+              {t('consequences.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -130,11 +134,11 @@ export default function Consequences({
             bg="#fce8e8"
             right={
               <Btn color="orange" size="sm" onClick={() => setShowNew(true)}>
-                + Propose
+                {t('consequences.proposeButtonShort')}
               </Btn>
             }
           >
-            pending approval
+            {t('consequences.pendingTitle')}
           </CT>{" "}
           {pending.length === 0 && (
             <div
@@ -145,7 +149,7 @@ export default function Consequences({
                 fontSize: 13,
               }}
             >
-              ✅ No pending items
+              {t('consequences.noPendingItems')}
             </div>
           )}{" "}
           {pending.map((c) => (
@@ -173,7 +177,7 @@ export default function Consequences({
                   {typeLabels[c.type] || c.type}
                 </div>{" "}
                 <Badge type="orange" style={{ marginRight: "auto" }}>
-                  Pending
+                  {t('consequences.pendingBadge')}
                 </Badge>{" "}
               </div>{" "}
               <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 3 }}>
@@ -183,15 +187,15 @@ export default function Consequences({
                 {c.desc}
               </div>{" "}
               <div style={{ fontSize: 11, color: C.soft, marginBottom: 10 }}>
-                Proposed by: {uName(users, c.proposedBy)} | {c.reason}
+                {t('consequences.proposedByLabel')} {uName(users, c.proposedBy)} | {c.reason}
               </div>{" "}
               {user.role === "manager" && (
                 <div style={{ display: "flex", gap: 8 }}>
                   <Btn color="teal" size="sm" onClick={() => approve(c.id)}>
-                    ✓ Approve
+                    {t('consequences.approveButton')}
                   </Btn>
                   <Btn color="outline" size="sm" onClick={() => reject(c.id)}>
-                    ✗ Reject
+                    {t('consequences.rejectButton')}
                   </Btn>
                 </div>
               )}{" "}
@@ -201,7 +205,7 @@ export default function Consequences({
         <Card>
           {" "}
           <CT icon="✅" bg="#e8f8ef">
-            Active Consequences
+            {t('consequences.activeConsequencesTitle')}
           </CT>{" "}
           {approved.length === 0 && (
             <div
@@ -212,7 +216,7 @@ export default function Consequences({
                 fontSize: 13,
               }}
             >
-              No results active
+              {t('consequences.noActiveResults')}
             </div>
           )}{" "}
           {approved.map((c) => (
@@ -239,7 +243,7 @@ export default function Consequences({
                   {typeLabels[c.type]}
                 </div>{" "}
                 <Badge type="green" style={{ marginRight: "auto" }}>
-                  Active
+                  {t('consequences.activeBadge')}
                 </Badge>{" "}
               </div>{" "}
               <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 3 }}>
@@ -249,11 +253,11 @@ export default function Consequences({
                 {c.desc}
               </div>{" "}
               <div style={{ fontSize: 11, color: C.soft, marginBottom: 8 }}>
-                Approved by: {uName(users, c.approvedBy)}
+                {t('consequences.approvedByLabel')} {uName(users, c.approvedBy)}
               </div>{" "}
               {user.role === "manager" && (
                 <Btn color="outline" size="sm" onClick={() => cancel(c.id)}>
-                  Cancel
+                  {t('consequences.cancelButton')}
                 </Btn>
               )}{" "}
             </div>

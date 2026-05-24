@@ -2,7 +2,7 @@ import { C } from "../data/constants";
 import { Badge, Card, CT, Btn } from "../components/ui";
 import AbsenceForm from "./AbsenceForm";
 
-export default function Absences({ patients, user, toast, onMarkAway, onReturn }) {
+export default function Absences({ patients, user, toast, onMarkAway, onReturn, t = (k) => k, dir = "ltr" }) {
   const isManager = user.role === "manager";
   const away = patients.filter((p) => p.status === "away");
   const confirmReturn = async (id) => {
@@ -10,7 +10,7 @@ export default function Absences({ patients, user, toast, onMarkAway, onReturn }
     try {
       await onReturn(id);
       toast(`✅ ${name} returned to center`);
-    } catch { toast("❌ Failed to update"); }
+    } catch { toast(t('absences.toastReturnFailed')); }
   };
   return (
     <div>
@@ -18,11 +18,11 @@ export default function Absences({ patients, user, toast, onMarkAway, onReturn }
       <Card style={{ marginBottom: 16 }}>
         {" "}
         <CT icon="🏠" bg="#fef9e7">
-          Patients outside center right now
+          {t('absences.patientsOutsideTitle')}
         </CT>{" "}
         {away.length === 0 ? (
           <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>
-            ✅ No Patients outside center right now
+            {t('absences.noPatientOutside')}
           </div>
         ) : (
           away.map((p) => (
@@ -38,7 +38,7 @@ export default function Absences({ patients, user, toast, onMarkAway, onReturn }
                 </div>
               </div>{" "}
               <Btn color="teal" size="sm" onClick={() => confirmReturn(p.id)}>
-                ✓ returned to center
+                {t('absences.returnedButton')}
               </Btn>{" "}
             </div>
           ))
@@ -47,12 +47,14 @@ export default function Absences({ patients, user, toast, onMarkAway, onReturn }
       <Card>
         {" "}
         <CT icon="📤" bg="#e8f0fb">
-          {isManager ? "Mark New Absence" : "Mark Patient Absence"}
+          {isManager ? t('absences.markAbsenceTitle') : t('absences.markPatientAbsenceTitle')}
         </CT>{" "}
         <AbsenceForm
           patients={patients.filter((p) => p.status === "active")}
           onMarkAway={onMarkAway}
           toast={toast}
+          t={t}
+          dir={dir}
         />{" "}
       </Card>{" "}
     </div>

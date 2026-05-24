@@ -8,18 +8,18 @@ import {
 import { Btn, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
-export default function AbsenceForm({ patients, onMarkAway, toast }) {
+export default function AbsenceForm({ patients, onMarkAway, toast, t = (k) => k, dir = "ltr" }) {
   const { isMobile } = useBreakpoint();
   const [selPat, setSelPat] = useState("");
   const [type, setType] = useState("Home Visit");
   const [returnDate, setReturnDate] = useState("");
   const submit = async () => {
     if (!selPat || !returnDate) {
-      toast("⚠️ Please select Patient and Return Date");
+      toast(t('absences.toastSelectPatientDate'));
       return;
     }
     if (!isValidDateDdMmYyyy(returnDate)) {
-      toast("⚠️ Invalid return date (use DD/MM/YYYY)");
+      toast(t('absences.toastInvalidReturnDate'));
       return;
     }
     try {
@@ -28,7 +28,7 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
       setSelPat("");
       setReturnDate("");
       toast(`✅ ${name} left for ${type} – Expected return ${returnDate}`);
-    } catch { toast("❌ Failed to record absence"); }
+    } catch { toast(t('absences.toastRecordFailed')); }
   };
   return (
     <div>
@@ -42,23 +42,25 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
         }}
       >
         {" "}
-        <FL label="Patient">
+        <FL label={t('absences.patientLabel')}>
           {" "}
           <FS
+            dir={dir}
             value={selPat}
             onChange={setSelPat}
             options={[
-              { v: "", l: "-- Select Patient --" },
+              { v: "", l: t('absences.selectPatientPlaceholder') },
               ...patients.map((p) => ({ v: p.id, l: p.name })),
             ]}
           />{" "}
         </FL>{" "}
-        <FL label="Date Return Expected">
+        <FL label={t('patientProfile.dateReturnLabel')}>
           {" "}
           <FI
+            dir={dir}
             value={returnDate}
             onChange={setReturnDate}
-            placeholder="DD/MM/YYYY"
+            placeholder={t('patientProfile.dateReturnPlaceholder')}
             sanitize={sanitizeDateDdMm}
             maxLength={V.DATE_UI_MAX}
             inputMode="numeric"
@@ -66,26 +68,31 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
           />{" "}
         </FL>{" "}
       </div>{" "}
-      <FL label="Type Logout">
+      <FL label={t('patientProfile.typeLogoutLabel')}>
         {" "}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {" "}
-          {["Home Visit", "Errands", "Therapy Medical", "Other"].map((t) => (
+          {[
+            { key: "Home Visit", label: t('patientProfile.homeVisit') },
+            { key: "Errands", label: t('patientProfile.errands') },
+            { key: "Therapy Medical", label: t('patientProfile.therapyMedical') },
+            { key: "Other", label: t('patientProfile.other') },
+          ].map(({ key, label }) => (
             <div
-              key={t}
-              onClick={() => setType(t)}
+              key={key}
+              onClick={() => setType(key)}
               style={{
                 padding: "6px 14px",
                 borderRadius: 20,
-                border: `2px solid ${type === t ? C.teal : C.border}`,
-                background: type === t ? C.teal : "#fff",
-                color: type === t ? "#fff" : C.mid,
+                border: `2px solid ${type === key ? C.teal : C.border}`,
+                background: type === key ? C.teal : "#fff",
+                color: type === key ? "#fff" : C.mid,
                 fontSize: 12,
                 fontWeight: 700,
                 cursor: "pointer",
               }}
             >
-              {t}
+              {label}
             </div>
           ))}{" "}
         </div>{" "}
@@ -102,22 +109,11 @@ export default function AbsenceForm({ patients, onMarkAway, toast }) {
         }}
       >
         {" "}
-        ⚠️ During absence Patient will NOT appear in Medication Distribution,
-        Groups and Phones.{" "}
+        {t('patientProfile.absenceWarning')}{" "}
       </div>{" "}
       <Btn color="teal" onClick={submit}>
-        ✓ Approve Absence
+        {t('absences.approveAbsenceButton')}
       </Btn>{" "}
     </div>
   );
-} /* Unique colors for Counselors in schedule */
-const COUNSELOR_COLORS = [
-  "#0d7377",
-  "#1e5fa8",
-  "#5c2d91",
-  "#c55a11",
-  "#375623",
-  "#c00000",
-  "#7b3f00",
-  "#006d6d",
-];
+}

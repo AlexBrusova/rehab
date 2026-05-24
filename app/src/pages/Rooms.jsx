@@ -8,14 +8,14 @@ import { sanitizeRoomBuilding, sanitizeRoomNumber, sanitizeRoomCapacity } from "
 
 export default function Rooms({
   rooms,
-  setRooms,
   patients,
-  setPatients,
   toast,
   onAddRoom,
   onUpdateRoom,
   onDeleteRoom,
   onUpdatePatient,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [showAdd, setShowAdd] = useState(false);
@@ -35,7 +35,7 @@ export default function Rooms({
   const unassigned = patients.filter((p) => p.status === "active" && !p.roomId);
   const addRoom = async () => {
     if (!newR.number || !newR.building) {
-      toast("⚠️ Please fill building and room number");
+      toast(t("rooms.toastFillBuilding"));
       return;
     }
     const cap = parseInt(String(newR.capacity || "1"), 10);
@@ -44,7 +44,7 @@ export default function Rooms({
       cap < V.ROOM_CAPACITY_MIN ||
       cap > V.ROOM_CAPACITY_MAX
     ) {
-      toast(`⚠️ Capacity must be ${V.ROOM_CAPACITY_MIN}–${V.ROOM_CAPACITY_MAX}`);
+      toast(t("rooms.toastCapacityRange"));
       return;
     }
     try {
@@ -56,9 +56,9 @@ export default function Rooms({
       });
       setNewR({ number: "", building: "Building A", capacity: "1" });
       setShowAdd(false);
-      toast("✅ Room added");
+      toast(t("rooms.toastAddSuccess"));
     } catch {
-      toast("❌ Failed to add room");
+      toast(t("rooms.toastAddFailed"));
     }
   };
   const saveEdit = async () => {
@@ -70,7 +70,7 @@ export default function Rooms({
         cap < V.ROOM_CAPACITY_MIN ||
         cap > V.ROOM_CAPACITY_MAX
       ) {
-        toast(`⚠️ Capacity must be ${V.ROOM_CAPACITY_MIN}–${V.ROOM_CAPACITY_MAX}`);
+        toast(t("rooms.toastCapacityRange"));
         return;
       }
       payload.capacity = cap;
@@ -78,64 +78,64 @@ export default function Rooms({
     try {
       await onUpdateRoom(openRoom, payload);
       setEditingRoom(false);
-      toast("✅ Room updated");
+      toast(t("rooms.toastUpdateSuccess"));
     } catch {
-      toast("❌ Failed to update room");
+      toast(t("rooms.toastUpdateFailed"));
     }
   };
   const deleteRoom = async () => {
     if (occ.length > 0) {
-      toast("⚠️ Please remove patients before deleting");
+      toast(t("rooms.toastRemovePatientFirst"));
       return;
     }
     try {
       await onDeleteRoom(openRoom);
       setOpenRoom(null);
-      toast("🗑️ Room deleted");
+      toast(t("rooms.toastDeleteSuccess"));
     } catch {
-      toast("❌ Failed to delete room");
+      toast(t("rooms.toastDeleteFailed"));
     }
   };
   const vacatePatient = async (patId) => {
     try {
       await onUpdatePatient(patId, { roomId: null });
-      toast("✅ Patient removed from room");
+      toast(t("rooms.toastRemovePatientSuccess"));
     } catch {
-      toast("❌ Failed to update patient");
+      toast(t("rooms.toastRemovePatientFailed"));
     }
   };
   const movePatient = async () => {
     if (!movePatId || !moveToRoomId) {
-      toast("⚠️ Select Patient and Room first");
+      toast(t("rooms.toastSelectPatientAndRoom"));
       return;
     }
     const target = rooms.find((r) => r.id === moveToRoomId);
     const targetOcc = patients.filter((p) => p.roomId === moveToRoomId).length;
     if (targetOcc >= target.capacity) {
-      toast(`⚠️ ${target.number} Full`);
+      toast(t("rooms.toastRoomFull"));
       return;
     }
     try {
       await onUpdatePatient(movePatId, { roomId: moveToRoomId });
       setMovePatId("");
       setMoveToRoomId("");
-      toast(`✅ Patient moved to ${target.number}`);
+      toast(t("rooms.toastAssignSuccess"));
     } catch {
-      toast("❌ Failed to move patient");
+      toast(t("rooms.toastAssignFailed"));
     }
   };
   const assignToRoom = async (patId) => {
     if (!patId) return;
     const cur = rooms.find((r) => r.id === openRoom);
     if (occ.length >= cur.capacity) {
-      toast("⚠️ Room is Full");
+      toast(t("rooms.toastRoomFull"));
       return;
     }
     try {
       await onUpdatePatient(patId, { roomId: openRoom });
-      toast("✅ Patient assigned to Room");
+      toast(t("rooms.toastAssignSuccess"));
     } catch {
-      toast("❌ Failed to assign patient");
+      toast(t("rooms.toastAssignFailed"));
     }
   }; /* ── Inner screen – Open Room ── */
   if (openRoom && room) {
@@ -173,7 +173,7 @@ export default function Rooms({
               gap: 5,
             }}
           >
-            ← Back
+            {t("rooms.backButton")}
           </button>{" "}
           <div style={{ fontSize: 18, fontWeight: 900 }}>
             {room.number} &nbsp;
@@ -206,10 +206,10 @@ export default function Rooms({
                 });
               }}
             >
-              ✏️ Edit
+              {t("rooms.editButton")}
             </Btn>{" "}
             <Btn color="red" size="sm" onClick={deleteRoom}>
-              🗑️ Delete Room
+              {t("rooms.deleteRoomButton")}
             </Btn>{" "}
           </div>{" "}
         </div>{" "}
@@ -218,7 +218,7 @@ export default function Rooms({
           <Card style={{ marginBottom: 16, border: `2px solid ${C.teal}` }}>
             {" "}
             <CT icon="✏️" bg="#e3f7f8">
-              Edit Room Details
+              {t("rooms.editRoomDetailsTitle")}
             </CT>{" "}
             <div
               style={{
@@ -239,13 +239,14 @@ export default function Rooms({
                     marginBottom: 3,
                   }}
                 >
-                  Building
+                  {t("rooms.buildingLabel")}
                 </label>
                 <FI
                   value={editData.building || ""}
                   onChange={(v) => setEditData((d) => ({ ...d, building: v }))}
                   sanitize={sanitizeRoomBuilding}
                   maxLength={V.ROOM_BUILDING_MAX}
+                  dir={dir}
                 />
               </div>{" "}
               <div>
@@ -258,13 +259,14 @@ export default function Rooms({
                     marginBottom: 3,
                   }}
                 >
-                  Room Number
+                  {t("rooms.roomNumberLabel")}
                 </label>
                 <FI
                   value={editData.number || ""}
                   onChange={(v) => setEditData((d) => ({ ...d, number: v }))}
                   sanitize={sanitizeRoomNumber}
                   maxLength={V.ROOM_NUMBER_MAX}
+                  dir={dir}
                 />
               </div>{" "}
               <div>
@@ -277,7 +279,7 @@ export default function Rooms({
                     marginBottom: 3,
                   }}
                 >
-                  Capacity
+                  {t("rooms.capacityLabel")}
                 </label>
                 <FI
                   value={editData.capacity ?? ""}
@@ -286,19 +288,20 @@ export default function Rooms({
                   maxLength={2}
                   inputMode="numeric"
                   placeholder="1–50"
+                  dir={dir}
                 />
               </div>{" "}
             </div>{" "}
             <div style={{ display: "flex", gap: 8 }}>
               <Btn color="teal" size="sm" onClick={saveEdit}>
-                ✓ Save
+                {t("rooms.addButton")}
               </Btn>
               <Btn
                 color="outline"
                 size="sm"
                 onClick={() => setEditingRoom(false)}
               >
-                Cancel
+                {t("rooms.cancelButton")}
               </Btn>
             </div>{" "}
           </Card>
@@ -311,7 +314,7 @@ export default function Rooms({
           <Card>
             {" "}
             <CT icon="👥" bg="#e8f0fb">
-              Patients in Room
+              {t("rooms.patientsInRoomTitle")}
             </CT>{" "}
             {occ.length === 0 && (
               <div
@@ -323,7 +326,7 @@ export default function Rooms({
                   fontStyle: "italic",
                 }}
               >
-                Room is vacant
+                {t("rooms.roomVacant")}
               </div>
             )}{" "}
             {occ.map((p) => (
@@ -378,7 +381,7 @@ export default function Rooms({
                   size="sm"
                   onClick={() => vacatePatient(p.id)}
                 >
-                  Clear
+                  {t("rooms.clearButton")}
                 </Btn>{" "}
               </div>
             ))}{" "}
@@ -403,8 +406,8 @@ export default function Rooms({
                     borderRadius: 8,
                     fontSize: 13,
                     fontFamily: "inherit",
-                    direction: "ltr",
                   }}
+                  dir={dir}
                 >
                   {" "}
                   <option value="">+ Add Patient without a Room</option>{" "}
@@ -425,7 +428,7 @@ export default function Rooms({
                   textAlign: "center",
                 }}
               >
-                All Patients assigned to Rooms
+                {t("rooms.allPatientsAssigned")}
               </div>
             )}{" "}
           </Card>{" "}
@@ -433,7 +436,7 @@ export default function Rooms({
           <Card>
             {" "}
             <CT icon="🔄" bg="#fef3e8">
-              Transfer Patient to Another Room
+              {t("rooms.transferPatientTitle")}
             </CT>{" "}
             {occ.length === 0 ? (
               <div
@@ -449,24 +452,26 @@ export default function Rooms({
             ) : (
               <>
                 {" "}
-                <FL label="Select Patient to Transfer">
+                <FL label={t("rooms.selectPatientToTransfer")}>
                   {" "}
                   <FS
                     value={movePatId}
                     onChange={setMovePatId}
+                    dir={dir}
                     options={[
-                      { v: "", l: "-- Select Patient --" },
+                      { v: "", l: t("rooms.selectPatientPlaceholder") },
                       ...occ.map((p) => ({ v: p.id, l: p.name })),
                     ]}
                   />{" "}
                 </FL>{" "}
-                <FL label="Room first">
+                <FL label={t("rooms.roomFirstLabel")}>
                   {" "}
                   <FS
                     value={moveToRoomId}
                     onChange={setMoveToRoomId}
+                    dir={dir}
                     options={[
-                      { v: "", l: "-- Select Room --" },
+                      { v: "", l: t("rooms.selectRoomPlaceholder") },
                       ...allOtherRooms.map((r) => {
                         const c = patients.filter(
                           (p) => p.roomId === r.id,
@@ -480,7 +485,7 @@ export default function Rooms({
                   />{" "}
                 </FL>{" "}
                 <Btn color="orange" onClick={movePatient}>
-                  🔄 Transfer
+                  {t("rooms.transferButton")}
                 </Btn>{" "}
               </>
             )}{" "}
@@ -500,7 +505,7 @@ export default function Rooms({
                   marginBottom: 8,
                 }}
               >
-                All Rooms in Center
+                {t("rooms.allRoomsInCenter")}
               </div>{" "}
               {rooms.map((r) => {
                 const c = patients.filter((p) => p.roomId === r.id).length;
@@ -548,38 +553,41 @@ export default function Rooms({
     <div>
       {" "}
       {showAdd && (
-        <Modal onClose={() => setShowAdd(false)} title="🏠 Add Room">
+        <Modal onClose={() => setShowAdd(false)} title={t("rooms.addRoomTitle")}>
           {" "}
-          <FL label="Building">
+          <FL label={t("rooms.buildingLabel")}>
             <FI
               value={newR.building}
               onChange={(v) => setNewR((r) => ({ ...r, building: v }))}
-              placeholder="Building A"
+              placeholder={t("rooms.buildingPlaceholder")}
+              dir={dir}
               {...roomBuildingRules}
             />
           </FL>{" "}
-          <FL label="Room Number">
+          <FL label={t("rooms.roomNumberLabel")}>
             <FI
               value={newR.number}
               onChange={(v) => setNewR((r) => ({ ...r, number: v }))}
-              placeholder="Room 5"
+              placeholder={t("rooms.roomNumberPlaceholder")}
+              dir={dir}
               {...roomNumberRules}
             />
           </FL>{" "}
-          <FL label="Capacity (Patients)">
+          <FL label={t("rooms.capacityLabel")}>
             <FI
               value={newR.capacity}
               onChange={(v) => setNewR((r) => ({ ...r, capacity: v }))}
-              placeholder="2"
+              placeholder={t("rooms.capacityPlaceholder")}
+              dir={dir}
               {...roomCapacityRules}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="teal" onClick={addRoom}>
-              ✓ Add
+              {t("rooms.addButton")}
             </Btn>
             <Btn color="outline" onClick={() => setShowAdd(false)}>
-              Cancel
+              {t("rooms.cancelButton")}
             </Btn>
           </div>{" "}
         </Modal>
@@ -610,7 +618,7 @@ export default function Rooms({
                   .length
               }
             </strong>{" "}
-            occupied
+            {t("rooms.occupiedLabel")}
           </span>{" "}
           <span>
             <strong style={{ color: C.soft }}>
@@ -619,7 +627,7 @@ export default function Rooms({
                   .length
               }
             </strong>{" "}
-            Vacant
+            {t("rooms.vacantLabel")}
           </span>{" "}
           {unassigned.length > 0 && (
             <span style={{ color: C.orange, fontWeight: 700 }}>
@@ -628,7 +636,7 @@ export default function Rooms({
           )}{" "}
         </div>{" "}
         <Btn color="teal" size="sm" onClick={() => setShowAdd(true)}>
-          + Add Room
+          {t("rooms.addRoomButton")}
         </Btn>{" "}
       </div>{" "}
       {buildings.map((bld) => (
@@ -711,7 +719,7 @@ export default function Rooms({
                           padding: "6px 0",
                         }}
                       >
-                        Vacant
+                        {t("rooms.vacantLabel")}
                       </div>
                     ) : (
                       occ.map((p) => (
@@ -770,7 +778,7 @@ export default function Rooms({
                         textAlign: "center",
                       }}
                     >
-                      Click for Management ←
+                      {t("rooms.clickForManagement")}
                     </div>{" "}
                   </div>
                 );

@@ -11,6 +11,8 @@ export default function Therapy({
   user,
   toast,
   onAddSession,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const { isMobile } = useBreakpoint();
   const [showNew, setShowNew] = useState(false);
@@ -25,20 +27,20 @@ export default function Therapy({
   const effectivePatientId = newT.patientId || patients[0]?.id || "";
   const addSession = async () => {
     if (!newT.topic) {
-      toast("⚠️ Please fill Topic");
+      toast(t('therapy.toastTopicRequired'));
       return;
     }
     try {
       await onAddSession({ ...newT, patientId: effectivePatientId });
       setNewT({ patientId: "", topic: "", notes: "", counselorNote: "", urgency: "NORMAL" });
       setShowNew(false);
-      toast("✅ Session recorded");
-    } catch { toast("❌ Failed to save session"); }
+      toast(t('therapy.toastSessionRecorded'));
+    } catch { toast(t('therapy.toastSessionFailed')); }
   };
   const UP = {
-    NORMAL: { l: "Normal", t: "teal" },
-    ATTENTION: { l: "Requires attention", t: "orange" },
-    URGENT: { l: "Urgent", t: "red" },
+    NORMAL: { l: t('therapy.normalUrgency'), t: "teal" },
+    ATTENTION: { l: t('therapy.attentionUrgency'), t: "orange" },
+    URGENT: { l: t('therapy.urgentUrgency'), t: "red" },
   };
   return (
     <div>
@@ -46,27 +48,28 @@ export default function Therapy({
       {showNew && (
         <Modal
           onClose={() => setShowNew(false)}
-          title="🧠 New Session Record"
+          title={t('therapy.newSessionTitle')}
           width={500}
         >
           {" "}
-          <FL label="Patient">
+          <FL label={t('therapy.patientLabel')}>
             <FS
               value={effectivePatientId}
               onChange={(v) => setNewT((t) => ({ ...t, patientId: v }))}
               options={patients.map((p) => ({ v: p.id, l: p.name }))}
             />
           </FL>{" "}
-          <FL label="Session Topic">
+          <FL label={t('therapy.sessionTopicLabel')}>
             <FI
               value={newT.topic}
               onChange={(v) => setNewT((t) => ({ ...t, topic: v }))}
-              placeholder="e.g.: Trauma processing"
+              placeholder={t('therapy.sessionTopicPlaceholder')}
               sanitize={sanitizeTopic}
               maxLength={V.TOPIC_MAX}
+              dir={dir}
             />
           </FL>{" "}
-          <FL label="Urgency">
+          <FL label={t('therapy.urgencyLabel')}>
             {" "}
             <div style={{ display: "flex", gap: 8 }}>
               {" "}
@@ -99,7 +102,7 @@ export default function Therapy({
               ))}{" "}
             </div>{" "}
           </FL>{" "}
-          <FL label="Private record (therapist + manager only)">
+          <FL label={t('therapy.privateRecordLabel')}>
             {" "}
             <div style={{ marginBottom: 6 }}>
               <VoiceBtn
@@ -111,27 +114,29 @@ export default function Therapy({
             <FTA
               value={newT.notes}
               onChange={(v) => setNewT((t) => ({ ...t, notes: v }))}
-              placeholder="Session content, observations, recommendations..."
+              placeholder={t('therapy.privateRecordPlaceholder')}
               rows={3}
               sanitize={sanitizeFreeText}
               maxLength={V.NOTE_MAX}
+              dir={dir}
             />{" "}
           </FL>{" "}
-          <FL label="Note for Counselors (visible to all staff)">
+          <FL label={t('therapy.counselorNoteLabel')}>
             <FI
               value={newT.counselorNote}
               onChange={(v) => setNewT((t) => ({ ...t, counselorNote: v }))}
-              placeholder='e.g.: "Patient needs extra support"'
+              placeholder={t('therapy.counselorNotePlaceholder')}
               sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
               maxLength={V.SHORT_LABEL}
+              dir={dir}
             />
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
             <Btn color="purple" onClick={addSession}>
-              ✓ Save Record
+              {t('therapy.saveRecordButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowNew(false)}>
-              Cancel
+              {t('therapy.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -147,27 +152,26 @@ export default function Therapy({
       >
         {" "}
         <Alrt type="purple" icon="🔐">
-          <strong>Private record</strong> – therapist + manager only.{" "}
-          <strong>Counselor Notes</strong> – visible to all staff.
+          {t('therapy.privateRecordWarning')}
         </Alrt>{" "}
         <Btn
           color="purple"
           style={{ flexShrink: 0 }}
           onClick={() => setShowNew(true)}
         >
-          + New Record
+          {t('therapy.newRecordButton')}
         </Btn>{" "}
       </div>{" "}
       <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 12 }}>
         {" "}
-        {therapy.map((t) => (
+        {therapy.map((session) => (
           <Card
-            key={t.id}
+            key={session.id}
             style={{
               cursor: "pointer",
-              border: selected === t.id ? `2px solid ${C.purple}` : undefined,
+              border: selected === session.id ? `2px solid ${C.purple}` : undefined,
             }}
-            onClick={() => setSelected(selected === t.id ? null : t.id)}
+            onClick={() => setSelected(selected === session.id ? null : session.id)}
           >
             {" "}
             <div style={{ display: "flex", gap: 10 }}>
@@ -190,24 +194,24 @@ export default function Therapy({
               <div style={{ flex: 1 }}>
                 {" "}
                 <div style={{ fontWeight: 800, fontSize: 13, marginBottom: 3 }}>
-                  {pName(patients, t.patientId)}
+                  {pName(patients, session.patientId)}
                 </div>{" "}
                 <div style={{ fontSize: 12, color: C.soft, marginBottom: 6 }}>
-                  {t.date} | {t.topic}
+                  {session.date} | {session.topic}
                 </div>{" "}
                 <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
                   {" "}
-                  <Badge type={UP[t.urgency].t}>{UP[t.urgency].l}</Badge>{" "}
-                  {t.counselorNote && (
-                    <Badge type="teal">💬 Note for Counselors</Badge>
+                  <Badge type={UP[session.urgency].t}>{UP[session.urgency].l}</Badge>{" "}
+                  {session.counselorNote && (
+                    <Badge type="teal">{t('therapy.noteForCounselors')}</Badge>
                   )}{" "}
                 </div>{" "}
               </div>{" "}
               <span style={{ color: C.soft, fontSize: 12 }}>
-                {selected === t.id ? "▲" : "▼"}
+                {selected === session.id ? "▲" : "▼"}
               </span>{" "}
             </div>{" "}
-            {selected === t.id && (
+            {selected === session.id && (
               <div
                 style={{
                   marginTop: 12,
@@ -216,7 +220,7 @@ export default function Therapy({
                 }}
               >
                 {" "}
-                {t.counselorNote && (
+                {session.counselorNote && (
                   <div
                     style={{
                       background: "#e3f7f8",
@@ -228,7 +232,7 @@ export default function Therapy({
                       color: "#054548",
                     }}
                   >
-                    <strong>Note for Counselors:</strong> {t.counselorNote}
+                    <strong>{t('therapy.noteForCounselorsContent')}</strong> {session.counselorNote}
                   </div>
                 )}{" "}
                 {user.role === "manager" || user.role === "therapist" ? (
@@ -242,7 +246,7 @@ export default function Therapy({
                       color: "#3d1a6b",
                     }}
                   >
-                    <strong>Private record:</strong> {t.notes}
+                    <strong>{t('therapy.privateRecordContent')}</strong> {session.notes}
                   </div>
                 ) : (
                   <div
@@ -256,7 +260,7 @@ export default function Therapy({
                       fontStyle: "italic",
                     }}
                   >
-                    Session content hidden from Counselors 🔒
+                    {t('therapy.sessionHiddenFromCounselors')}
                   </div>
                 )}{" "}
               </div>

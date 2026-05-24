@@ -1,3 +1,4 @@
+import PropTypes from "prop-types";
 import { C } from "../../data/constants";
 
 export default function FTA({
@@ -8,6 +9,7 @@ export default function FTA({
   maxLength,
   sanitize,
   title,
+  dir = "ltr",
   ...rest
 }) {
   const handle = (e) => {
@@ -24,6 +26,7 @@ export default function FTA({
       placeholder={placeholder || ""}
       rows={rows}
       title={title}
+      dir={dir}
       style={{
         width: "100%",
         padding: "9px 12px",
@@ -31,7 +34,6 @@ export default function FTA({
         borderRadius: 8,
         fontSize: 13,
         fontFamily: "inherit",
-        direction: "ltr",
         resize: "vertical",
         boxSizing: "border-box",
       }}
@@ -39,3 +41,14 @@ export default function FTA({
     />
   );
 }
+
+FTA.propTypes = {
+  value: PropTypes.string,
+  onChange: PropTypes.func,
+  placeholder: PropTypes.string,
+  rows: PropTypes.number,
+  maxLength: PropTypes.number,
+  sanitize: PropTypes.func,
+  title: PropTypes.string,
+  dir: PropTypes.string,
+};

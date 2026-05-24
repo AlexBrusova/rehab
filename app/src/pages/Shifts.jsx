@@ -6,12 +6,13 @@ import { Badge, Card, CT, Btn, Th, Td, Modal, FL, FS, FTA, VoiceBtn } from "../c
 
 export default function Shifts({
   shifts,
-  setShifts,
   users,
   user,
   toast,
   onCreateShift,
   onUpdateShift,
+  t = (k) => k,
+  dir = "ltr",
 }) {
   const [shiftActive, setShiftActive] = useState(true);
   const [showStart, setShowStart] = useState(false);
@@ -38,13 +39,14 @@ export default function Shifts({
     <div>
       {" "}
       {showStart && (
-        <Modal onClose={() => setShowStart(false)} title="🔄 Start Shift">
+        <Modal onClose={() => setShowStart(false)} title={t('shifts.startShiftTitle')}>
           {" "}
-          <FL label="Who am I receiving the shift from? ⭐">
+          <FL label={t('shifts.receivingFromLabel')}>
             <FS
               value={receivedFrom}
               onChange={setReceivedFrom}
               options={counselors}
+              dir={dir}
             />
           </FL>{" "}
           <div
@@ -65,7 +67,7 @@ export default function Shifts({
                 marginBottom: 8,
               }}
             >
-              📋 Handoff Notes from previous shift:
+              {t('shifts.handoffNotesTitle')}
             </div>{" "}
             <div style={{ fontSize: 13, color: C.mid, whiteSpace: "pre-line" }}>
               {notes}
@@ -82,7 +84,7 @@ export default function Shifts({
                 cursor: "pointer",
               }}
             >
-              <input type="checkbox" /> I have read and confirmed
+              <input type="checkbox" /> {t('shifts.confirmReadCheckbox')}
             </label>{" "}
           </div>{" "}
           <div style={{ display: "flex", gap: 10 }}>
@@ -95,16 +97,16 @@ export default function Shifts({
                   await onCreateShift({ date: today, receivedFrom, start });
                   setShowStart(false);
                   setShiftActive(true);
-                  toast("✅ Shift opened");
+                  toast(t('shifts.toastStartSuccess'));
                 } catch {
-                  toast("❌ Failed to start shift");
+                  toast(t('shifts.toastStartFailed'));
                 }
               }}
             >
-              ✓ Start Shift
+              {t('shifts.startShiftButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowStart(false)}>
-              Cancel
+              {t('shifts.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -112,7 +114,7 @@ export default function Shifts({
       {showEnd && (
         <Modal
           onClose={() => setShowEnd(false)}
-          title="🔄 End Shift"
+          title={t('shifts.endShiftTitle')}
           width={460}
         >
           {" "}
@@ -127,7 +129,7 @@ export default function Shifts({
           >
             {" "}
             <div style={{ fontWeight: 800, marginBottom: 8 }}>
-              Auto Summary:
+              {t('shifts.autoSummaryTitle')}
             </div>{" "}
             {[
               ["Groups", "3 Groups"],
@@ -149,7 +151,7 @@ export default function Shifts({
               </div>
             ))}{" "}
           </div>{" "}
-          <FL label="Handoff Notes">
+          <FL label={t('shifts.handoffNotesLabel')}>
             {" "}
             <div style={{ marginBottom: 6 }}>
               <VoiceBtn onTranscript={(v) => setNotes(v)} />
@@ -157,21 +159,23 @@ export default function Shifts({
             <FTA
               value={notes}
               onChange={setNotes}
-              placeholder="Notes for next Counselor..."
+              placeholder={t('shifts.handoffNotesPlaceholder')}
               rows={3}
               sanitize={sanitizeFreeText}
               maxLength={V.NOTE_MAX}
+              dir={dir}
             />{" "}
           </FL>{" "}
-          <FL label="Who are you handing the shift to? ⭐">
+          <FL label={t('shifts.handingToLabel')}>
             {" "}
             <FS
               value={handedTo}
               onChange={setHandedTo}
               options={[
-                { v: "", l: "-- Select Counselor --" },
+                { v: "", l: t('shifts.selectCounselorPlaceholder') },
                 ...counselors.map((n) => ({ v: n, l: n })),
               ]}
+              dir={dir}
             />{" "}
           </FL>{" "}
           <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
@@ -180,7 +184,7 @@ export default function Shifts({
               disabled={!handedTo}
               onClick={async () => {
                 if (!handedTo) {
-                  toast("⚠️ Please select Counselor");
+                  toast(t('shifts.toastSelectCounselor'));
                   return;
                 }
                 try {
@@ -203,14 +207,14 @@ export default function Shifts({
                   setShiftActive(false);
                   toast(`✅ Handed to ${handedTo} – Pending approval`);
                 } catch {
-                  toast("❌ Failed to complete shift");
+                  toast(t('shifts.toastEndFailed'));
                 }
               }}
             >
-              ✓ Finish and Handoff
+              {t('shifts.finishHandoffButton')}
             </Btn>
             <Btn color="outline" onClick={() => setShowEnd(false)}>
-              Cancel
+              {t('shifts.cancelButton')}
             </Btn>
           </div>{" "}
         </Modal>
@@ -233,7 +237,7 @@ export default function Shifts({
             {" "}
             <div>
               <div style={{ fontSize: 12, opacity: 0.6, marginBottom: 4 }}>
-                Active shift
+                {t('shifts.activeShiftLabel')}
               </div>
               <div style={{ fontSize: 22, fontWeight: 900, marginBottom: 3 }}>
                 {user.name}
@@ -254,16 +258,16 @@ export default function Shifts({
               <div style={{ fontSize: 28, fontWeight: 900, color: "#5dffd5" }}>
                 7:42
               </div>
-              <div style={{ fontSize: 11, opacity: 0.6 }}>hours Active</div>
+              <div style={{ fontSize: 11, opacity: 0.6 }}>{t('shifts.hoursActiveLabel')}</div>
             </div>{" "}
             <Btn color="orange" onClick={() => setShowEnd(true)}>
-              🔄 End Shift
+              {t('shifts.endShiftButton')}
             </Btn>{" "}
           </div>{" "}
           <Card style={{ marginBottom: 16 }}>
             {" "}
             <CT icon="📋" bg="#e3f7f8">
-              Shift Journal
+              {t('shifts.shiftJournalTitle')}
             </CT>{" "}
             {log.map((e, i) => (
               <div
@@ -297,29 +301,29 @@ export default function Shifts({
           {" "}
           <div style={{ fontSize: 40, marginBottom: 16 }}>🔄</div>{" "}
           <div style={{ fontWeight: 800, fontSize: 16, marginBottom: 8 }}>
-            No Active Shift
+            {t('shifts.noActiveShift')}
           </div>{" "}
           <Btn color="teal" onClick={() => setShowStart(true)}>
-            Start Shift
+            {t('shifts.beginShiftButton')}
           </Btn>{" "}
         </div>
       )}{" "}
       <Card>
         {" "}
         <CT icon="📁" bg="#f0f2f5">
-          Shift History
+          {t('shifts.shiftHistoryTitle')}
         </CT>{" "}
         <table
           style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}
         >
           <thead>
             <tr>
-              <Th>Counselor</Th>
-              <Th>Start</Th>
-              <Th>End</Th>
-              <Th>Received from</Th>
-              <Th>Handed to</Th>
-              <Th>Status</Th>
+              <Th>{t('shifts.counselorColumn')}</Th>
+              <Th>{t('shifts.startColumn')}</Th>
+              <Th>{t('shifts.endColumn')}</Th>
+              <Th>{t('shifts.receivedFromColumn')}</Th>
+              <Th>{t('shifts.handedToColumn')}</Th>
+              <Th>{t('shifts.statusColumn')}</Th>
             </tr>
           </thead>
           <tbody>
@@ -336,7 +340,7 @@ export default function Shifts({
                 <Td style={{ fontSize: 12 }}>{s.handedTo}</Td>{" "}
                 <Td>
                   <Badge type={s.accepted ? "green" : "orange"}>
-                    {s.accepted ? "✓ Approved" : "Pending"}
+                    {s.accepted ? t('shifts.approvedBadge') : t('shifts.pendingBadge')}
                   </Badge>
                 </Td>{" "}
               </tr>

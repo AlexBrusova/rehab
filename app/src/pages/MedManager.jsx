@@ -7,6 +7,8 @@ import EditMedRow from "./EditMedRow";
 import useBreakpoint from "../hooks/useBreakpoint";
 
 export default function MedManager({
+  t = (k) => k,
+  dir = "ltr",
   patients,
   meds,
   toast,
@@ -33,40 +35,39 @@ export default function MedManager({
     try {
       await onSaveMed(id, upd);
       setEditMed(null);
-      toast("✅ Medication updated – Counselors will be notified");
-    } catch { toast("❌ Failed to update medication"); }
+      toast(t('medManager.toastUpdateSuccess'));
+    } catch { toast(t('medManager.toastUpdateFailed')); }
   };
   const removeMed = async (id) => {
     try {
       await onRemoveMed(id);
-      toast("🗑️ Medication removed");
-    } catch { toast("❌ Failed to remove medication"); }
+      toast(t('medManager.toastDeleteSuccess'));
+    } catch { toast(t('medManager.toastDeleteFailed')); }
   };
   const addMed = async () => {
     if (!newMed.name || !newMed.dose) {
-      toast("⚠️ Please fill Name and Dose");
+      toast(t('medManager.toastNameDoseRequired'));
       return;
     }
     try {
       await onAddMed(selPat, newMed);
       setNewMed({ name: "", dose: "", unit: "mg", morning: false, noon: false, evening: false, night: false });
       setShowAdd(false);
-      toast("✅ Medication added – Counselors will be notified");
-    } catch { toast("❌ Failed to add medication"); }
+      toast(t('medManager.toastAddSuccess'));
+    } catch { toast(t('medManager.toastAddFailed')); }
   };
   return (
     <div>
       {" "}
       <Alrt type="purple" icon="💊">
         {" "}
-        Here you can add, edit, and remove Medications per Patient. All changes
-        highlighted automatically and notify Counselors.{" "}
+        {t('medManager.medicationsInfo')}{" "}
       </Alrt>{" "}
       {/* Patient selector */}{" "}
       <Card style={{ marginBottom: 16 }}>
         {" "}
         <CT icon="👤" bg="#e8f0fb">
-          Select Patient
+          {t('medManager.selectPatient')}
         </CT>{" "}
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
           {" "}
@@ -93,7 +94,7 @@ export default function MedManager({
               {" "}
               {p.name}{" "}
               <span style={{ marginRight: 6, fontSize: 11, opacity: 0.7 }}>
-                ({meds.filter((m) => m.patientId === p.id).length} Medications)
+                ({meds.filter((m) => m.patientId === p.id).length} {t('medManager.medicationsUnit')})
               </span>{" "}
             </button>
           ))}{" "}
@@ -112,7 +113,7 @@ export default function MedManager({
           >
             {" "}
             <CT icon="💊" bg="#e8f0fb">
-              Medications – {pat.name}
+              {t('medManager.medicationsTitle')} {pat.name}
             </CT>{" "}
             <Btn
               color="teal"
@@ -122,7 +123,7 @@ export default function MedManager({
                 setEditMed(null);
               }}
             >
-              + Add Medication
+              {t('medManager.addMedicationButton')}
             </Btn>{" "}
           </div>{" "}
           {/* Add form */}{" "}
@@ -145,7 +146,7 @@ export default function MedManager({
                   marginBottom: 10,
                 }}
               >
-                ➕ New Medication
+                {t('medManager.newMedicationTitle')}
               </div>{" "}
               <div
                 style={{
@@ -165,12 +166,13 @@ export default function MedManager({
                       marginBottom: 3,
                     }}
                   >
-                    Medication Name
+                    {t('medManager.medicationNameLabel')}
                   </label>
                   <FI
                     value={newMed.name}
                     onChange={(v) => setNewMed((m) => ({ ...m, name: v }))}
-                    placeholder="e.g.: Methadone"
+                    placeholder={t('medManager.medicationNamePlaceholder')}
+                    dir={dir}
                     {...medNameRules}
                     maxLength={V.MED_NAME_MAX}
                   />
@@ -184,12 +186,13 @@ export default function MedManager({
                       marginBottom: 3,
                     }}
                   >
-                    Dose
+                    {t('medManager.doseLabel')}
                   </label>
                   <FI
                     value={newMed.dose}
                     onChange={(v) => setNewMed((m) => ({ ...m, dose: v }))}
-                    placeholder="40"
+                    placeholder={t('medManager.dosePlaceholder')}
+                    dir={dir}
                     {...medDoseRules}
                     maxLength={V.MED_DOSE_MAX}
                   />
@@ -203,19 +206,20 @@ export default function MedManager({
                       marginBottom: 3,
                     }}
                   >
-                    Unit
+                    {t('medManager.unitLabel')}
                   </label>
                   <FS
                     value={newMed.unit}
                     onChange={(v) => setNewMed((m) => ({ ...m, unit: v }))}
                     options={["mg", "mcg", "ml", "IU", "g"]}
+                    dir={dir}
                   />
                 </div>{" "}
               </div>{" "}
               <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
                 {" "}
                 {["morning", "noon", "evening", "night"].map((k, i) => {
-                  const l = ["Morning", "Noon", "Evening", "Night"][i];
+                  const l = [t('medManager.morningLabel'), t('medManager.noonLabel'), t('medManager.eveningLabel'), t('medManager.nightLabel')][i];
                   return (
                     <div
                       key={k}
@@ -238,14 +242,14 @@ export default function MedManager({
               </div>{" "}
               <div style={{ display: "flex", gap: 8 }}>
                 <Btn color="teal" size="sm" onClick={addMed}>
-                  ✓ Add
+                  {t('medManager.addButton')}
                 </Btn>
                 <Btn
                   color="outline"
                   size="sm"
                   onClick={() => setShowAdd(false)}
                 >
-                  Cancel
+                  {t('medManager.cancelButton')}
                 </Btn>
               </div>{" "}
             </div>
@@ -259,7 +263,7 @@ export default function MedManager({
                 fontSize: 13,
               }}
             >
-              No medications on record for this patient
+              {t('medManager.noMedicationsRecorded')}
             </div>
           )}{" "}
           {pMeds.map((m) => (
@@ -270,6 +274,8 @@ export default function MedManager({
                   med={m}
                   onSave={(upd) => saveMed(m.id, upd)}
                   onCancel={() => setEditMed(null)}
+                  t={t}
+                  dir={dir}
                 />
               ) : (
                 <div
@@ -287,7 +293,7 @@ export default function MedManager({
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
                         {m.name}
-                        {m.changed && <span style={{ background: C.orange, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>updated</span>}
+                        {m.changed && <span style={{ background: C.orange, color: "#fff", fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 8 }}>{t('medManager.updatedBadge')}</span>}
                       </div>
                       <div style={{ fontSize: 12, color: C.mid }}>
                         {m.dose}{m.unit}
@@ -296,17 +302,17 @@ export default function MedManager({
                       </div>
                     </div>
                     <div style={{ display: "flex", gap: 5, flexShrink: 0 }}>
-                      <button onClick={() => { setEditMed(m.id); setShowAdd(false); }} style={{ padding: "4px 10px", borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: C.mid, fontFamily: "inherit" }}>✏️ Edit</button>
+                      <button onClick={() => { setEditMed(m.id); setShowAdd(false); }} style={{ padding: "4px 10px", borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", fontSize: 12, fontWeight: 700, color: C.mid, fontFamily: "inherit" }}>{t('medManager.editButton')}</button>
                       <button onClick={() => removeMed(m.id)} style={{ padding: "4px 10px", borderRadius: 7, border: "1.5px solid #fcc", background: "#fff5f5", cursor: "pointer", fontSize: 12, fontWeight: 700, color: C.red, fontFamily: "inherit" }}>✕</button>
                     </div>
                   </div>
                   {/* bottom row: time badges */}
                   <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
-                    {["Morning", "Noon", "Evening", "Night"].map((t, i) => {
-                      const k = ["morning", "noon", "evening", "night"][i];
+                    {["morning", "noon", "evening", "night"].map((k, i) => {
+                      const label = [t('medManager.morningLabel'), t('medManager.noonLabel'), t('medManager.eveningLabel'), t('medManager.nightLabel')][i];
                       return (
-                        <span key={t} style={{ padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: m[k] ? C.teal : "#f0f2f5", color: m[k] ? "#fff" : "#aaa" }}>
-                          {t}
+                        <span key={k} style={{ padding: "2px 8px", borderRadius: 12, fontSize: 11, fontWeight: 700, background: m[k] ? C.teal : "#f0f2f5", color: m[k] ? "#fff" : "#aaa" }}>
+                          {label}
                         </span>
                       );
                     })}
