@@ -3,6 +3,10 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  test: {
+    include: ['src/**/*.test.js'],
+    exclude: ['e2e/**', 'node_modules/**'],
+  },
   server: {
     proxy: {
       "/api": { target: "http://localhost:4000", changeOrigin: true },
