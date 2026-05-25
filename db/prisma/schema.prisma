@@ -34,7 +34,7 @@ model User {
   username        String  @unique
   passwordHash    String
   name            String
-  role            Role
+  role            String
   roleLabel       String
   initials        String
   color           String  @default("#1e5fa8")
@@ -55,13 +55,7 @@ model User {
   version   BigInt   @default(0)
 }
 
-enum Role {
-  org_manager
-  manager
-  counselor
-  doctor
-  therapist
-}
+
 
 model UserHouseAccess {
   userId  String
@@ -158,7 +152,7 @@ model MedDistribution {
 model Finance {
   id        String      @id @default(cuid())
   patientId String
-  type      FinanceType
+  type      String
   amount    Int
   source    String
   note      String
@@ -170,15 +164,10 @@ model Finance {
   createdAt DateTime @default(now())
 }
 
-enum FinanceType {
-  deposit
-  withdrawal
-}
-
 model CashboxEntry {
-  id      String      @id @default(cuid())
+  id      String @id @default(cuid())
   houseId String
-  type    FinanceType
+  type    String
   amount  Int
   cat     String
   note    String
@@ -243,16 +232,11 @@ model Phone {
   returnBy   String
   returnedAt String?
   late       Boolean     @default(false)
-  status     PhoneStatus @default(active)
+  status     String      @default("active")
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
-}
-
-enum PhoneStatus {
-  active
-  returned
 }
 
 model Shift {
@@ -261,7 +245,7 @@ model Shift {
   counselorId  String
   date         String
   shift        String      @default("24h")
-  status       ShiftStatus @default(pending)
+  status       String      @default("pending")
   note         String?
   receivedFrom String?
   handedTo     String?
@@ -274,12 +258,6 @@ model Shift {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-enum ShiftStatus {
-  pending
-  ACTIVE
-  completed
 }
 
 model Schedule {
@@ -303,7 +281,7 @@ model Consequence {
   type        String
   description String
   date        String
-  status      ConsequenceStatus @default(pending)
+  status      String            @default("pending")
   approvedBy  String?
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
@@ -311,12 +289,6 @@ model Consequence {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-enum ConsequenceStatus {
-  pending
-  approved
-  rejected
 }
 
 model Absence {
@@ -327,20 +299,13 @@ model Absence {
   startDate   String
   endDate     String
   approvedBy  String?
-  status      AbsenceStatus @default(pending)
+  status      String        @default("pending")
   returnedAt  String?
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
   house   House   @relation(fields: [houseId], references: [id])
 
   createdAt DateTime @default(now())
-}
-
-enum AbsenceStatus {
-  pending
-  approved
-  active
-  returned
 }
 
 model AbsenceHistory {
