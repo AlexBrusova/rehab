@@ -44,7 +44,7 @@ class GroupController(
     data class AttendanceRow(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
-        @field:Pattern(regexp = "^(present|absent)$")
+        @field:Pattern(regexp = "^(present|absent|late)$")
         val status: String? = null,
     )
 
@@ -52,7 +52,7 @@ class GroupController(
     data class PatchAttendanceRow(
         @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
-        @field:Pattern(regexp = "^(present|absent)$")
+        @field:Pattern(regexp = "^(present|absent|late)$")
         val status: String? = null,
     )
 
@@ -162,7 +162,7 @@ class GroupController(
     data class PutAttendanceBody(
         @field:NotBlank @field:Size(max = UiValidation.ID_MAX)
         val patientId: String? = null,
-        @field:NotBlank @field:Pattern(regexp = "^(present|absent)$")
+        @field:NotBlank @field:Pattern(regexp = "^(present|absent|late)$")
         val status: String? = null,
     )
 

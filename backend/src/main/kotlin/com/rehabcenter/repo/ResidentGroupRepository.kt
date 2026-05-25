@@ -5,8 +5,12 @@ import org.springframework.data.jpa.repository.EntityGraph
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.util.Optional
 
 interface ResidentGroupRepository : JpaRepository<ResidentGroup, String> {
+    @EntityGraph(attributePaths = ["attendance"])
+    override fun findById(id: String): Optional<ResidentGroup>
+
     @EntityGraph(attributePaths = ["attendance"])
     @Query(
         """
