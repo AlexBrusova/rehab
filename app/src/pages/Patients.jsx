@@ -279,6 +279,8 @@ export default function Patients({
           onAddMed={onAddMed}
           onSaveMed={onSaveMed}
           onRemoveMed={onRemoveMed}
+          t={t}
+          dir={dir}
         />
       )}{" "}
       <div
