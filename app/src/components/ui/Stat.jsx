@@ -1,8 +1,9 @@
 import { C } from "../../data/constants";
 
-export default function Stat({ label, value, sub, icon, accent }) {
+export default function Stat({ label, value, sub, icon, accent, onClick }) {
   return (
     <div
+      onClick={onClick}
       style={{
         background: C.card,
         borderRadius: 14,
@@ -11,6 +12,7 @@ export default function Stat({ label, value, sub, icon, accent }) {
         position: "relative",
         overflow: "hidden",
         borderRight: `4px solid ${accent}`,
+        cursor: onClick ? "pointer" : "default",
       }}
     >
       <div style={{ fontSize: 11, color: C.soft, fontWeight: 600, marginBottom: 4 }}>
