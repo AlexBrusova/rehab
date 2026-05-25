@@ -84,6 +84,8 @@ export const en = {
     changedMedicationsSub: "Require confirmation",
     alertsActive: "Alerts active",
     alertsActiveSub: "Require attention",
+    phonesInUse: "Phones In Use",
+    phonesInUseSub: "overdue",
     alertsTitle: "Alerts",
     phoneNoReturned: "Phone No Returned!",
     toManagePhones: "to Manage Phones ←",

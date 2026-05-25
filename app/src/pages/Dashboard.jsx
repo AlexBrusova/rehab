@@ -75,7 +75,7 @@ export default function Dashboard({
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: isMobile ? "1fr" : "repeat(3,1fr)",
+          gridTemplateColumns: isMobile ? "1fr" : "repeat(4,1fr)",
           gap: 14,
           marginBottom: 20,
         }}
@@ -101,6 +101,13 @@ export default function Dashboard({
           sub={t('dashboard.alertsActiveSub')}
           icon="🔔"
           accent={C.red}
+        />{" "}
+        <Stat
+          label={t('dashboard.phonesInUse')}
+          value={phones.length}
+          sub={`${overduePhones.length} ${t('dashboard.phonesInUseSub')}`}
+          icon="📱"
+          accent={overduePhones.length > 0 ? C.red : C.teal}
         />{" "}
       </div>{" "}
       <div
