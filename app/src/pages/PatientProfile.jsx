@@ -2,8 +2,6 @@ import { useState } from "react";
 import { C } from "../data/constants";
 import { V } from "../data/validationLimits";
 import {
-  isValidDateDdMmYyyy,
-  sanitizeDateDdMm,
   sanitizeMedDose,
   sanitizeMedName,
 } from "../lib/inputSanitize";
@@ -24,6 +22,7 @@ export default function PatientProfile({
   consequences,
   finance,
   onUpdatePatient,
+  onMarkAway = () => {},
   onAddMed,
   onSaveMed,
   onRemoveMed,
@@ -77,14 +76,10 @@ export default function PatientProfile({
 
   const openAbsence = async () => {
     if (!absData.returnDate) { toast(t('patientProfile.toastReturnDateRequired')); return; }
-    if (!isValidDateDdMmYyyy(absData.returnDate)) {
-      toast(t('patientProfile.toastInvalidReturnDate'));
-      return;
-    }
     try {
-      await onUpdatePatient(pid, { awayType: absData.type });
+      await onMarkAway(pid, absData.type, absData.returnDate);
       setShowAbsence(false);
-      toast(`✅ ${p.name} left for ${absData.type} – back on ${absData.returnDate}`);
+      toast(`✅ ${p.name} left for ${absData.type} – back on ${absData.returnDate.replace("T", " ")}`);
     } catch { toast(t('patientProfile.toastAbsenceFailed')); }
   };
 
@@ -117,13 +112,9 @@ export default function PatientProfile({
           </FL>
           <FL label={t('patientProfile.dateReturnLabel')}>
             <FI
+              type="datetime-local"
               value={absData.returnDate}
               onChange={(v) => setAbsData((d) => ({ ...d, returnDate: v }))}
-              placeholder={t('patientProfile.dateReturnPlaceholder')}
-              sanitize={sanitizeDateDdMm}
-              maxLength={V.DATE_UI_MAX}
-              inputMode="numeric"
-              title="DD/MM/YYYY"
               dir={dir}
             />
           </FL>

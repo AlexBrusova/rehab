@@ -25,8 +25,8 @@ class Absence(
     var type: String = "",
     @Column(nullable = false)
     var startDate: String = "",
-    @Column(nullable = false)
-    var endDate: String = "",
+    @Column(nullable = false, columnDefinition = "TIMESTAMPTZ")
+    var endDate: Instant = Instant.now(),
     var approvedBy: String? = null,
     @Column(nullable = false)
     var status: String = "pending",

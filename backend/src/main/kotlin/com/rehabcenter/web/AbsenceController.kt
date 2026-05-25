@@ -20,6 +20,9 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 
 @Validated
@@ -44,13 +47,16 @@ class AbsenceController(
         val type: String? = null,
         @field:NotBlank @field:Size(max = UiValidation.DATE_UI_MAX)
         val startDate: String? = null,
-        @field:NotBlank @field:Size(max = UiValidation.DATE_UI_MAX)
+        @field:NotBlank @field:Pattern(regexp = UiValidation.DATETIME_LOCAL_PATTERN)
         val endDate: String? = null,
     )
 
     @Transactional
     @PostMapping
     fun create(@RequestBody @Valid body: CreateAbsenceBody): ResponseEntity<Any> {
+        val endDate = LocalDateTime
+            .parse(body.endDate!!, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
+            .toInstant(ZoneOffset.UTC)
         val a =
             Absence(
                 id = UUID.randomUUID().toString(),
@@ -58,7 +64,7 @@ class AbsenceController(
                 houseId = body.houseId!!,
                 type = body.type ?: "",
                 startDate = body.startDate!!,
-                endDate = body.endDate!!,
+                endDate = endDate,
                 status = "pending",
                 createdAt = Instant.now(),
             )

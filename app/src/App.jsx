@@ -188,11 +188,23 @@ export default function App() {
     setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, ...stateUpdate } : p)));
   };
 
-  const markPatientAway = async (patientId, awayType) => {
+  const markPatientAway = async (patientId, awayType, endDate) => {
     await authFetch(`/api/patients/${patientId}`, {
       method: "PATCH",
       body: JSON.stringify({ awayType }),
     });
+    if (endDate) {
+      await authFetch("/api/absences", {
+        method: "POST",
+        body: JSON.stringify({
+          patientId,
+          houseId: activeHouseId,
+          type: awayType,
+          startDate: new Date().toLocaleDateString("en-GB"),
+          endDate,
+        }),
+      });
+    }
     setPatients((prev) => prev.map((p) => p.id === patientId ? { ...p, status: "away", awayType } : p));
   };
 
@@ -544,6 +556,7 @@ export default function App() {
           onAddPatient={createPatient}
           onArchivePatient={archivePatient}
           onUpdatePatient={updatePatient}
+          onMarkAway={markPatientAway}
           onAddMed={createMed}
           onSaveMed={updateMed}
           onRemoveMed={deleteMed}

@@ -33,7 +33,7 @@ class AbsenceIT : AbstractIntegrationTest() {
             "houseId" to "h1",
             "type" to "hospital",
             "startDate" to "01/01/2025",
-            "endDate" to "05/01/2025",
+            "endDate" to "2025-01-05T12:00",
         )
         val res = rest.exchange(
             "/api/absences",
@@ -53,7 +53,7 @@ class AbsenceIT : AbstractIntegrationTest() {
             "houseId" to "h1",
             "type" to "leave",
             "startDate" to "10/01/2025",
-            "endDate" to "12/01/2025",
+            "endDate" to "2025-01-12T09:00",
             // extra fields that UI might send:
             "id" to "some-id",
             "createdAt" to "2024-01-01T00:00:00Z",
@@ -77,7 +77,7 @@ class AbsenceIT : AbstractIntegrationTest() {
             "houseId" to "h1",
             "type" to "leave",
             "startDate" to "10/01/2025",
-            "endDate" to "12/01/2025",
+            "endDate" to "2025-01-12T09:00",
         )
         val res = rest.exchange(
             "/api/absences",
@@ -97,7 +97,7 @@ class AbsenceIT : AbstractIntegrationTest() {
             "houseId" to "h1",
             "type" to "leave",
             "startDate" to "15/01/2025",
-            "endDate" to "20/01/2025",
+            "endDate" to "2025-01-20T10:00",
         )
         val createRes = rest.exchange(
             "/api/absences",

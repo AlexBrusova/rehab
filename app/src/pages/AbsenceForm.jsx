@@ -1,10 +1,5 @@
 import { useState } from "react";
 import { C } from "../data/constants";
-import { V } from "../data/validationLimits";
-import {
-  isValidDateDdMmYyyy,
-  sanitizeDateDdMm,
-} from "../lib/inputSanitize";
 import { Btn, FL, FI, FS } from "../components/ui";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -18,16 +13,12 @@ export default function AbsenceForm({ patients, onMarkAway, toast, t = (k) => k,
       toast(t('absences.toastSelectPatientDate'));
       return;
     }
-    if (!isValidDateDdMmYyyy(returnDate)) {
-      toast(t('absences.toastInvalidReturnDate'));
-      return;
-    }
     try {
       const name = patients.find((p) => p.id === selPat)?.name;
-      await onMarkAway(selPat, type);
+      await onMarkAway(selPat, type, returnDate);
       setSelPat("");
       setReturnDate("");
-      toast(`✅ ${name} left for ${type} – Expected return ${returnDate}`);
+      toast(`✅ ${name} left for ${type} – Expected return ${returnDate.replace("T", " ")}`);
     } catch { toast(t('absences.toastRecordFailed')); }
   };
   return (
@@ -57,14 +48,10 @@ export default function AbsenceForm({ patients, onMarkAway, toast, t = (k) => k,
         <FL label={t('patientProfile.dateReturnLabel')}>
           {" "}
           <FI
-            dir={dir}
+            type="datetime-local"
             value={returnDate}
             onChange={setReturnDate}
-            placeholder={t('patientProfile.dateReturnPlaceholder')}
-            sanitize={sanitizeDateDdMm}
-            maxLength={V.DATE_UI_MAX}
-            inputMode="numeric"
-            title="DD/MM/YYYY"
+            dir={dir}
           />{" "}
         </FL>{" "}
       </div>{" "}

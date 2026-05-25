@@ -29,6 +29,7 @@ export default function Patients({
   onAddPatient,
   onArchivePatient,
   onUpdatePatient,
+  onMarkAway = () => {},
   onAddMed,
   onSaveMed,
   onRemoveMed,
@@ -276,6 +277,7 @@ export default function Patients({
           consequences={consequences}
           finance={finance}
           onUpdatePatient={onUpdatePatient}
+          onMarkAway={onMarkAway}
           onAddMed={onAddMed}
           onSaveMed={onSaveMed}
           onRemoveMed={onRemoveMed}

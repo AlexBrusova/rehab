@@ -40,6 +40,9 @@ object UiValidation {
     const val ABSENCE_STATUS = "^(pending|approved|active|returned)$"
     const val FINANCE_TYPE = "^(deposit|withdrawal)$"
     const val THERAPY_URGENCY = "^(NORMAL|URGENT|ATTENTION)$"
+
+    /** datetime-local HTML input format: YYYY-MM-DDTHH:MM */
+    const val DATETIME_LOCAL_PATTERN = "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$"
 }
 
 data class FieldConstraints(
