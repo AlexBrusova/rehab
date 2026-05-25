@@ -94,6 +94,7 @@ export default function Dashboard({
           sub={t('dashboard.changedMedicationsSub')}
           icon="💊"
           accent={C.orange}
+          onClick={() => onNav("medications")}
         />{" "}
         <Stat
           label={t('dashboard.alertsActive')}
