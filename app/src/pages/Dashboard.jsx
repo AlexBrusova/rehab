@@ -108,6 +108,7 @@ export default function Dashboard({
           sub={`${overduePhones.length} ${t('dashboard.phonesInUseSub')}`}
           icon="📱"
           accent={overduePhones.length > 0 ? C.red : C.teal}
+          onClick={() => onNav("phones")}
         />{" "}
       </div>{" "}
       <div
