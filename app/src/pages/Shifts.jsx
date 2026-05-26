@@ -30,7 +30,6 @@ export default function Shifts({
     { t: "09:30", i: "🗣️", tx: "Morning group – 22 Present" },
     { t: "09:15", i: "💊", tx: "Medication Distribution Morning – 23/24" },
     { t: "11:00", i: "🗣️", tx: "Group Therapy – 20 Present" },
-    { t: "12:10", i: "📱", tx: "Ron Katz – Phone 30 min" },
     { t: "13:00", i: "💊", tx: "Medication Distribution Noon" },
     { t: "14:30", i: "🚨", tx: "Yael Shemesh – SOS: Sedation" },
     { t: "14:00", i: "🗣️", tx: "Skills workshop – Active" },
@@ -135,7 +134,6 @@ export default function Shifts({
               ["Groups", "3 Groups"],
               ["Distributions", "1-2 missing"],
               ["Events", "SOS ×1"],
-              ["Phones", "2 uses"],
             ].map(([k, v]) => (
               <div
                 key={k}
