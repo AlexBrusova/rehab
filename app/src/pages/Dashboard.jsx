@@ -87,6 +87,7 @@ export default function Dashboard({
           sub={`${patients.filter((p) => p.status === "away").length} ${t('dashboard.activePatientsSub')}`}
           icon="👥"
           accent={C.blue}
+          onClick={() => onNav("patients")}
         />{" "}
         <Stat
           label={t('dashboard.changedMedications')}
@@ -102,6 +103,7 @@ export default function Dashboard({
           sub={t('dashboard.alertsActiveSub')}
           icon="🔔"
           accent={C.red}
+          onClick={() => onNav("consequences")}
         />{" "}
         <Stat
           label={t('dashboard.phonesInUse')}
