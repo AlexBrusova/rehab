@@ -15,6 +15,7 @@ export default function Dashboard({
   shifts,
   users,
   phones,
+  absences = [],
   activeHouse,
   onNav,
 
@@ -26,6 +27,7 @@ export default function Dashboard({
   const { isMobile } = useBreakpoint();
   const [profilePid, setProfilePid] = useState(null);
   const pending = consequences.filter((c) => c.status === "pending").length;
+  const pendingAbsences = absences.filter((a) => a.status === "pending").length;
   const lowMood = patients.filter(
     (p) => p.status === "active" && p.mood <= 3,
   ).length;
@@ -170,7 +172,18 @@ export default function Dashboard({
               </span>
             </Alrt>
           )}{" "}
-          {lowMood + changed + urgentTherapy + pending === 0 && (
+          {pendingAbsences > 0 && (
+            <Alrt type="yellow" icon="🏠">
+              <strong>{pendingAbsences} {t('dashboard.absencesPending')}</strong>{" "}
+              <span
+                onClick={() => onNav("absences")}
+                style={{ textDecoration: "underline", cursor: "pointer" }}
+              >
+                {t('dashboard.forApproval')}
+              </span>
+            </Alrt>
+          )}{" "}
+          {lowMood + changed + urgentTherapy + pending + pendingAbsences === 0 && (
             <div
               style={{
                 textAlign: "center",

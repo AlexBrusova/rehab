@@ -95,6 +95,8 @@ export const en = {
     clickMedicationDistribution: "Click for Medication Distribution ←",
     urgentFromTherapist: "Urgent from Emotional Therapist",
     consequencesPending: "consequences pending approval",
+    absencesPending: "absence requests pending approval",
+    forApproval: "for approval →",
     noActiveAlerts: "No active alerts",
     activeShift: "Active shift",
     onDutyCounselor: "On-duty Counselor",

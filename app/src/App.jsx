@@ -60,6 +60,7 @@ export default function App() {
   const [shifts, setShifts] = useState([]);
   const [dailySummary, setDailySummary] = useState([]);
   const [schedule, setSchedule] = useState([]);
+  const [absences, setAbsences] = useState([]);
   const [therapistAssignments, setTherapistAssignments] = useState({});
   const [user, setUser] = useState(() => {
     if (getToken()) return getStoredUser();
@@ -156,6 +157,9 @@ export default function App() {
       .catch(console.error);
     authFetch(`/api/schedule?houseId=${activeHouseId}`)
       .then(setSchedule)
+      .catch(console.error);
+    authFetch(`/api/absences?houseId=${activeHouseId}`)
+      .then(setAbsences)
       .catch(console.error);
   }, [user, activeHouseId]);
 
@@ -528,6 +532,7 @@ export default function App() {
           shifts={houseShifts}
           users={users}
           phones={phones}
+          absences={absences}
           activeHouse={activeHouse}
           onNav={navTo}
           setPatients={setPatients}
