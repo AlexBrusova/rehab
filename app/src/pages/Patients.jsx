@@ -382,6 +382,8 @@ export default function Patients({
               <Th>{t('patients.tableHeaderName')}</Th>
               <Th>{t('patients.tableHeaderAdmission')}</Th>
               <Th>{t('patients.tableHeaderDaysInCenter')}</Th>
+              <Th>{t('patients.tableHeaderLocation')}</Th>
+              <Th>{t('patients.tableHeaderNotes')}</Th>
               {filter === "active" ? (
                 <>
                   <Th>{t('patients.tableHeaderStatus')}</Th>
@@ -472,6 +474,25 @@ export default function Patients({
                   </Td>{" "}
                   <Td style={{ fontWeight: 900, color: C.teal, fontSize: 15 }}>
                     {p.days}
+                  </Td>{" "}
+                  <Td style={{ fontSize: 12, color: C.soft, whiteSpace: "nowrap" }}>
+                    {(() => {
+                      const room = rooms.find((r) => r.id === p.roomId);
+                      const loc = room ? `${room.number} – ${room.building}` : "—";
+                      return p.status === "away" ? `${loc} 🏠` : loc;
+                    })()}
+                  </Td>{" "}
+                  <Td
+                    style={{
+                      fontSize: 12,
+                      color: C.soft,
+                      maxWidth: 160,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {p.notes ? (p.notes.length > 30 ? `${p.notes.slice(0, 30)}…` : p.notes) : "—"}
                   </Td>{" "}
                   {filter === "active" ? (
                     <>
