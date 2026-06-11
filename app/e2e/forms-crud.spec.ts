@@ -30,6 +30,26 @@ test.describe("Forms, validation, and creates", () => {
     await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
   });
 
+  test("Patients: edit notes from profile and see preview in table", async ({ page }) => {
+    await goToScreen(page, "patients");
+    await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 20_000 });
+    await page.locator("tbody tr").first().click();
+
+    await page.getByText("📝 Notes").first().click();
+    await page.getByRole("button", { name: "✏️ Edit" }).click();
+
+    const noteText = `E2E note ${Date.now()}`;
+    const textarea = page.locator("textarea");
+    await textarea.fill(noteText);
+    await page.getByRole("button", { name: "✓ Save" }).click();
+    await expectToast(page, /Notes updated/);
+
+    await expect(page.getByText(noteText)).toBeVisible();
+
+    await page.getByRole("dialog").getByText("✕", { exact: true }).first().click();
+    await expect(page.getByText(noteText.slice(0, 30))).toBeVisible();
+  });
+
   test("Groups: empty topic shows validation", async ({ page }) => {
     await goToScreen(page, "groups");
     await page.getByRole("button", { name: "+ Open New Group" }).click();
