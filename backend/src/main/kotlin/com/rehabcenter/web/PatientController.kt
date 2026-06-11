@@ -174,6 +174,12 @@ class PatientController(
             }
             p.dischargeDate = dischargeDate
         }
+        textOrNull("notes")?.let { notes ->
+            if (notes.length > UiValidation.NOTE_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Notes value is too long")
+            }
+            p.notes = notes
+        }
         if (node.has("daysInRehab")) {
             if (!node["daysInRehab"].isNumber) {
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Days in rehab must be a number")

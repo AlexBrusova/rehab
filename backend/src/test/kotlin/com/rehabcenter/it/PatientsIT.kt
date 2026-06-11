@@ -73,6 +73,36 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `patch patient notes`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("notes" to "Needs follow-up next week"), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(200)
+        assertThat(res.body!!["notes"]).isEqualTo("Needs follow-up next week")
+    }
+
+    @Test
+    fun `patch patient notes too long is rejected`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val tooLong = "x".repeat(4001)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("notes" to tooLong), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
     fun `create patient returns 201 and persists`() {
         val token = rest.obtainToken("manager1", "1234")
         val headers = bearerHeaders(token)
