@@ -66,6 +66,8 @@ class PatientController(
         val houseId: String? = null,
         @field:Size(max = UiValidation.ID_MAX, message = "Room ID is too long")
         val roomId: String? = null,
+        @field:Size(max = UiValidation.NOTE_MAX, message = "Notes value is too long")
+        val notes: String? = null,
     )
 
     @Transactional
@@ -93,6 +95,7 @@ class PatientController(
                 houseId = houseId,
                 roomId = roomId,
                 patientRecordStatus = "active",
+                notes = body.notes,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             )

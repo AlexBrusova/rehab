@@ -105,6 +105,29 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `create patient with notes persists notes`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val body =
+            mapOf(
+                "name" to "IT Notes Patient",
+                "dob" to "01/01/1991",
+                "admitDate" to "01/01/2025",
+                "houseId" to "h1",
+                "notes" to "Allergic to penicillin",
+            )
+        val create =
+            rest.exchange(
+                "/api/patients",
+                HttpMethod.POST,
+                HttpEntity(body, headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(create.statusCode.value()).isEqualTo(201)
+        assertThat(create.body!!["notes"]).isEqualTo("Allergic to penicillin")
+    }
+
+    @Test
     fun `GET patients returns 200 and status field is string active or archived`() {
         val token = rest.obtainToken("manager1", "1234")
         val res =
