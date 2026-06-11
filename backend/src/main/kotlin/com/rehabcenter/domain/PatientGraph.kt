@@ -68,6 +68,7 @@ class Patient(
     var awayType: String? = null,
     var dischargeType: String? = null,
     var dischargeDate: String? = null,
+    var notes: String? = null,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roomId", insertable = false, updatable = false)
     var room: Room? = null,

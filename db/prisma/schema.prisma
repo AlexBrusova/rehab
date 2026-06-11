@@ -80,6 +80,7 @@ model Patient {
   dischargeDate String?
   /// Временно вне дома (логика Kotlin/Express); колонка синхронизирована с JPA `Patient.awayType`.
   awayType    String?
+  notes       String?
 
   house             House               @relation(fields: [houseId], references: [id])
   room              Room?               @relation(fields: [roomId], references: [id])
