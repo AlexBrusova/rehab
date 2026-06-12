@@ -73,6 +73,49 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `patch updates idNum, addiction, phone and emergency contact fields`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(
+                    mapOf(
+                        "idNum" to "987654321",
+                        "addiction" to "Gambling",
+                        "phone" to "+1-555-0100",
+                        "emergencyContactName" to "Jane Doe",
+                        "emergencyContactPhone" to "+1-555-0199",
+                    ),
+                    headers,
+                ),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(200)
+        assertThat(res.body!!["idNum"]).isEqualTo("987654321")
+        assertThat(res.body!!["addiction"]).isEqualTo("Gambling")
+        assertThat(res.body!!["phone"]).isEqualTo("+1-555-0100")
+        assertThat(res.body!!["emergencyContactName"]).isEqualTo("Jane Doe")
+        assertThat(res.body!!["emergencyContactPhone"]).isEqualTo("+1-555-0199")
+    }
+
+    @Test
+    fun `patch rejects emergencyContactName longer than SHORT_LABEL`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val tooLong = "a".repeat(121)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("emergencyContactName" to tooLong), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
     fun `create patient returns 201 and persists`() {
         val token = rest.obtainToken("manager1", "1234")
         val headers = bearerHeaders(token)

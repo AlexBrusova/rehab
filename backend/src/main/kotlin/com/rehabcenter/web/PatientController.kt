@@ -177,6 +177,36 @@ class PatientController(
             }
             p.dischargeDate = dischargeDate
         }
+        textOrNull("idNum")?.let { idNum ->
+            if (idNum.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "ID number is too long")
+            }
+            p.idNum = idNum
+        }
+        textOrNull("addiction")?.let { addiction ->
+            if (addiction.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Addiction type is too long")
+            }
+            p.addiction = addiction
+        }
+        textOrNull("phone")?.let { phone ->
+            if (phone.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone is too long")
+            }
+            p.phone = phone
+        }
+        textOrNull("emergencyContactName")?.let { name ->
+            if (name.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Emergency contact name is too long")
+            }
+            p.emergencyContactName = name
+        }
+        textOrNull("emergencyContactPhone")?.let { phone ->
+            if (phone.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Emergency contact phone is too long")
+            }
+            p.emergencyContactPhone = phone
+        }
         if (node.has("daysInRehab")) {
             if (!node["daysInRehab"].isNumber) {
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Days in rehab must be a number")
