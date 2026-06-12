@@ -66,6 +66,11 @@ class Patient(
     @Column(nullable = false)
     var alert: Boolean = false,
     var awayType: String? = null,
+    var idNum: String? = null,
+    var addiction: String? = null,
+    var phone: String? = null,
+    var emergencyContactName: String? = null,
+    var emergencyContactPhone: String? = null,
     var dischargeType: String? = null,
     var dischargeDate: String? = null,
     @ManyToOne(fetch = FetchType.LAZY)
