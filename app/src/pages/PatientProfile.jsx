@@ -4,6 +4,8 @@ import { V } from "../data/validationLimits";
 import {
   sanitizeMedDose,
   sanitizeMedName,
+  sanitizeFreeText,
+  sanitizeNationalIdDigits,
 } from "../lib/inputSanitize";
 import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS } from "../components/ui";
 import EditMedRow from "./EditMedRow";
@@ -34,6 +36,14 @@ export default function PatientProfile({
   const [tab, setTab] = useState("meds");
   const [editMed, setEditMed] = useState(null);
   const [showAddMed, setShowAddMed] = useState(false);
+  const [editingDetails, setEditingDetails] = useState(false);
+  const [detailsDraft, setDetailsDraft] = useState({
+    idNum: "",
+    addiction: "",
+    phone: "",
+    emergencyContactName: "",
+    emergencyContactPhone: "",
+  });
   const [newMed, setNewMed] = useState({
     name: "", dose: "", unit: "mg",
     morning: false, noon: false, evening: false, night: false,
@@ -55,6 +65,27 @@ export default function PatientProfile({
       setEditMed(null);
       toast(t('patientProfile.toastUpdateSuccess'));
     } catch { toast(t('patientProfile.toastUpdateFailed')); }
+  };
+
+  const startEditDetails = () => {
+    setDetailsDraft({
+      idNum: p.idNum || "",
+      addiction: p.addiction || "",
+      phone: p.phone || "",
+      emergencyContactName: p.emergencyContactName || "",
+      emergencyContactPhone: p.emergencyContactPhone || "",
+    });
+    setEditingDetails(true);
+  };
+
+  const saveDetails = async () => {
+    try {
+      await onUpdatePatient(pid, detailsDraft);
+      setEditingDetails(false);
+      toast(t('patientProfile.toastDetailsUpdateSuccess'));
+    } catch {
+      toast(t('patientProfile.toastDetailsUpdateFailed'));
+    }
   };
 
   const removeMed = async (id) => {
@@ -401,7 +432,14 @@ export default function PatientProfile({
       {tab === "notes" && (
         <div>
           <Card style={{ marginBottom: 12 }}>
-            <CT icon="📋" bg="#e8f0fb">{t('patientProfile.patientDetailsTitle')}</CT>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <CT icon="📋" bg="#e8f0fb">{t('patientProfile.patientDetailsTitle')}</CT>
+              {canEditMeds && !editingDetails && (
+                <Btn size="sm" color="outline" onClick={startEditDetails}>
+                  {t('patientProfile.editDetailsButton')}
+                </Btn>
+              )}
+            </div>
             {[
               [t('patientProfile.fullNameLabel'), p.name],
               [t('patientProfile.dateOfBirthLabel'), p.dob || "—"],
@@ -418,6 +456,76 @@ export default function PatientProfile({
               <div style={{ marginTop: 10, background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
                 <div style={{ fontWeight: 700, fontSize: 11, color: C.soft, marginBottom: 4 }}>{t('patientProfile.notesLabel')}</div>
                 {p.notes}
+              </div>
+            )}
+            {!editingDetails && (
+              <>
+                {[
+                  [t('patientProfile.idNumberLabel'), p.idNum],
+                  [t('patientProfile.addictionTypeLabel'), p.addiction],
+                  [t('patientProfile.phoneLabel'), p.phone],
+                  [t('patientProfile.emergencyContactNameLabel'), p.emergencyContactName],
+                  [t('patientProfile.emergencyContactPhoneLabel'), p.emergencyContactPhone],
+                ].map(([l, v]) => (
+                  <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "7px 0", borderBottom: `1px solid ${C.border}`, fontSize: 13 }}>
+                    <span style={{ color: C.soft }}>{l}</span>
+                    <span style={{ fontWeight: 600 }}>{v || "—"}</span>
+                  </div>
+                ))}
+              </>
+            )}
+            {editingDetails && (
+              <div style={{ marginTop: 10 }}>
+                <FL label={t('patientProfile.idNumberLabel')}>
+                  <FI
+                    dir={dir}
+                    value={detailsDraft.idNum}
+                    onChange={(v) => setDetailsDraft((d) => ({ ...d, idNum: v }))}
+                    sanitize={sanitizeNationalIdDigits}
+                    maxLength={9}
+                    inputMode="numeric"
+                  />
+                </FL>
+                <FL label={t('patientProfile.addictionTypeLabel')}>
+                  <FI
+                    dir={dir}
+                    value={detailsDraft.addiction}
+                    onChange={(v) => setDetailsDraft((d) => ({ ...d, addiction: v }))}
+                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+                    maxLength={V.SHORT_LABEL}
+                  />
+                </FL>
+                <FL label={t('patientProfile.phoneLabel')}>
+                  <FI
+                    dir={dir}
+                    value={detailsDraft.phone}
+                    onChange={(v) => setDetailsDraft((d) => ({ ...d, phone: v }))}
+                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+                    maxLength={V.SHORT_LABEL}
+                  />
+                </FL>
+                <FL label={t('patientProfile.emergencyContactNameLabel')}>
+                  <FI
+                    dir={dir}
+                    value={detailsDraft.emergencyContactName}
+                    onChange={(v) => setDetailsDraft((d) => ({ ...d, emergencyContactName: v }))}
+                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+                    maxLength={V.SHORT_LABEL}
+                  />
+                </FL>
+                <FL label={t('patientProfile.emergencyContactPhoneLabel')}>
+                  <FI
+                    dir={dir}
+                    value={detailsDraft.emergencyContactPhone}
+                    onChange={(v) => setDetailsDraft((d) => ({ ...d, emergencyContactPhone: v }))}
+                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+                    maxLength={V.SHORT_LABEL}
+                  />
+                </FL>
+                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                  <Btn size="sm" onClick={saveDetails}>{t('common.saveButton')}</Btn>
+                  <Btn size="sm" color="outline" onClick={() => setEditingDetails(false)}>{t('common.cancelButton')}</Btn>
+                </div>
               </div>
             )}
           </Card>
