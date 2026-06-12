@@ -66,6 +66,10 @@ class PatientController(
         val houseId: String? = null,
         @field:Size(max = UiValidation.ID_MAX, message = "Room ID is too long")
         val roomId: String? = null,
+        @field:Size(max = UiValidation.SHORT_LABEL, message = "ID number is too long")
+        val idNum: String? = null,
+        @field:Size(max = UiValidation.SHORT_LABEL, message = "Addiction type is too long")
+        val addiction: String? = null,
     )
 
     @Transactional
@@ -92,6 +96,8 @@ class PatientController(
                 admitDate = body.admitDate!!,
                 houseId = houseId,
                 roomId = roomId,
+                idNum = body.idNum,
+                addiction = body.addiction,
                 patientRecordStatus = "active",
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
