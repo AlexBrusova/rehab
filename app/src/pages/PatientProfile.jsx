@@ -486,42 +486,22 @@ export default function PatientProfile({
                     inputMode="numeric"
                   />
                 </FL>
-                <FL label={t('patientProfile.addictionTypeLabel')}>
-                  <FI
-                    dir={dir}
-                    value={detailsDraft.addiction}
-                    onChange={(v) => setDetailsDraft((d) => ({ ...d, addiction: v }))}
-                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
-                    maxLength={V.SHORT_LABEL}
-                  />
-                </FL>
-                <FL label={t('patientProfile.phoneLabel')}>
-                  <FI
-                    dir={dir}
-                    value={detailsDraft.phone}
-                    onChange={(v) => setDetailsDraft((d) => ({ ...d, phone: v }))}
-                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
-                    maxLength={V.SHORT_LABEL}
-                  />
-                </FL>
-                <FL label={t('patientProfile.emergencyContactNameLabel')}>
-                  <FI
-                    dir={dir}
-                    value={detailsDraft.emergencyContactName}
-                    onChange={(v) => setDetailsDraft((d) => ({ ...d, emergencyContactName: v }))}
-                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
-                    maxLength={V.SHORT_LABEL}
-                  />
-                </FL>
-                <FL label={t('patientProfile.emergencyContactPhoneLabel')}>
-                  <FI
-                    dir={dir}
-                    value={detailsDraft.emergencyContactPhone}
-                    onChange={(v) => setDetailsDraft((d) => ({ ...d, emergencyContactPhone: v }))}
-                    sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
-                    maxLength={V.SHORT_LABEL}
-                  />
-                </FL>
+                {[
+                  ["addiction", t('patientProfile.addictionTypeLabel')],
+                  ["phone", t('patientProfile.phoneLabel')],
+                  ["emergencyContactName", t('patientProfile.emergencyContactNameLabel')],
+                  ["emergencyContactPhone", t('patientProfile.emergencyContactPhoneLabel')],
+                ].map(([key, label]) => (
+                  <FL key={key} label={label}>
+                    <FI
+                      dir={dir}
+                      value={detailsDraft[key]}
+                      onChange={(v) => setDetailsDraft((d) => ({ ...d, [key]: v }))}
+                      sanitize={(s) => sanitizeFreeText(s, V.SHORT_LABEL)}
+                      maxLength={V.SHORT_LABEL}
+                    />
+                  </FL>
+                ))}
                 <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
                   <Btn size="sm" onClick={saveDetails}>{t('common.saveButton')}</Btn>
                   <Btn size="sm" color="outline" onClick={() => setEditingDetails(false)}>{t('common.cancelButton')}</Btn>
