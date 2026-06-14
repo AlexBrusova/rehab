@@ -87,4 +87,26 @@ test.describe("Forms, validation, and creates", () => {
     await dialog.getByRole("button", { name: "✓ Propose" }).click();
     await expectToast(page, /Consequence proposed/);
   });
+
+  test("MedManager: medication summary shows all medications with schedule", async ({
+    page,
+  }) => {
+    await goToScreen(page, "medmanager");
+    await page.locator("button").filter({ hasText: /Medications/ }).first().click();
+
+    await page.getByRole("button", { name: "+ Add Medication" }).click();
+
+    const medName = `E2E Summary Med ${Date.now()}`;
+    await page.getByPlaceholder("e.g.: Methadone").fill(medName);
+    await page.getByPlaceholder("40").fill("25");
+    await page.getByText("Morning", { exact: true }).click();
+
+    const post = page.waitForResponse(
+      (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "✓ Add" }).click();
+    await post;
+
+    await expect(page.getByText(`${medName} 25mg — Morning`)).toBeVisible();
+  });
 });
