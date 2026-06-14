@@ -88,24 +88,44 @@ test.describe("Forms, validation, and creates", () => {
     await expectToast(page, /Consequence proposed/);
   });
 
-  test("MedManager: medication summary shows all medications with schedule", async ({
+  test("MedManager: medication summary groups medications by time of day", async ({
     page,
   }) => {
     await goToScreen(page, "medmanager");
 
     await page.getByRole("button", { name: "+ Add Medication" }).click();
 
-    const medName = `E2E Summary Med ${Date.now()}`;
-    await page.getByPlaceholder("e.g.: Methadone").fill(medName);
+    const morningMed = `E2E Morning Med ${Date.now()}`;
+    await page.getByPlaceholder("e.g.: Methadone").fill(morningMed);
     await page.getByPlaceholder("40").fill("25");
     await page.getByText("Morning", { exact: true }).click();
 
-    const post = page.waitForResponse(
+    const post1 = page.waitForResponse(
       (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
     );
     await page.getByRole("button", { name: "✓ Add" }).click();
-    await post;
+    await post1;
 
-    await expect(page.getByText(`${medName} 25mg — Morning`)).toBeVisible();
+    await expect(page.getByText(`Morning: ${morningMed} 25mg`)).toBeVisible();
+
+    await page.getByRole("button", { name: "+ Add Medication" }).click();
+
+    const noScheduleMed = `E2E No Schedule Med ${Date.now()}`;
+    await page.getByPlaceholder("e.g.: Methadone").fill(noScheduleMed);
+    await page.getByPlaceholder("40").fill("10");
+
+    const post2 = page.waitForResponse(
+      (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "✓ Add" }).click();
+    await post2;
+
+    await expect(
+      page.getByText(`No schedule: ${noScheduleMed} 10mg`),
+    ).toBeVisible();
+
+    await expect(page.getByText(/^Noon:/)).not.toBeVisible();
+    await expect(page.getByText(/^Evening:/)).not.toBeVisible();
+    await expect(page.getByText(/^Night:/)).not.toBeVisible();
   });
 });
