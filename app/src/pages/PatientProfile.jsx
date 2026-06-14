@@ -147,7 +147,15 @@ export default function PatientProfile({
             <Badge type={p.status === "away" ? "yellow" : "green"}>
               {p.status === "away" ? `🏠 ${p.awayType}` : t('patientProfile.activeStatus')}
             </Badge>
+            {pActiveCons.length > 0 && (
+              <Badge type="orange">⛔ {pActiveCons.length} {t('patientProfile.consequencesLabel')}</Badge>
+            )}
           </div>
+          {pActiveCons.length > 0 && (
+            <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
+              {[...new Set(pActiveCons.map((c) => typeLabels[c.type] || c.type))].join(", ")}
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
           <div style={{ textAlign: "center", background: "rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 16px" }}>
