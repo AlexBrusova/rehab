@@ -37,6 +37,23 @@ export default function MedManager({
     evening: t('medManager.eveningLabel'),
     night: t('medManager.nightLabel'),
   };
+  const summaryGroups = [
+    { key: "morning", label: dayLabels.morning },
+    { key: "noon", label: dayLabels.noon },
+    { key: "evening", label: dayLabels.evening },
+    { key: "night", label: dayLabels.night },
+  ]
+    .map((g) => ({
+      label: g.label,
+      meds: pMeds.filter((m) => m[g.key]),
+    }))
+    .concat([
+      {
+        label: t('medManager.noScheduleLabel'),
+        meds: pMeds.filter((m) => !m.morning && !m.noon && !m.evening && !m.night),
+      },
+    ])
+    .filter((g) => g.meds.length > 0);
   const saveMed = async (id, upd) => {
     try {
       await onSaveMed(id, upd);
@@ -138,15 +155,11 @@ export default function MedManager({
                 {t('medManager.medicationsSummaryTitle')}
               </div>
               <div style={{ background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
-                {pMeds
-                  .map((m) => {
-                    const days = ["morning", "noon", "evening", "night"]
-                      .filter((k) => m[k])
-                      .map((k) => dayLabels[k]);
-                    const schedule = days.length > 0 ? days.join(", ") : t('medManager.noScheduleSet');
-                    return `${m.name} ${m.dose}${m.unit} — ${schedule}`;
-                  })
-                  .join("; ")}
+                {summaryGroups.map((g) => (
+                  <div key={g.label}>
+                    {g.label}: {g.meds.map((m) => `${m.name} ${m.dose}${m.unit}`).join(", ")}
+                  </div>
+                ))}
               </div>
             </div>
           )}{" "}
