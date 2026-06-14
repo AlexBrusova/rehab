@@ -116,6 +116,30 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `patch rejects idNum with non-numeric characters or more than 9 digits`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+
+        val nonNumeric =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("idNum" to "abc123456"), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(nonNumeric.statusCode.value()).isEqualTo(400)
+
+        val tooLong =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("idNum" to "1234567890"), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(tooLong.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
     fun `create patient returns 201 and persists`() {
         val token = rest.obtainToken("manager1", "1234")
         val headers = bearerHeaders(token)
