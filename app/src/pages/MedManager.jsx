@@ -126,6 +126,30 @@ export default function MedManager({
               {t('medManager.addMedicationButton')}
             </Btn>{" "}
           </div>{" "}
+          {pMeds.length > 0 && (
+            <div style={{ marginBottom: 12 }} dir={dir}>
+              <div style={{ fontWeight: 700, fontSize: 11, color: C.soft, marginBottom: 4 }}>
+                {t('medManager.medicationsSummaryTitle')}
+              </div>
+              <div style={{ background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
+                {pMeds
+                  .map((m) => {
+                    const dayLabels = {
+                      morning: t('medManager.morningLabel'),
+                      noon: t('medManager.noonLabel'),
+                      evening: t('medManager.eveningLabel'),
+                      night: t('medManager.nightLabel'),
+                    };
+                    const days = ["morning", "noon", "evening", "night"]
+                      .filter((k) => m[k])
+                      .map((k) => dayLabels[k]);
+                    const schedule = days.length > 0 ? days.join(", ") : t('medManager.noScheduleSet');
+                    return `${m.name} ${m.dose}${m.unit} — ${schedule}`;
+                  })
+                  .join("; ")}
+              </div>
+            </div>
+          )}{" "}
           {/* Add form */}{" "}
           {showAdd && (
             <div
