@@ -285,6 +285,8 @@ export const en = {
     addButton: "✓ Add",
     cancelButton: "Cancel",
     noMedicationsRecorded: "No medications on record for this patient",
+    medicationsSummaryTitle: "All Medications",
+    noScheduleSet: "No schedule set",
     updatedBadge: "updated",
     editButton: "✏️ Edit",
     deleteButton: "✕",
