@@ -73,6 +73,73 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `patch updates idNum, addiction, phone and emergency contact fields`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(
+                    mapOf(
+                        "idNum" to "987654321",
+                        "addiction" to "Gambling",
+                        "phone" to "+1-555-0100",
+                        "emergencyContactName" to "Jane Doe",
+                        "emergencyContactPhone" to "+1-555-0199",
+                    ),
+                    headers,
+                ),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(200)
+        assertThat(res.body!!["idNum"]).isEqualTo("987654321")
+        assertThat(res.body!!["addiction"]).isEqualTo("Gambling")
+        assertThat(res.body!!["phone"]).isEqualTo("+1-555-0100")
+        assertThat(res.body!!["emergencyContactName"]).isEqualTo("Jane Doe")
+        assertThat(res.body!!["emergencyContactPhone"]).isEqualTo("+1-555-0199")
+    }
+
+    @Test
+    fun `patch rejects emergencyContactName longer than SHORT_LABEL`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val tooLong = "a".repeat(121)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("emergencyContactName" to tooLong), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
+    fun `patch rejects idNum with non-numeric characters or more than 9 digits`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+
+        val nonNumeric =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("idNum" to "abc123456"), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(nonNumeric.statusCode.value()).isEqualTo(400)
+
+        val tooLong =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("idNum" to "1234567890"), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(tooLong.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
     fun `create patient returns 201 and persists`() {
         val token = rest.obtainToken("manager1", "1234")
         val headers = bearerHeaders(token)
@@ -102,6 +169,31 @@ class PatientsIT : AbstractIntegrationTest() {
                 object : ParameterizedTypeReference<List<Map<String, Any?>>>() {},
             )
         assertThat(listed.body!!.any { it["id"] == id && it["name"] == "IT New Patient" }).isTrue()
+    }
+
+    @Test
+    fun `create patient persists idNum and addiction`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val body =
+            mapOf(
+                "name" to "IT Patient With Details",
+                "dob" to "01/01/1991",
+                "admitDate" to "01/01/2025",
+                "houseId" to "h1",
+                "idNum" to "123456789",
+                "addiction" to "Alcohol",
+            )
+        val create =
+            rest.exchange(
+                "/api/patients",
+                HttpMethod.POST,
+                HttpEntity(body, headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(create.statusCode.value()).isEqualTo(201)
+        assertThat(create.body!!["idNum"]).isEqualTo("123456789")
+        assertThat(create.body!!["addiction"]).isEqualTo("Alcohol")
     }
 
     @Test

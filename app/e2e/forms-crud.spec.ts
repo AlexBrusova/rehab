@@ -30,6 +30,32 @@ test.describe("Forms, validation, and creates", () => {
     await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
   });
 
+  test("Patients: edit profile details (ID, addiction, phone, emergency contact)", async ({ page }) => {
+    await goToScreen(page, "patients");
+    await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 20_000 });
+    await page.locator("tbody tr").first().click();
+
+    const dialog = page.getByRole("dialog");
+    await dialog.getByText("📝 Notes").click();
+    await dialog.getByRole("button", { name: "✏️ Edit Details" }).click();
+
+    const idValue = String(Date.now()).slice(-9);
+    await dialog.getByText("ID number", { exact: true }).locator("xpath=following-sibling::div//input").fill(idValue);
+    await dialog.getByText("Addiction Type", { exact: true }).locator("xpath=following-sibling::div//input").fill("Alcohol");
+    await dialog.getByText("Phone", { exact: true }).locator("xpath=following-sibling::div//input").fill("+1-555-0100");
+    await dialog.getByText("Emergency Contact Name", { exact: true }).locator("xpath=following-sibling::div//input").fill("Jane Doe");
+    await dialog.getByText("Emergency Contact Phone", { exact: true }).locator("xpath=following-sibling::div//input").fill("+1-555-0199");
+
+    await dialog.getByRole("button", { name: "✓ Save" }).click();
+    await expectToast(page, /Patient details updated/);
+
+    await expect(dialog.getByText(idValue)).toBeVisible();
+    await expect(dialog.getByText("Alcohol")).toBeVisible();
+    await expect(dialog.getByText("+1-555-0100")).toBeVisible();
+    await expect(dialog.getByText("Jane Doe")).toBeVisible();
+    await expect(dialog.getByText("+1-555-0199")).toBeVisible();
+  });
+
   test("Groups: empty topic shows validation", async ({ page }) => {
     await goToScreen(page, "groups");
     await page.getByRole("button", { name: "+ Open New Group" }).click();

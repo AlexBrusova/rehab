@@ -9,6 +9,7 @@ import com.rehabcenter.repo.RoomRepository
 import com.rehabcenter.validation.UiValidation
 import jakarta.validation.Valid
 import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -66,6 +67,10 @@ class PatientController(
         val houseId: String? = null,
         @field:Size(max = UiValidation.ID_MAX, message = "Room ID is too long")
         val roomId: String? = null,
+        @field:Pattern(regexp = "^\\d{0,9}$", message = "ID number must be up to 9 digits")
+        val idNum: String? = null,
+        @field:Size(max = UiValidation.SHORT_LABEL, message = "Addiction type is too long")
+        val addiction: String? = null,
     )
 
     @Transactional
@@ -92,6 +97,8 @@ class PatientController(
                 admitDate = body.admitDate!!,
                 houseId = houseId,
                 roomId = roomId,
+                idNum = body.idNum,
+                addiction = body.addiction,
                 patientRecordStatus = "active",
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
@@ -170,6 +177,36 @@ class PatientController(
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Discharge date value is too long")
             }
             p.dischargeDate = dischargeDate
+        }
+        textOrNull("idNum")?.let { idNum ->
+            if (!idNum.matches(Regex("^\\d{0,9}$"))) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "ID number must be up to 9 digits")
+            }
+            p.idNum = idNum
+        }
+        textOrNull("addiction")?.let { addiction ->
+            if (addiction.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Addiction type is too long")
+            }
+            p.addiction = addiction
+        }
+        textOrNull("phone")?.let { phone ->
+            if (phone.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Phone is too long")
+            }
+            p.phone = phone
+        }
+        textOrNull("emergencyContactName")?.let { name ->
+            if (name.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Emergency contact name is too long")
+            }
+            p.emergencyContactName = name
+        }
+        textOrNull("emergencyContactPhone")?.let { phone ->
+            if (phone.length > UiValidation.SHORT_LABEL) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Emergency contact phone is too long")
+            }
+            p.emergencyContactPhone = phone
         }
         if (node.has("daysInRehab")) {
             if (!node["daysInRehab"].isNumber) {
