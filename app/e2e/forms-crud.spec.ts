@@ -44,7 +44,7 @@ test.describe("Forms, validation, and creates", () => {
     await page.getByRole("button", { name: "✓ Save" }).click();
     await expectToast(page, /Notes updated/);
 
-    await expect(page.getByText(noteText)).toBeVisible();
+    await expect(page.getByRole("dialog").getByText(noteText)).toBeVisible();
 
     await page.getByRole("dialog").getByText("✕", { exact: true }).first().click();
     await expect(page.getByText(noteText.slice(0, 30))).toBeVisible();
