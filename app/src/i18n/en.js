@@ -287,6 +287,7 @@ export const en = {
     noMedicationsRecorded: "No medications on record for this patient",
     medicationsSummaryTitle: "All Medications",
     noScheduleSet: "No schedule set",
+    noScheduleLabel: "No schedule",
     updatedBadge: "updated",
     editButton: "✏️ Edit",
     deleteButton: "✕",
