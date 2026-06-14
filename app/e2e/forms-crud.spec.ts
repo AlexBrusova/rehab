@@ -96,9 +96,10 @@ test.describe("Forms, validation, and creates", () => {
     await page.getByRole("button", { name: "+ Add Medication" }).click();
 
     const morningMed = `E2E Morning Med ${Date.now()}`;
+    const addForm = page.getByText("➕ New Medication").locator("..");
     await page.getByPlaceholder("e.g.: Methadone").fill(morningMed);
     await page.getByPlaceholder("40").fill("25");
-    await page.getByText("Morning", { exact: true }).click();
+    await addForm.getByText("Morning", { exact: true }).click();
 
     const post1 = page.waitForResponse(
       (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
