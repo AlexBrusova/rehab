@@ -66,6 +66,8 @@ class PatientController(
         val houseId: String? = null,
         @field:Size(max = UiValidation.ID_MAX, message = "Room ID is too long")
         val roomId: String? = null,
+        @field:Size(max = UiValidation.NOTE_MAX, message = "Notes value is too long")
+        val notes: String? = null,
     )
 
     @Transactional
@@ -93,6 +95,7 @@ class PatientController(
                 houseId = houseId,
                 roomId = roomId,
                 patientRecordStatus = "active",
+                notes = body.notes,
                 createdAt = Instant.now(),
                 updatedAt = Instant.now(),
             )
@@ -170,6 +173,12 @@ class PatientController(
                 throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Discharge date value is too long")
             }
             p.dischargeDate = dischargeDate
+        }
+        textOrNull("notes")?.let { notes ->
+            if (notes.length > UiValidation.NOTE_MAX) {
+                throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Notes value is too long")
+            }
+            p.notes = notes
         }
         if (node.has("daysInRehab")) {
             if (!node["daysInRehab"].isNumber) {

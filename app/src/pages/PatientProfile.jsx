@@ -4,8 +4,9 @@ import { V } from "../data/validationLimits";
 import {
   sanitizeMedDose,
   sanitizeMedName,
+  sanitizeFreeText,
 } from "../lib/inputSanitize";
-import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS } from "../components/ui";
+import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS, FTA } from "../components/ui";
 import EditMedRow from "./EditMedRow";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -40,6 +41,8 @@ export default function PatientProfile({
   });
   const [showAbsence, setShowAbsence] = useState(false);
   const [absData, setAbsData] = useState({ type: t('patientProfile.homeVisit'), returnDate: "" });
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [notesDraft, setNotesDraft] = useState("");
 
   const canManageAbsence = user.role === "manager" || user.role === "counselor";
   const canRequestAbsence = user.role === "counselor" || user.role === "manager";
@@ -88,6 +91,19 @@ export default function PatientProfile({
       await onUpdatePatient(pid, { awayType: null });
       toast(`✅ ${p.name} returned to center`);
     } catch { toast(t('patientProfile.toastReturnFailed')); }
+  };
+
+  const startEditNotes = () => {
+    setNotesDraft(p.notes || "");
+    setEditingNotes(true);
+  };
+
+  const saveNotes = async () => {
+    try {
+      await onUpdatePatient(pid, { notes: notesDraft });
+      setEditingNotes(false);
+      toast(t('patientProfile.toastNotesUpdateSuccess'));
+    } catch { toast(t('patientProfile.toastNotesUpdateFailed')); }
   };
 
   return (
@@ -414,12 +430,34 @@ export default function PatientProfile({
                 <span style={{ fontWeight: 600 }}>{v}</span>
               </div>
             ))}
-            {p.notes && (
-              <div style={{ marginTop: 10, background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
-                <div style={{ fontWeight: 700, fontSize: 11, color: C.soft, marginBottom: 4 }}>{t('patientProfile.notesLabel')}</div>
-                {p.notes}
+            <div style={{ marginTop: 10, background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
+                <span style={{ fontWeight: 700, fontSize: 11, color: C.soft }}>{t('patientProfile.notesLabel')}</span>
+                {canEditMeds && !editingNotes && (
+                  <button onClick={startEditNotes} style={{ padding: "3px 8px", borderRadius: 7, border: `1.5px solid ${C.border}`, background: "#fff", cursor: "pointer", fontSize: 11, fontWeight: 700, color: C.mid, fontFamily: "inherit" }}>
+                    {t('patientProfile.editNotesButton')}
+                  </button>
+                )}
               </div>
-            )}
+              {editingNotes ? (
+                <div>
+                  <FTA
+                    dir={dir}
+                    value={notesDraft}
+                    onChange={setNotesDraft}
+                    sanitize={(s) => sanitizeFreeText(s, V.NOTE_MAX)}
+                    maxLength={V.NOTE_MAX}
+                    rows={4}
+                  />
+                  <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                    <Btn color="teal" size="sm" onClick={saveNotes}>{t('common.saveButton')}</Btn>
+                    <Btn color="outline" size="sm" onClick={() => setEditingNotes(false)}>{t('common.cancelButton')}</Btn>
+                  </div>
+                </div>
+              ) : (
+                <div>{p.notes || t('patientProfile.noNotes')}</div>
+              )}
+            </div>
           </Card>
         </div>
       )}

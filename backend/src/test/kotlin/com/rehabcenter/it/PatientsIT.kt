@@ -73,6 +73,36 @@ class PatientsIT : AbstractIntegrationTest() {
     }
 
     @Test
+    fun `patch patient notes`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("notes" to "Needs follow-up next week"), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(200)
+        assertThat(res.body!!["notes"]).isEqualTo("Needs follow-up next week")
+    }
+
+    @Test
+    fun `patch patient notes too long is rejected`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val tooLong = "x".repeat(4001)
+        val res =
+            rest.exchange(
+                "/api/patients/p1",
+                HttpMethod.PATCH,
+                HttpEntity(mapOf("notes" to tooLong), headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(res.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
     fun `create patient returns 201 and persists`() {
         val token = rest.obtainToken("manager1", "1234")
         val headers = bearerHeaders(token)
@@ -102,6 +132,29 @@ class PatientsIT : AbstractIntegrationTest() {
                 object : ParameterizedTypeReference<List<Map<String, Any?>>>() {},
             )
         assertThat(listed.body!!.any { it["id"] == id && it["name"] == "IT New Patient" }).isTrue()
+    }
+
+    @Test
+    fun `create patient with notes persists notes`() {
+        val token = rest.obtainToken("manager1", "1234")
+        val headers = bearerHeaders(token)
+        val body =
+            mapOf(
+                "name" to "IT Notes Patient",
+                "dob" to "01/01/1991",
+                "admitDate" to "01/01/2025",
+                "houseId" to "h1",
+                "notes" to "Allergic to penicillin",
+            )
+        val create =
+            rest.exchange(
+                "/api/patients",
+                HttpMethod.POST,
+                HttpEntity(body, headers),
+                object : ParameterizedTypeReference<Map<String, Any?>>() {},
+            )
+        assertThat(create.statusCode.value()).isEqualTo(201)
+        assertThat(create.body!!["notes"]).isEqualTo("Allergic to penicillin")
     }
 
     @Test
