@@ -175,6 +175,7 @@ export const en = {
     medicationsTab: "💊 Medications",
     absencesTab: "🏠 Absences",
     consequencesTab: "⛔ Consequences",
+    consequencesLabel: "Consequences",
     financeTab: "💰 General",
     moodsTab: "😊 Indicators",
     therapyTab: "🧠 Emotional Therapy",
