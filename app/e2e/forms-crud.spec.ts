@@ -92,7 +92,6 @@ test.describe("Forms, validation, and creates", () => {
     page,
   }) => {
     await goToScreen(page, "medmanager");
-    await page.locator("button").filter({ hasText: /Medications/ }).first().click();
 
     await page.getByRole("button", { name: "+ Add Medication" }).click();
 
