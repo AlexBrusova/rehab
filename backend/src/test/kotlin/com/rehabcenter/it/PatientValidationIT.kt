@@ -137,7 +137,7 @@ class PatientValidationIT : AbstractIntegrationTest() {
             "dob" to "10/05/1990",
             "admitDate" to "01/03/2025",
             "houseId" to "h1",
-            "idNum" to "ID-12345",
+            "idNum" to "123456789",
             "addiction" to "alcohol",
             "notes" to "some extra note from frontend",
         )
