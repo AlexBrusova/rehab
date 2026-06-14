@@ -31,6 +31,12 @@ export default function MedManager({
   });
   const pMeds = meds.filter((m) => m.patientId === selPat);
   const pat = patients.find((p) => p.id === selPat);
+  const dayLabels = {
+    morning: t('medManager.morningLabel'),
+    noon: t('medManager.noonLabel'),
+    evening: t('medManager.eveningLabel'),
+    night: t('medManager.nightLabel'),
+  };
   const saveMed = async (id, upd) => {
     try {
       await onSaveMed(id, upd);
@@ -134,12 +140,6 @@ export default function MedManager({
               <div style={{ background: "#f7f9fc", borderRadius: 8, padding: "9px 12px", fontSize: 13, color: C.mid }}>
                 {pMeds
                   .map((m) => {
-                    const dayLabels = {
-                      morning: t('medManager.morningLabel'),
-                      noon: t('medManager.noonLabel'),
-                      evening: t('medManager.eveningLabel'),
-                      night: t('medManager.nightLabel'),
-                    };
                     const days = ["morning", "noon", "evening", "night"]
                       .filter((k) => m[k])
                       .map((k) => dayLabels[k]);
