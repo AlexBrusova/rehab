@@ -88,6 +88,32 @@ test.describe("Forms, validation, and creates", () => {
     await expectToast(page, /Consequence proposed/);
   });
 
+  test("Patients: active consequence shows badge and type on profile", async ({ page }) => {
+    await goToScreen(page, "consequences");
+    await page.getByRole("button", { name: "+ Propose" }).click();
+    const dialog = page.getByRole("dialog", { name: /Propose Consequence/i });
+    const patientSelect = dialog.locator("select").first();
+    await expect(async () => {
+      const n = await patientSelect.locator("option").count();
+      if (n < 1) throw new Error("patient select has no options yet");
+    }).toPass({ timeout: 20_000 });
+    await patientSelect.selectOption({ index: 0 });
+    const patientName = (await patientSelect.locator("option:checked").textContent())?.trim();
+    await dialog
+      .getByPlaceholder("e.g.: Phone Restriction 3 days")
+      .fill("E2E active consequence");
+    await dialog.getByRole("button", { name: "✓ Propose" }).click();
+    await expectToast(page, /Consequence proposed/);
+
+    await goToScreen(page, "patients");
+    await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 20_000 });
+    await page.locator("tbody tr", { hasText: patientName }).first().click();
+
+    const profile = page.getByRole("dialog");
+    await expect(profile.getByText(/^⛔ \d+ Consequences$/)).toBeVisible();
+    await expect(profile.getByText(/📵 Phone Restriction/)).toBeVisible();
+  });
+
   test("MedManager: medication summary groups medications by time of day", async ({
     page,
   }) => {
