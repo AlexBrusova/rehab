@@ -313,8 +313,8 @@ export default function PatientProfile({
       {tab === "finance" && (
         <div>
           {(() => {
-            const pFin = (finance || []).filter((f) => f.patientId === pid).sort((a, b) => b.id.localeCompare(a.id));
-            const balance = pFin.length ? pFin[pFin.length - 1].balance ?? 0 : 0;
+            const pFin = (finance || []).filter((f) => f.patientId === pid).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            const balance = pFin.length ? pFin[0].balance ?? 0 : 0;
             return (
               <>
                 <div style={{ background: `linear-gradient(135deg,${C.teal},${C.tealLt})`, borderRadius: 12, padding: 16, color: "#fff", marginBottom: 14, textAlign: "center" }}>

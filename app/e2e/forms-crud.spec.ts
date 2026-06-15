@@ -87,4 +87,60 @@ test.describe("Forms, validation, and creates", () => {
     await dialog.getByRole("button", { name: "✓ Propose" }).click();
     await expectToast(page, /Consequence proposed/);
   });
+
+  test("Patients: profile Finance tab shows current balance and newest-first history", async ({ page }) => {
+    await goToScreen(page, "finance");
+    await page.waitForLoadState("networkidle");
+
+    const patientSelect = page
+      .locator("label", { hasText: "Select Patient" })
+      .locator("xpath=following-sibling::select");
+    await expect(async () => {
+      const n = await patientSelect.locator("option").count();
+      if (n < 1) throw new Error("patient select has no options yet");
+    }).toPass({ timeout: 20_000 });
+    await patientSelect.selectOption({ index: 0 });
+    const patientName = (await patientSelect.locator("option:checked").textContent())?.trim() ?? "";
+
+    const base = Date.now() % 1000;
+    const depositAmount = String(100 + (base % 50));
+    const withdrawalAmount = String(50 + (base % 40));
+
+    await page.getByRole("button", { name: "+ Deposit" }).click();
+    let dialog = page.getByRole("dialog", { name: "💰 Deposit to Patient" });
+    await dialog.getByPlaceholder("500").fill(depositAmount);
+    const depositPost = page.waitForResponse(
+      (r) => r.url().includes("/api/finance/patient") && r.request().method() === "POST",
+    );
+    await dialog.getByRole("button", { name: "✓ Save" }).click();
+    await depositPost;
+    await expectToast(page, /Deposit recorded/);
+
+    await page.getByRole("button", { name: "+ Withdrawal" }).click();
+    dialog = page.getByRole("dialog", { name: "💸 Withdrawal from Patient" });
+    await dialog.getByPlaceholder("500").fill(withdrawalAmount);
+    const withdrawalPost = page.waitForResponse(
+      (r) => r.url().includes("/api/finance/patient") && r.request().method() === "POST",
+    );
+    await dialog.getByRole("button", { name: "✓ Save" }).click();
+    const withdrawalRes = await withdrawalPost;
+    await expectToast(page, /Withdrawal recorded/);
+    const { balance: expectedBalance } = await withdrawalRes.json();
+
+    await goToScreen(page, "patients");
+    await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 20_000 });
+    await page.locator("tbody tr", { hasText: patientName }).first().click();
+
+    const profile = page.getByRole("dialog");
+    await profile.getByText("💰 General").click();
+
+    await expect(profile.getByText(`₪${Number(expectedBalance).toLocaleString()}`)).toBeVisible();
+
+    const dialogText = await profile.textContent();
+    const depositIndex = dialogText.indexOf(`+₪${depositAmount}`);
+    const withdrawalIndex = dialogText.indexOf(`-₪${withdrawalAmount}`);
+    expect(depositIndex).toBeGreaterThan(-1);
+    expect(withdrawalIndex).toBeGreaterThan(-1);
+    expect(withdrawalIndex).toBeLessThan(depositIndex);
+  });
 });
