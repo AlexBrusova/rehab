@@ -4,8 +4,9 @@ import { V } from "../data/validationLimits";
 import {
   sanitizeMedDose,
   sanitizeMedName,
+  sanitizeVitalNumber,
 } from "../lib/inputSanitize";
-import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS } from "../components/ui";
+import { Badge, Card, CT, Alrt, Btn, Modal, FL, FI, FS, FTA } from "../components/ui";
 import EditMedRow from "./EditMedRow";
 import useBreakpoint from "../hooks/useBreakpoint";
 
@@ -21,6 +22,8 @@ export default function PatientProfile({
   toast,
   consequences,
   finance,
+  vitals = [],
+  onAddVital,
   onUpdatePatient,
   onMarkAway = () => {},
   onAddMed,
@@ -40,6 +43,8 @@ export default function PatientProfile({
   });
   const [showAbsence, setShowAbsence] = useState(false);
   const [absData, setAbsData] = useState({ type: t('patientProfile.homeVisit'), returnDate: "" });
+  const [showAddVital, setShowAddVital] = useState(false);
+  const [newVital, setNewVital] = useState({ systolic: "", diastolic: "", pulse: "", note: "" });
 
   const canManageAbsence = user.role === "manager" || user.role === "counselor";
   const canRequestAbsence = user.role === "counselor" || user.role === "manager";
@@ -47,6 +52,8 @@ export default function PatientProfile({
   const room = rooms.find((r) => r.id === p?.roomId);
   const pMeds = meds.filter((m) => m.patientId === pid);
   const pTherapy = therapy.filter((th) => th.patientId === pid);
+  const pVitals = vitals.filter((v) => v.patientId === pid);
+  const canAddVital = user.role === "doctor" || user.role === "therapist";
   if (!p) return null;
 
   const saveMed = async (id, upd) => {
@@ -72,6 +79,19 @@ export default function PatientProfile({
       setShowAddMed(false);
       toast(t('patientProfile.toastAddSuccess'));
     } catch { toast(t('patientProfile.toastAddFailed')); }
+  };
+
+  const addVital = async () => {
+    if (!newVital.systolic || !newVital.diastolic || !newVital.pulse) {
+      toast(t('patientProfile.toastFillVitalsRequired'));
+      return;
+    }
+    try {
+      await onAddVital(pid, p.houseId, newVital);
+      setNewVital({ systolic: "", diastolic: "", pulse: "", note: "" });
+      setShowAddVital(false);
+      toast(t('patientProfile.toastVitalAddSuccess'));
+    } catch { toast(t('patientProfile.toastVitalAddFailed')); }
   };
 
   const openAbsence = async () => {
@@ -170,6 +190,7 @@ export default function PatientProfile({
           ["absence", t('patientProfile.absencesTab')],
           ["cons", t('patientProfile.consequencesTab')],
           ["finance", t('patientProfile.financeTab')],
+          ...(user.role !== "counselor" ? [["vitals", t('patientProfile.vitalsTab')]] : []),
           ["moods", t('patientProfile.moodsTab')],
           ["therapy", t('patientProfile.therapyTab')],
           ["notes", t('patientProfile.notesTab')],
@@ -342,6 +363,76 @@ export default function PatientProfile({
               </>
             );
           })()}
+        </div>
+      )}
+
+      {/* VITALS TAB */}
+      {tab === "vitals" && (
+        <div>
+          {canAddVital && (
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+              <Btn color="teal" size="sm" onClick={() => setShowAddVital(true)}>{t('patientProfile.addVitalsButton')}</Btn>
+            </div>
+          )}
+          {showAddVital && (
+            <div style={{ background: "#f0fafa", borderRadius: 10, border: `2px solid ${C.teal}`, padding: 14, marginBottom: 10 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr 1fr", gap: 8, marginBottom: 8 }}>
+                <FI
+                  value={newVital.systolic}
+                  onChange={(v) => setNewVital((m) => ({ ...m, systolic: v }))}
+                  placeholder={t('patientProfile.systolicPlaceholder')}
+                  type="number"
+                  sanitize={sanitizeVitalNumber}
+                  dir={dir}
+                />
+                <FI
+                  value={newVital.diastolic}
+                  onChange={(v) => setNewVital((m) => ({ ...m, diastolic: v }))}
+                  placeholder={t('patientProfile.diastolicPlaceholder')}
+                  type="number"
+                  sanitize={sanitizeVitalNumber}
+                  dir={dir}
+                />
+                <FI
+                  value={newVital.pulse}
+                  onChange={(v) => setNewVital((m) => ({ ...m, pulse: v }))}
+                  placeholder={t('patientProfile.pulsePlaceholder')}
+                  type="number"
+                  sanitize={sanitizeVitalNumber}
+                  dir={dir}
+                />
+              </div>
+              <FTA
+                value={newVital.note}
+                onChange={(v) => setNewVital((m) => ({ ...m, note: v }))}
+                placeholder={t('patientProfile.vitalNotePlaceholder')}
+                maxLength={V.NOTE_MAX}
+                rows={2}
+                dir={dir}
+              />
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <Btn color="teal" size="sm" onClick={addVital}>{t('patientProfile.addButton')}</Btn>
+                <Btn color="outline" size="sm" onClick={() => setShowAddVital(false)}>{t('patientProfile.cancelButton')}</Btn>
+              </div>
+            </div>
+          )}
+          {pVitals.length === 0 ? (
+            <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>{t('patientProfile.noVitalRecords')}</div>
+          ) : (
+            pVitals.map((v) => (
+              <div key={v.id} style={{ display: "flex", alignItems: "center", padding: "9px 0", borderBottom: `1px solid ${C.border}`, gap: 10 }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700 }}>
+                    {v.systolic}/{v.diastolic} | {t('patientProfile.pulseLabel')} {v.pulse}
+                  </div>
+                  {v.note && (
+                    <div style={{ fontSize: 12, color: C.mid, marginTop: 2 }}>{v.note}</div>
+                  )}
+                </div>
+                <div style={{ fontSize: 11, color: C.soft }}>{v.date}</div>
+              </div>
+            ))
+          )}
         </div>
       )}
 
