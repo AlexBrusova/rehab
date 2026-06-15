@@ -143,5 +143,4 @@ test.describe("Forms, validation, and creates", () => {
     expect(withdrawalIndex).toBeGreaterThan(-1);
     expect(withdrawalIndex).toBeLessThan(depositIndex);
   });
->>>>>>> 8b47682 (test: e2e coverage for patient profile finance balance and history ordering)
 });
