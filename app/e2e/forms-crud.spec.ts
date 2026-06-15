@@ -98,7 +98,7 @@ test.describe("Forms, validation, and creates", () => {
       if (n < 1) throw new Error("patient select has no options yet");
     }).toPass({ timeout: 20_000 });
     await patientSelect.selectOption({ index: 0 });
-    const patientName = (await patientSelect.locator("option:checked").textContent())?.trim();
+    const patientName = (await patientSelect.locator("option:checked").textContent())?.trim() ?? "";
     await dialog
       .getByPlaceholder("e.g.: Phone Restriction 3 days")
       .fill("E2E active consequence");
