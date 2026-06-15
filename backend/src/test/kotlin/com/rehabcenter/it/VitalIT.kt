@@ -3,6 +3,7 @@ package com.rehabcenter.it
 import com.rehabcenter.testsupport.AbstractIntegrationTest
 import com.rehabcenter.testsupport.bearerHeaders
 import com.rehabcenter.testsupport.obtainToken
+import com.rehabcenter.validation.UiValidation
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.core.ParameterizedTypeReference
@@ -105,7 +106,52 @@ class VitalIT : AbstractIntegrationTest() {
         )
         assertThat(res.statusCode.is2xxSuccessful).isTrue()
         val dates = res.body!!.map { it["date"] }
-        assertThat(dates.first()).isEqualTo("02/01/2025")
+        assertThat(dates).containsExactly("02/01/2025", "01/01/2025")
+
+        val newest = res.body!!.first()
+        assertThat(newest["systolic"]).isEqualTo(138)
+        assertThat(newest["diastolic"]).isEqualTo(90)
+        assertThat(newest["pulse"]).isEqualTo(80)
+        assertThat(newest["note"]).isEqualTo("Borderline pressure - monitor")
+    }
+
+    @Test
+    fun `POST vitals returns 400 when date is missing`() {
+        val token = doctorToken()
+        val body = validCreateBody() - "date"
+        val res = rest.exchange(
+            "/api/vitals",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            String::class.java,
+        )
+        assertThat(res.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
+    fun `POST vitals returns 400 when diastolic is out of range`() {
+        val token = doctorToken()
+        val body = validCreateBody() + mapOf("diastolic" to 500)
+        val res = rest.exchange(
+            "/api/vitals",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            String::class.java,
+        )
+        assertThat(res.statusCode.value()).isEqualTo(400)
+    }
+
+    @Test
+    fun `POST vitals returns 400 when note exceeds max length`() {
+        val token = doctorToken()
+        val body = validCreateBody() + mapOf("note" to "a".repeat(UiValidation.NOTE_MAX + 1))
+        val res = rest.exchange(
+            "/api/vitals",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            String::class.java,
+        )
+        assertThat(res.statusCode.value()).isEqualTo(400)
     }
 
     @Test
