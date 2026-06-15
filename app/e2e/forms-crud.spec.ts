@@ -87,4 +87,72 @@ test.describe("Forms, validation, and creates", () => {
     await dialog.getByRole("button", { name: "✓ Propose" }).click();
     await expectToast(page, /Consequence proposed/);
   });
+
+  test("Patients: active consequence shows badge and type on profile", async ({ page }) => {
+    await goToScreen(page, "consequences");
+    await page.getByRole("button", { name: "+ Propose" }).click();
+    const dialog = page.getByRole("dialog", { name: /Propose Consequence/i });
+    const patientSelect = dialog.locator("select").first();
+    await expect(async () => {
+      const n = await patientSelect.locator("option").count();
+      if (n < 1) throw new Error("patient select has no options yet");
+    }).toPass({ timeout: 20_000 });
+    await patientSelect.selectOption({ index: 0 });
+    const patientName = (await patientSelect.locator("option:checked").textContent())?.trim() ?? "";
+    await dialog
+      .getByPlaceholder("e.g.: Phone Restriction 3 days")
+      .fill("E2E active consequence");
+    await dialog.getByRole("button", { name: "✓ Propose" }).click();
+    await expectToast(page, /Consequence proposed/);
+
+    await goToScreen(page, "patients");
+    await expect(page.locator("tbody tr").first()).toBeVisible({ timeout: 20_000 });
+    await page.locator("tbody tr", { hasText: patientName }).first().click();
+
+    const profile = page.getByRole("dialog");
+    await expect(profile.getByText(/^⛔ \d+ Consequences$/)).toBeVisible();
+    await expect(profile.getByText(/📵 Phone Restriction/)).toBeVisible();
+  });
+
+  test("MedManager: medication summary groups medications by time of day", async ({
+    page,
+  }) => {
+    await goToScreen(page, "medmanager");
+
+    await page.getByRole("button", { name: "+ Add Medication" }).click();
+
+    const morningMed = `E2E Morning Med ${Date.now()}`;
+    const addForm = page.getByText("➕ New Medication").locator("..");
+    await page.getByPlaceholder("e.g.: Methadone").fill(morningMed);
+    await page.getByPlaceholder("40").fill("25");
+    await addForm.getByText("Morning", { exact: true }).click();
+
+    const post1 = page.waitForResponse(
+      (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "✓ Add" }).click();
+    await post1;
+
+    await expect(page.getByText(`Morning: ${morningMed} 25mg`)).toBeVisible();
+
+    await page.getByRole("button", { name: "+ Add Medication" }).click();
+
+    const noScheduleMed = `E2E No Schedule Med ${Date.now()}`;
+    await page.getByPlaceholder("e.g.: Methadone").fill(noScheduleMed);
+    await page.getByPlaceholder("40").fill("10");
+
+    const post2 = page.waitForResponse(
+      (r) => r.url().includes("/api/meds") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "✓ Add" }).click();
+    await post2;
+
+    await expect(
+      page.getByText(`No schedule: ${noScheduleMed} 10mg`),
+    ).toBeVisible();
+
+    await expect(page.getByText(/^Noon:/)).not.toBeVisible();
+    await expect(page.getByText(/^Evening:/)).not.toBeVisible();
+    await expect(page.getByText(/^Night:/)).not.toBeVisible();
+  });
 });

@@ -47,6 +47,10 @@ export default function PatientProfile({
   const room = rooms.find((r) => r.id === p?.roomId);
   const pMeds = meds.filter((m) => m.patientId === pid);
   const pTherapy = therapy.filter((th) => th.patientId === pid);
+  const typeLabels = { phone: "📵 Phone Restriction", visit: "🏠 Cancel Home Visit", cigarettes: "🚬 Cigarette Restriction", other: "📝 Other" };
+  const pActiveCons = (consequences || []).filter(
+    (c) => c.patientId === pid && (c.status === "pending" || c.status === "approved")
+  );
   if (!p) return null;
 
   const saveMed = async (id, upd) => {
@@ -143,7 +147,15 @@ export default function PatientProfile({
             <Badge type={p.status === "away" ? "yellow" : "green"}>
               {p.status === "away" ? `🏠 ${p.awayType}` : t('patientProfile.activeStatus')}
             </Badge>
+            {pActiveCons.length > 0 && (
+              <Badge type="orange">⛔ {pActiveCons.length} {t('patientProfile.consequencesLabel')}</Badge>
+            )}
           </div>
+          {pActiveCons.length > 0 && (
+            <div style={{ fontSize: 11, opacity: 0.7, marginTop: 4 }}>
+              {[...new Set(pActiveCons.map((c) => typeLabels[c.type] || c.type))].join(", ")}
+            </div>
+          )}
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 8, alignItems: "center" }}>
           <div style={{ textAlign: "center", background: "rgba(255,255,255,0.1)", borderRadius: 10, padding: "10px 16px" }}>
@@ -291,7 +303,6 @@ export default function PatientProfile({
         <div>
           {(() => {
             const pCons = (consequences || []).filter((c) => c.patientId === pid);
-            const typeLabels = { phone: "📵 Phone Restriction", visit: "🏠 Cancel Home Visit", cigarettes: "🚬 Cigarette Restriction", other: "📝 Other" };
             if (pCons.length === 0) return <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>{t('patientProfile.noConsequenceRecords')}</div>;
             return pCons.map((c) => (
               <div key={c.id} style={{ borderRadius: 10, border: `1.5px solid ${c.status === "approved" ? C.orange : c.status === "pending" ? "#f5c07a" : C.border}`, padding: 14, marginBottom: 10, background: c.status === "approved" ? "#fff8f0" : c.status === "pending" ? "#fffbf0" : "#f9f9f9" }}>
