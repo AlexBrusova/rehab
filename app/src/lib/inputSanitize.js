@@ -107,6 +107,16 @@ export function sanitizeRoomCapacity(s) {
   return String(n);
 }
 
+/** Числовое поле vitals (давление/пульс): 0–300. */
+export function sanitizeVitalNumber(s) {
+  const d = String(s ?? "").replace(/\D/g, "");
+  if (!d) return "";
+  let n = parseInt(d, 10);
+  if (Number.isNaN(n)) return "";
+  n = Math.min(V.VITAL_VALUE_MAX, Math.max(V.VITAL_VALUE_MIN, n));
+  return String(n);
+}
+
 /** Сумма: неотрицательное число, до двух знаков после точки. */
 export function sanitizeMoneyAmount(s) {
   let t = stripControlChars(String(s ?? "")).replace(/[^\d.]/g, "");
