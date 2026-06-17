@@ -26,6 +26,8 @@ export default function Patients({
   initialPatientId,
   consequences,
   finance,
+  vitals,
+  onAddVital,
   onAddPatient,
   onArchivePatient,
   onUpdatePatient,
@@ -276,6 +278,8 @@ export default function Patients({
           toast={toast}
           consequences={consequences}
           finance={finance}
+          vitals={vitals}
+          onAddVital={onAddVital}
           onUpdatePatient={onUpdatePatient}
           onMarkAway={onMarkAway}
           onAddMed={onAddMed}

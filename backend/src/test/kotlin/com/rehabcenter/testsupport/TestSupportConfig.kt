@@ -20,6 +20,7 @@ import com.rehabcenter.repo.ShiftRepository
 import com.rehabcenter.repo.TherapistAssignmentRepository
 import com.rehabcenter.repo.TherapySessionRepository
 import com.rehabcenter.repo.UserRepository
+import com.rehabcenter.repo.VitalRepository
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.boot.test.context.TestConfiguration
 import org.springframework.cache.CacheManager
@@ -46,6 +47,7 @@ class TestSupportConfig {
         therapistAssignments: TherapistAssignmentRepository,
         absences: AbsenceRepository,
         finances: FinanceRepository,
+        vitals: VitalRepository,
         cashboxCounts: CashboxCountRepository,
         cashboxEntries: CashboxEntryRepository,
         residentGroups: ResidentGroupRepository,
@@ -70,6 +72,7 @@ class TestSupportConfig {
             therapistAssignments,
             absences,
             finances,
+            vitals,
             cashboxCounts,
             cashboxEntries,
             residentGroups,
@@ -96,6 +99,7 @@ class IntegrationTestFixture(
     private val therapistAssignments: TherapistAssignmentRepository,
     private val absences: AbsenceRepository,
     private val finances: FinanceRepository,
+    private val vitals: VitalRepository,
     private val cashboxCounts: CashboxCountRepository,
     private val cashboxEntries: CashboxEntryRepository,
     private val residentGroups: ResidentGroupRepository,
@@ -113,6 +117,7 @@ class IntegrationTestFixture(
             therapySessions.deleteAll()
             therapistAssignments.deleteAll()
             absences.deleteAll()
+            vitals.deleteAll()
             finances.deleteAll()
             cashboxCounts.deleteAll()
             cashboxEntries.deleteAll()

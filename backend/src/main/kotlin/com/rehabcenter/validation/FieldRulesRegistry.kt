@@ -32,6 +32,8 @@ import com.rehabcenter.validation.UiValidation.TIME_HHMM_MAX
 import com.rehabcenter.validation.UiValidation.TIME_HHMM_PATTERN
 import com.rehabcenter.validation.UiValidation.TOPIC_MAX
 import com.rehabcenter.validation.UiValidation.USERNAME_MAX
+import com.rehabcenter.validation.UiValidation.VITAL_VALUE_MAX
+import com.rehabcenter.validation.UiValidation.VITAL_VALUE_MIN
 
 object FieldRulesRegistry {
     val ALL: Map<String, Map<String, FieldConstraints>> = mapOf(
@@ -139,6 +141,13 @@ object FieldRulesRegistry {
             "type" to FieldConstraints(required = true, pattern = FINANCE_TYPE),
             "amount" to FieldConstraints(required = true, min = -1000000000, max = 1000000000),
             "source" to FieldConstraints(maxLength = SHORT_LABEL),
+            "note" to FieldConstraints(maxLength = NOTE_MAX),
+            "date" to FieldConstraints(required = true, maxLength = DATE_UI_MAX),
+        ),
+        "vital" to mapOf(
+            "systolic" to FieldConstraints(required = true, min = VITAL_VALUE_MIN, max = VITAL_VALUE_MAX),
+            "diastolic" to FieldConstraints(required = true, min = VITAL_VALUE_MIN, max = VITAL_VALUE_MAX),
+            "pulse" to FieldConstraints(required = true, min = VITAL_VALUE_MIN, max = VITAL_VALUE_MAX),
             "note" to FieldConstraints(maxLength = NOTE_MAX),
             "date" to FieldConstraints(required = true, maxLength = DATE_UI_MAX),
         ),

@@ -54,6 +54,7 @@ export default function App() {
   const [attendance, setAttendance] = useState([]);
   const [consequences, setConsequences] = useState([]);
   const [finance, setFinance] = useState([]);
+  const [vitals, setVitals] = useState([]);
   const [cashbox, setCashbox] = useState([]);
   const [cashboxCounts, setCashboxCounts] = useState([]);
   const [therapy, setTherapy] = useState([]);
@@ -139,6 +140,9 @@ export default function App() {
     const today = new Date().toLocaleDateString("en-GB");
     authFetch(`/api/finance/patient?houseId=${activeHouseId}`)
       .then(setFinance)
+      .catch(console.error);
+    authFetch(`/api/vitals?houseId=${activeHouseId}`)
+      .then(setVitals)
       .catch(console.error);
     authFetch(`/api/finance/cashbox?houseId=${activeHouseId}`)
       .then(setCashbox)
@@ -386,6 +390,24 @@ export default function App() {
     return created;
   };
 
+  const createVital = async (patientId, houseId, { systolic, diastolic, pulse, note }) => {
+    const date = new Date().toLocaleDateString("en-GB");
+    const created = await authFetch("/api/vitals", {
+      method: "POST",
+      body: JSON.stringify({
+        patientId,
+        houseId,
+        systolic: Number(systolic),
+        diastolic: Number(diastolic),
+        pulse: Number(pulse),
+        note: note || "",
+        date,
+      }),
+    });
+    setVitals((prev) => [created, ...prev]);
+    return created;
+  };
+
   const createCashTx = async (houseId, type, amount, cat, note, currentBalance) => {
     const newBal = type === "deposit" ? currentBalance + amount : currentBalance - amount;
     const date = new Date().toLocaleDateString("en-GB");
@@ -519,6 +541,7 @@ export default function App() {
   );
   const houseTherapy = therapy.filter((t) => housePatientIds.has(t.patientId));
   const houseFinance = finance.filter((f) => housePatientIds.has(f.patientId));
+  const houseVitals = vitals.filter((v) => housePatientIds.has(v.patientId));
   const nav = NAV_CFG[user.role] || NAV_CFG.counselor;
   const screenEl = {
     dashboard: (
@@ -558,6 +581,8 @@ export default function App() {
           initialPatientId={initialPatientId}
           consequences={houseConsequences}
           finance={houseFinance}
+          vitals={houseVitals}
+          onAddVital={createVital}
           onAddPatient={createPatient}
           onArchivePatient={archivePatient}
           onUpdatePatient={updatePatient}

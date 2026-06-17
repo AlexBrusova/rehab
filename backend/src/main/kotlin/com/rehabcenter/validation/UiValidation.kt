@@ -27,6 +27,8 @@ object UiValidation {
     const val SCHEDULE_SHIFT_TYPE_MAX = 32
     const val CONSEQUENCE_TYPE_MAX = 64
     const val HANDOFF_NAME_MAX = 120
+    const val VITAL_VALUE_MIN = 0
+    const val VITAL_VALUE_MAX = 300
 
     /** Часы:минуты 00:00–23:59 (телефоны, касса, выдача лекарств). */
     const val TIME_HHMM_PATTERN = "^([01]\\d|2[0-3]):[0-5]\\d$"

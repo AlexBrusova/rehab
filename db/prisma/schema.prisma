@@ -20,6 +20,7 @@ model House {
   shifts         Shift[]
   schedules      Schedule[]
   consequences   Consequence[]
+  vitals         Vital[]
   cashbox        CashboxEntry[]
   cashboxCounts  CashboxCount[]
   dailySummaries DailySummary[]
@@ -87,6 +88,7 @@ model Patient {
   distributions     MedDistribution[]
   finances          Finance[]
   consequences      Consequence[]
+  vitals            Vital[]
   phones            Phone[]
   absences          Absence[]
   absenceHistory    AbsenceHistory[]
@@ -162,6 +164,25 @@ model Finance {
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
+}
+
+model Vital {
+  id        String   @id @default(cuid())
+  patientId String
+  houseId   String
+  systolic  Int
+  diastolic Int
+  pulse     Int
+  note      String   @default("")
+  date      String
+
+  patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  house   House   @relation(fields: [houseId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@index([patientId])
+  @@index([houseId])
 }
 
 model CashboxEntry {
