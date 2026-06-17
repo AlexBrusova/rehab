@@ -383,6 +383,7 @@ export default function PatientProfile({
                   placeholder={t('patientProfile.systolicPlaceholder')}
                   type="number"
                   sanitize={sanitizeVitalNumber}
+                  maxLength={3}
                   dir={dir}
                 />
                 <FI
@@ -391,6 +392,7 @@ export default function PatientProfile({
                   placeholder={t('patientProfile.diastolicPlaceholder')}
                   type="number"
                   sanitize={sanitizeVitalNumber}
+                  maxLength={3}
                   dir={dir}
                 />
                 <FI
@@ -399,6 +401,7 @@ export default function PatientProfile({
                   placeholder={t('patientProfile.pulsePlaceholder')}
                   type="number"
                   sanitize={sanitizeVitalNumber}
+                  maxLength={3}
                   dir={dir}
                 />
               </div>
