@@ -165,4 +165,31 @@ class VitalIT : AbstractIntegrationTest() {
         )
         assertThat(res.statusCode.value()).isEqualTo(400)
     }
+
+    @Test
+    fun `POST vitals stores createdByName when provided`() {
+        val token = doctorToken()
+        val body = validCreateBody() + mapOf("createdByName" to "Dr. Sarah Levi")
+        val res = rest.exchange(
+            "/api/vitals",
+            HttpMethod.POST,
+            HttpEntity(body, bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+        assertThat(res.body!!["createdByName"]).isEqualTo("Dr. Sarah Levi")
+    }
+
+    @Test
+    fun `POST vitals defaults createdByName to empty string when not provided`() {
+        val token = doctorToken()
+        val res = rest.exchange(
+            "/api/vitals",
+            HttpMethod.POST,
+            HttpEntity(validCreateBody(), bearerHeaders(token)),
+            object : ParameterizedTypeReference<Map<String, Any?>>() {},
+        )
+        assertThat(res.statusCode.value()).isEqualTo(201)
+        assertThat(res.body!!["createdByName"]).isEqualTo("")
+    }
 }
