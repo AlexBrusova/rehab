@@ -28,6 +28,7 @@ export default function Patients({
   finance,
   vitals,
   onAddVital,
+  onAddSession,
   onAddPatient,
   onArchivePatient,
   onUpdatePatient,
@@ -280,6 +281,7 @@ export default function Patients({
           finance={finance}
           vitals={vitals}
           onAddVital={onAddVital}
+          onAddSession={onAddSession}
           onUpdatePatient={onUpdatePatient}
           onMarkAway={onMarkAway}
           onAddMed={onAddMed}
