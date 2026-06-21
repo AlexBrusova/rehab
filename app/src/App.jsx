@@ -402,6 +402,7 @@ export default function App() {
         pulse: Number(pulse),
         note: note || "",
         date,
+        createdByName: user.name,
       }),
     });
     setVitals((prev) => [created, ...prev]);
@@ -583,6 +584,7 @@ export default function App() {
           finance={houseFinance}
           vitals={houseVitals}
           onAddVital={createVital}
+          onAddSession={createTherapySession}
           onAddPatient={createPatient}
           onArchivePatient={archivePatient}
           onUpdatePatient={updatePatient}
