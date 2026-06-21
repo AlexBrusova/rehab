@@ -50,6 +50,8 @@ class VitalController(
         val note: String? = null,
         @field:NotBlank @field:Size(max = UiValidation.DATE_UI_MAX)
         val date: String? = null,
+        @field:Size(max = UiValidation.USERNAME_MAX)
+        val createdByName: String? = null,
     )
 
     @Transactional
@@ -67,6 +69,7 @@ class VitalController(
                 pulse = body.pulse!!,
                 note = body.note ?: "",
                 date = body.date!!,
+                createdByName = body.createdByName ?: "",
                 createdAt = Instant.now(),
             )
         return ResponseEntity.status(201).body(vitals.save(v))

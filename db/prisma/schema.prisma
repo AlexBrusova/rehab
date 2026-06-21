@@ -175,6 +175,7 @@ model Vital {
   pulse     Int
   note      String   @default("")
   date      String
+  createdByName String @default("")
 
   patient Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
   house   House   @relation(fields: [houseId], references: [id])
