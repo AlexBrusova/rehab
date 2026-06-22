@@ -57,4 +57,26 @@ test.describe("Vitals history tab", () => {
 
     await expect(page.getByRole("dialog").getByText("🩺 Vitals", { exact: true })).not.toBeVisible();
   });
+
+  test("vitals record shows Added by with doctor name", async ({ page }) => {
+    await loginAsDoctor(page);
+    await goToScreen(page, "patients");
+    await page.locator("table tbody tr").first().click();
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 15_000 });
+
+    await page.getByRole("dialog").getByText("🩺 Vitals", { exact: true }).click();
+    await page.getByRole("button", { name: "+ Add Vitals" }).click();
+
+    await page.getByPlaceholder("Systolic").fill("120");
+    await page.getByPlaceholder("Diastolic").fill("80");
+    await page.getByPlaceholder("Pulse").fill("70");
+
+    const post = page.waitForResponse(
+      (r) => r.url().includes("/api/vitals") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "✓ Add" }).click();
+    await post;
+
+    await expect(page.getByText("Added by: Dr. Sarah Levi")).toBeVisible();
+  });
 });

@@ -24,6 +24,7 @@ export default function PatientProfile({
   finance,
   vitals = [],
   onAddVital,
+  onAddSession,
   onUpdatePatient,
   onMarkAway = () => {},
   onAddMed,
@@ -45,6 +46,13 @@ export default function PatientProfile({
   const [absData, setAbsData] = useState({ type: t('patientProfile.homeVisit'), returnDate: "" });
   const [showAddVital, setShowAddVital] = useState(false);
   const [newVital, setNewVital] = useState({ systolic: "", diastolic: "", pulse: "", note: "" });
+  const [showAddSession, setShowAddSession] = useState(false);
+  const [newSession, setNewSession] = useState({
+    topic: "",
+    notes: "",
+    urgency: "NORMAL",
+    date: new Date().toLocaleDateString("en-GB"),
+  });
 
   const canManageAbsence = user.role === "manager" || user.role === "counselor";
   const canRequestAbsence = user.role === "counselor" || user.role === "manager";
@@ -54,6 +62,7 @@ export default function PatientProfile({
   const pTherapy = therapy.filter((th) => th.patientId === pid);
   const pVitals = vitals.filter((v) => v.patientId === pid);
   const canAddVital = user.role === "doctor" || user.role === "therapist";
+  const canAddSession = user.role === "doctor" || user.role === "therapist";
   if (!p) return null;
 
   const saveMed = async (id, upd) => {
@@ -92,6 +101,26 @@ export default function PatientProfile({
       setShowAddVital(false);
       toast(t('patientProfile.toastVitalAddSuccess'));
     } catch { toast(t('patientProfile.toastVitalAddFailed')); }
+  };
+
+  const addSession = async () => {
+    if (!newSession.topic.trim()) {
+      toast(t("patientProfile.toastFillSessionRequired"));
+      return;
+    }
+    try {
+      await onAddSession({ patientId: pid, ...newSession });
+      setNewSession({
+        topic: "",
+        notes: "",
+        urgency: "NORMAL",
+        date: new Date().toLocaleDateString("en-GB"),
+      });
+      setShowAddSession(false);
+      toast(t("patientProfile.toastSessionAddSuccess"));
+    } catch {
+      toast(t("patientProfile.toastSessionAddFailed"));
+    }
   };
 
   const openAbsence = async () => {
@@ -431,6 +460,11 @@ export default function PatientProfile({
                   {v.note && (
                     <div style={{ fontSize: 12, color: C.mid, marginTop: 2 }}>{v.note}</div>
                   )}
+                  {v.createdByName && (
+                    <div style={{ fontSize: 11, color: C.soft, marginTop: 2 }}>
+                      {t("patientProfile.addedBy")}: {v.createdByName}
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: 11, color: C.soft }}>{v.date}</div>
               </div>
@@ -460,6 +494,77 @@ export default function PatientProfile({
       {/* THERAPY TAB */}
       {tab === "therapy" && (
         <div>
+          {canAddSession && (
+            <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: 10 }}>
+              <Btn color="teal" size="sm" onClick={() => setShowAddSession(true)}>
+                {t("patientProfile.addSessionButton")}
+              </Btn>
+            </div>
+          )}
+          {showAddSession && (
+            <div
+              style={{
+                background: "#f0fafa",
+                borderRadius: 10,
+                border: `2px solid ${C.teal}`,
+                padding: 14,
+                marginBottom: 10,
+              }}
+            >
+              <FI
+                value={newSession.topic}
+                onChange={(v) => setNewSession((s) => ({ ...s, topic: v }))}
+                placeholder={t("patientProfile.sessionTopicPlaceholder")}
+                maxLength={V.TOPIC_MAX}
+                dir={dir}
+              />
+              <FTA
+                value={newSession.notes}
+                onChange={(v) => setNewSession((s) => ({ ...s, notes: v }))}
+                placeholder={t("patientProfile.sessionNotesPlaceholder")}
+                maxLength={V.NOTE_MAX}
+                rows={2}
+                dir={dir}
+                style={{ marginTop: 8 }}
+              />
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr",
+                  gap: 8,
+                  marginTop: 8,
+                }}
+              >
+                <FL label={t("patientProfile.sessionUrgencyLabel")}>
+                  <FS
+                    value={newSession.urgency}
+                    onChange={(v) => setNewSession((s) => ({ ...s, urgency: v }))}
+                    options={[
+                      { v: "NORMAL", l: t("patientProfile.urgencyNormal") },
+                      { v: "ATTENTION", l: t("patientProfile.urgencyAttention") },
+                      { v: "URGENT", l: t("patientProfile.urgencyUrgent") },
+                    ]}
+                    dir={dir}
+                  />
+                </FL>
+                <FI
+                  value={newSession.date}
+                  onChange={(v) => setNewSession((s) => ({ ...s, date: v }))}
+                  placeholder={t("patientProfile.sessionDatePlaceholder")}
+                  maxLength={32}
+                  dir={dir}
+                />
+              </div>
+              <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
+                <Btn color="teal" size="sm" onClick={addSession}>
+                  {t("patientProfile.addButton")}
+                </Btn>
+                <Btn color="outline" size="sm" onClick={() => setShowAddSession(false)}>
+                  {t("patientProfile.cancelButton")}
+                </Btn>
+              </div>
+            </div>
+          )}
           {pTherapy.length === 0 ? (
             <div style={{ textAlign: "center", padding: 20, color: C.soft, fontSize: 13 }}>{t('patientProfile.noScheduledSessions')}</div>
           ) : (

@@ -31,6 +31,8 @@ class Vital(
     var note: String = "",
     @Column(nullable = false)
     var date: String = "",
+    @Column(nullable = false)
+    var createdByName: String = "",
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patientId", insertable = false, updatable = false)
     @JsonIgnore
